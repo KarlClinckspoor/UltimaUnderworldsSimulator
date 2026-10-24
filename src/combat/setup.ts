@@ -31,6 +31,7 @@ export interface PlayerProfile {
   attackSpell: SpellAttack | null;
   /** The character and spell choice, so the fight can redo FixPlayerEquips when an item breaks. */
   character: Character; attackSpellIndex: number | null;
+  expRaw: number;          // experience in the game's units (tenths of the displayed XP)
 }
 
 export type MonsterSpell =
@@ -44,6 +45,7 @@ export interface MonsterProfile {
   dex: number; passive: boolean; attacks: Attack[]; exp: number;
   missile: { damage: number; type: number; name: string } | null;
   caster: number; offensive: boolean; spells: MonsterSpell[];
+  dungeonLevel: number;    // 1..9, for player_get_exp's halving rule
   ignoresFights: boolean;  // bA_1: never reacts to being hit (no flee check, a non-hostile one stays peaceful)
 }
 
@@ -120,7 +122,7 @@ export function playerProfile(c: Character, attackSpellIndex: number | null): Pl
     armour: d.armour, armourParts: d.armourParts, cmbModTH: d.cmbModTH, resist: d.resist, defence: d.defence,
     hasted: d.hasted, timeStop: d.timeStop, melee, fist, launcher,
     missileSkill: c.skills[SK.Missile], casting: c.skills[SK.Casting], manaSkill: c.skills[SK.Mana], attackSpell,
-    character: c, attackSpellIndex,
+    character: c, attackSpellIndex, expRaw: c.expRaw,
   };
 }
 
@@ -138,7 +140,7 @@ function monsterSpell(idx: number): MonsterSpell {
   return { kind: 'none', name: `${name} (${s.className ?? 'class ' + s.cls}, no effect on the player)` };
 }
 
-export function monsterProfile(creatureIndex: number, hp: number, powerful: boolean, attitude: number): MonsterProfile {
+export function monsterProfile(creatureIndex: number, hp: number, powerful: boolean, attitude: number, dungeonLevel = 1): MonsterProfile {
   const cr: CreatureRec = creatures[creatureIndex];
   const fm = cr.firesMissile;
   return {
@@ -146,7 +148,7 @@ export function monsterProfile(creatureIndex: number, hp: number, powerful: bool
     height: heightOf(cr.id), resist: resistOf(cr.id), armour: cr.armour, defence: cr.defence, nerve: cr.nerve,
     equip: cr.equip, str: cr.str, dex: cr.dex, passive: !!cr.passive, attacks: cr.attacks, exp: cr.exp,
     missile: fm !== null ? { damage: missiles[fm].damage, type: missiles[fm].damageType ?? 0x40, name: missiles[fm].name } : null,
-    caster: cr.caster, offensive: !!cr.offensive, spells: cr.spells.map(monsterSpell), ignoresFights: !!cr.ignoresFights,
+    caster: cr.caster, offensive: !!cr.offensive, spells: cr.spells.map(monsterSpell), ignoresFights: !!cr.ignoresFights, dungeonLevel,
   };
 }
 

@@ -29,7 +29,11 @@ export interface Stats {
   easyHalved: number; resistedPlayer: number;
   srcAttempts: number[]; srcHits: number[]; srcCrits: number[]; srcDamage: number[];
   defensiveCasts: number;
-  xp: number;                         // summed over wins
+  xp: number;                         // XP the game awards, summed over kills (raw units, tenths)
+  xpNominal: number;                  // the same without the 16-bit wrap of the powerful bonus
+  xpWrapped: number;                  // kills whose powerful bonus wrapped in 16 bits
+  xpNegative: number;                 // kills that took experience away (wrapped below zero)
+  xpHalved: number;                   // kills halved because the character outranks the dungeon level
   ttkSum: number;                     // seconds, wins
   dps: number;                        // summed damage per second over all fights
 }
@@ -44,7 +48,7 @@ export function emptyStats(hpBins = 1, monBins = 1, durBins = 241): Stats {
     weaponWearEvents: 0, weaponQualityLost: 0, weaponBroken: 0, armourWearEvents: 0, armourQualityLost: 0, armourBroken: 0,
     zoneHits: z(4), zoneDamage: z(4), zoneAbsorbed: [z(3), z(3), z(3), z(3)], zoneProtMisses: z(4), zoneMisses: z(4),
     easyHalved: 0, resistedPlayer: 0, srcAttempts: z(6), srcHits: z(6), srcCrits: z(6), srcDamage: z(6),
-    defensiveCasts: 0, xp: 0, ttkSum: 0, dps: 0,
+    defensiveCasts: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0, ttkSum: 0, dps: 0,
   };
 }
 

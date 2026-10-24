@@ -57,6 +57,29 @@ export function areaHits(rng: Rng, dist: number, flame: boolean): number {
   return hits;
 }
 
+/** Experience for a kill by the player (COMBAT.C player_killed_a -> SKILLCHK.C player_get_exp).
+    Only a kill pays: damage_critter calls player_killed_a when the critter dies and the player
+    struck it (directly, or with his missile or spell). exp * 4 + 2d(exp); a powerful critter
+    times (24..47)/16, computed in a 16-bit int in DOS UW1, which wraps (and can turn negative)
+    when the product passes 32767. player_get_exp then takes a negative amount away (floor 0),
+    ignores gains once experience is above 0x17700, and halves gains (+1) when the character's
+    level is above twice the dungeon level plus two. Units: tenths of the displayed XP. */
+export function killXp(M: MonsterProfile, P: { level: number; expRaw: number }, rng: Rng) {
+  let exp = M.exp * 4 + rng.rollem(2, M.exp);
+  let nominal = exp, wrapped = false, halved = false;
+  if (M.powerful) {
+    const prod = exp * (rng.int(24) + 24);
+    nominal = Math.trunc(prod / 16);
+    wrapped = prod > 32767;
+    exp = Math.trunc((((prod & 0xffff) ^ 0x8000) - 0x8000) / 16); // (int16) cast, then C division
+  }
+  let awarded = exp;
+  if (exp < 0) awarded = -Math.min(-exp, P.expRaw);
+  else if (P.expRaw > 0x17700) awarded = 0;
+  else if (M.dungeonLevel * 2 + 2 < P.level) { awarded = Math.trunc(exp / 2) + 1; halved = true; }
+  return { awarded, nominal, wrapped, halved };
+}
+
 export function monsterStartHp(m: MonsterProfile, mode: HpMode, rng: Rng): number {
   if (mode.kind === 'set') return Math.max(1, Math.min(255, mode.value | 0));
   if (mode.kind === 'roll') return Math.max(1, Math.trunc((m.avghit * (16 + rng.int(24))) / 32));
@@ -420,9 +443,11 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   if (outcome === 0) {
     st.hpLeftHist[Math.min(st.hpLeftHist.length - 1, php)]++;
     st.ttkSum += secs;
-    let xp = M.exp * 4 + rng.rollem(2, M.exp);
-    if (M.powerful) xp = Math.trunc((xp * (rng.int(24) + 24)) / 16);
-    st.xp += xp;
+    const x = killXp(M, P0, rng);
+    st.xp += x.awarded; st.xpNominal += x.nominal;
+    if (x.wrapped) st.xpWrapped++;
+    if (x.awarded < 0) st.xpNegative++;
+    if (x.halved) st.xpHalved++;
   } else st.monHpLeftHist[Math.min(st.monHpLeftHist.length - 1, mhp)]++;
   st.dealtPerFight += dealt; st.dealtPerFightSq += dealt * dealt;
   st.dps += secs > 0 ? dealt / secs : 0;

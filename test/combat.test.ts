@@ -5,7 +5,7 @@ import { readPlayerDat } from '../src/core/playerdat';
 import { characterFromSave, defaultCharacter } from '../src/core/character';
 import { makeRng } from '../src/core/rng';
 import { defaultSettings, monsterProfile, playerProfile } from '../src/combat/setup';
-import { fight, newStats, shotTimes, simulate, swingTimes } from '../src/combat/fight';
+import { fight, killXp, newStats, shotTimes, simulate, swingTimes } from '../src/combat/fight';
 import { monsterExpectedBlow, playerBlowDist } from '../src/combat/exact';
 import { creatures, SK } from '../src/data/gameData';
 import { picklocDist, damageRollDist } from '../src/combat/blow';
@@ -170,5 +170,43 @@ describe('review fixes', () => {
     const S = { ...defaultSettings(), timeLimit: 20 };
     const st = simulate(newStats(P, M, S), { ...P, hp: 5000, hpMax: 5000 }, M, S, { kind: 'set', value: 4 }, 200, makeRng(2));
     expect(st.outcomes[2]).toBe(0);
+  });
+});
+
+describe('experience (player_killed_a, player_get_exp)', () => {
+  // a random source that returns fixed values: rollem dice give `die` each, rand() % n gives `r`
+  const fixed = (die: number, r: number) => ({ next: () => 0, int: () => r, rollem: (d: number) => d * die });
+  const P = { level: 1, expRaw: 0 };
+  it('exp * 4 + 2d(exp)', () => {
+    const M = monsterProfile(cIndex('Giant Rat (0x43)'), 8, false, 0, 1); // exp 8
+    expect(killXp(M, P, fixed(8, 0)).awarded).toBe(8 * 4 + 16);
+  });
+  it('powerful: times (24 + rand % 24) / 16, in a 16-bit int that wraps', () => {
+    const goblin = monsterProfile(cIndex('Goblin (0x46)'), 21, true, 0, 1); // exp 5: 20 + 2d5
+    expect(killXp(goblin, P, fixed(5, 0)).awarded).toBe(Math.trunc((30 * 24) / 16));
+    const troll = monsterProfile(cIndex('Great Troll'), 100, true, 0, 4); // exp 438
+    const x = killXp(troll, { level: 1, expRaw: 500 }, fixed(438, 6)); // 1752 + 876 = 2628, x 30 = 78840
+    expect(x.wrapped).toBe(true);
+    expect(x.nominal).toBe(Math.trunc(78840 / 16));
+    // 78840 & 0xFFFF = 13304 -> 831
+    expect(x.awarded).toBe(831);
+    const y = killXp(troll, { level: 1, expRaw: 500 }, fixed(438, 0)); // 2628 x 24 = 63072 -> -2464 -> -154
+    expect(y.awarded).toBe(-154);
+    const z = killXp(troll, { level: 1, expRaw: 100 }, fixed(438, 0));
+    expect(z.awarded).toBe(-100); // a loss stops at 0 experience
+  });
+  it('halved (+1) above twice the dungeon level plus two; nothing above 0x17700', () => {
+    const M = monsterProfile(cIndex('Giant Rat (0x43)'), 8, false, 0, 1);
+    expect(killXp(M, { level: 5, expRaw: 0 }, fixed(8, 0)).awarded).toBe(24 + 1);
+    expect(killXp(M, { level: 4, expRaw: 0 }, fixed(8, 0)).awarded).toBe(48);
+    expect(killXp(M, { level: 16, expRaw: 0x17701 }, fixed(8, 0)).awarded).toBe(0);
+  });
+  it('only kills pay: XP sums over wins only', () => {
+    const P2 = playerProfile(karl(), null);
+    const M = monsterProfile(cIndex('Goblin (0x46)'), 15, false, 0, 1);
+    const S = defaultSettings();
+    const st = simulate(newStats(P2, M, S), P2, M, S, { kind: 'stored' }, 2000, makeRng(3));
+    expect(st.xp / st.outcomes[0]).toBeGreaterThanOrEqual(5 * 4 + 2);
+    expect(st.xp / st.outcomes[0]).toBeLessThanOrEqual(5 * 4 + 10);
   });
 });

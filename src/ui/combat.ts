@@ -1,5 +1,5 @@
 // Combat tab (plan Part B): one enemy N times, or every enemy in the game.
-import { ATTACK_SPELLS, derive, spellLabel, spellStatus, ZONE_NAMES } from '../core/character';
+import { ATTACK_SPELLS, derive, LEVEL_TABLE, spellLabel, spellStatus, ZONE_NAMES } from '../core/character';
 import { ATTITUDES, creatures, levels, type EnemyRow } from '../data/gameData';
 import { combatCapable, monsterProfile, playerProfile, type FightSettings, type MonsterProfile, type PlayerProfile } from '../combat/setup';
 import { runJobs, splitJob, type RunHandle } from '../combat/pool';
@@ -89,7 +89,7 @@ export function renderCombat(root: HTMLElement) {
   runBtn.onclick = async () => {
     if (!row) return;
     const P = playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null);
-    const M = monsterProfile(row.c, row.hp, !!row.pw, row.att);
+    const M = monsterProfile(row.c, row.hp, !!row.pw, row.att, u.level);
     const S = settings();
     const jobs = splitJob({ key: 'one', P, M, S, hpMode: hpMode(), seed: u.seed }, u.n);
     setRunning(true);
@@ -107,7 +107,7 @@ export function renderCombat(root: HTMLElement) {
     const S = settings();
     const P = playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null);
     const refs = allEnemies();
-    const jobs: Job[] = refs.map((r, i) => ({ key: String(i), P, M: monsterProfile(r.row.c, r.row.hp, !!r.row.pw, r.row.att), S,
+    const jobs: Job[] = refs.map((r, i) => ({ key: String(i), P, M: monsterProfile(r.row.c, r.row.hp, !!r.row.pw, r.row.att, r.level), S,
       hpMode: hpMode(), n: u.allN, seed: u.seed, stream: 1000 + i }));
     setRunning(true);
     const t0 = performance.now();
@@ -159,7 +159,7 @@ function allEnemies(): EnemyRef[] {
 
 function enemySummary(r: EnemyRow) {
   const cr = creatures[r.c];
-  const M = monsterProfile(r.c, r.hp, !!r.pw, r.att);
+  const M = monsterProfile(r.c, r.hp, !!r.pw, r.att, state.combat.level);
   const atk = cr.attacks.map((a, i) => (a.prob ? `slot ${i + 1}: to-hit ${a.chance + (cr.equip >> 1)}, damage ${a.damage} (${a.prob}%)` : '')).filter(Boolean).join(' · ');
   const extra = [M.missile ? `fires ${M.missile.name} (${M.missile.damage})` : '',
     M.caster ? `caster ${M.caster}${M.offensive ? '' : ' (no attack spells)'}: ${M.spells.map((s) => s.name).filter((n) => n !== '-').join(', ')}` : '',
@@ -176,7 +176,7 @@ function renderPreview(out: HTMLElement) {
   const L = levels.find((x) => x.level === u.level)!;
   const r = L.rows[u.row];
   const P = playerProfile(state.character, null);
-  const M = monsterProfile(r.c, r.hp, !!r.pw, r.att);
+  const M = monsterProfile(r.c, r.hp, !!r.pw, r.att, state.combat.level);
   clear(out);
   out.append(h('div', { class: 'cards' }, exactCard(P, M, settings())));
 }
@@ -215,11 +215,12 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   const wins = s.outcomes[0];
   const lead = meleeOnlyAtRange
     ? h('p', { class: 'lead' }, `${M.name} cannot reach you at ${S.distance} tiles. Damage per second ${fmt(s.dps / n, 2)}; killed within the limit in ${pct(wins / n)} of fights${wins ? `, mean time to kill ${fmt(s.ttkSum / wins)} s` : ''}.`)
-    : h('p', { class: 'lead' }, `Win ${pct(wins / n)}${wins ? ` · mean time to kill ${fmt(s.ttkSum / wins)} s · HP left ${fmt(meanOfHist(s.hpLeftHist), 1)} · XP per win ${fmt(s.xp / wins / 10, 1)}` : ''}`);
+    : h('p', { class: 'lead' }, `Win ${pct(wins / n)}${wins ? ` · mean time to kill ${fmt(s.ttkSum / wins)} s · HP left ${fmt(meanOfHist(s.hpLeftHist), 1)} · XP per kill ${fmt(s.xp / wins / 10, 1)}` : ''}`);
   const noRanged = S.mode === 'ranged' && !P.launcher && !P.attackSpell
     ? h('p', { class: 'warn' }, 'You have no ranged attack: equip a sling, bow or crossbow in the weapon hand, or choose a castable attack spell.') : null;
   oc.append(lead, noRanged ?? '', sb, t);
   cards.append(oc);
+  cards.append(xpCard(s, P, M));
 
   // durations
   const dc = card('Fight length', 'seconds of game time, stacked by outcome');
@@ -286,6 +287,29 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   out.append(cards);
 }
 
+/** Experience: only kills pay (player_killed_a). Raw units are tenths of the displayed XP. */
+function xpCard(s: Stats, P: PlayerProfile, M: MonsterProfile) {
+  const n = s.n, kills = s.outcomes[0];
+  const el = card('Experience', 'awarded only for a kill, as player_killed_a and player_get_exp do it; fled monsters give nothing');
+  const perFight = s.xp / n / 10, total = s.xp / 10;
+  el.append(h('p', { class: 'lead' }, `${fmt(total, 0)} XP over ${n.toLocaleString()} fights`,
+    h('small', { class: 'muted' }, ` · ${fmt(perFight, 2)} per fight · ${kills ? fmt(s.xp / kills / 10, 1) : '–'} per kill (${kills.toLocaleString()} kills)`)));
+  const lines: (string | HTMLElement)[] = [];
+  const next = P.level < 16 ? LEVEL_TABLE[P.level - 1] * 500 : null;
+  if (next !== null && s.xp > 0) {
+    const need = Math.max(0, next - P.expRaw);
+    lines.push(`Level ${P.level + 1} at ${next / 10} XP: ${fmt(need / 10, 0)} to go from ${Math.floor(P.expRaw / 10)}, about ${fmt(need / (s.xp / n), 0)} such fights.`);
+  }
+  if (s.xp > 0) lines.push(` A skill point every 300 XP: about ${fmt(3000 / (s.xp / n), 0)} fights per point.`);
+  el.append(h('p', {}, ...lines));
+  const notes: string[] = [];
+  if (s.xpHalved) notes.push(`Halved (+1) in ${pct(s.xpHalved / Math.max(1, kills))} of kills: level ${P.level} is above twice dungeon level ${M.dungeonLevel} plus two.`);
+  if (s.xpWrapped) notes.push(`The powerful bonus wrapped in 16 bits in ${pct(s.xpWrapped / Math.max(1, kills))} of kills (DOS UW1 computes exp × (24..47) in an int); ${s.xpNegative ? `${pct(s.xpNegative / Math.max(1, kills))} of kills took experience away. ` : ''}Without the wrap the kills would give ${fmt(s.xpNominal / Math.max(1, kills) / 10, 1)} XP each.`);
+  if (P.expRaw > 0x17700) notes.push('Experience above 9600: the game ignores further gains.');
+  for (const t of notes) el.append(h('p', { class: 'warn' }, t));
+  return el;
+}
+
 const meanOfHist = (hst: number[]) => { const t = hst.reduce((a, b) => a + b, 0); return t ? hst.reduce((s, c, i) => s + c * i, 0) / t : 0; };
 function lastNonZero(hs: number[][]) { let m = 0; for (const hh of hs) for (let i = 0; i < hh.length; i++) if (hh[i]) m = Math.max(m, i); return m; }
 
@@ -302,7 +326,9 @@ function renderAll(out: HTMLElement, res: AllResult[], rerender: () => void) {
   const cards = h('div', { class: 'cards' });
 
   const head = card('How many can this character beat?', `${res.length} enemy rows (${totalMonsters} monsters), ${u.allN} fights each`);
+  const xpAll = res.reduce((s, r) => s + (r.stats.xp / r.stats.n) * r.row.n, 0) / 10;
   head.append(h('p', { class: 'lead big' }, `${beaten} of ${totalMonsters}`, h('small', {}, ` monsters ${what} in at least ${pct(thr, 0)} of fights`)),
+    h('p', {}, `Expected XP from fighting every monster once: ${fmt(xpAll, 0)} (kills only, at your current level; ${fmt(res.reduce((s, r) => s + (r.stats.outcomes[0] / r.stats.n) * r.row.n, 0), 0)} expected kills).`),
     h('p', { class: 'hint' }, 'A monster that flees escapes in this model (nobody moves); in the game you may chase it. Use the switch above to count flights as beaten.'));
   cards.append(head);
 
@@ -331,17 +357,20 @@ function renderAll(out: HTMLElement, res: AllResult[], rerender: () => void) {
     return [b, rs.reduce((s, r) => s + r.row.n, 0) - b];
   });
   stackedBars(lBox, groups, [{ name: 'beaten', color: C.win, values: per.map((p) => p[0]) }, { name: 'not beaten', color: C.death, values: per.map((p) => p[1]) }], { height: 200, yLabel: 'monsters' });
-  lc.append(lBox);
+  const xBox = h('div');
+  stackedBars(xBox, groups, [{ name: 'expected XP', color: C.accent, values: levels.map((L) => res.filter((r) => r.level === L.level).reduce((s, r) => s + (r.stats.xp / r.stats.n) * r.row.n, 0) / 10) }],
+    { height: 170, yLabel: 'XP', tip: (cat, _s, v) => `${cat}: ${v.toFixed(0)} XP expected from fighting each monster once` });
+  lc.append(lBox, h('p', { class: 'sub' }, 'Expected XP per level, fighting each monster once'), xBox);
   cards.append(lc);
 
   const tc = card('Table', 'click a row to open it in the single-enemy view');
-  const tbl = h('table', { class: 'mini wide sortable' }, h('tr', {}, ...['Lvl', 'Enemy', 'HP', 'Count', 'Win', 'Death', 'Flee', 'Timeout', 'Mean length'].map((x) => h('th', {}, x))));
+  const tbl = h('table', { class: 'mini wide sortable' }, h('tr', {}, ...['Lvl', 'Enemy', 'HP', 'Count', 'Win', 'Death', 'Flee', 'Timeout', 'Mean length', 'XP / fight'].map((x) => h('th', {}, x))));
   for (const r of [...res].sort((a, b) => a.level - b.level || winP(b) - winP(a))) {
     const o = r.stats.outcomes, n = r.stats.n;
     const meanLen = r.stats.durSum.reduce((a, b) => a + b, 0) / n;
     tbl.append(h('tr', { class: winP(r) >= thr ? 'ok' : 'bad', onclick: () => { u.level = r.level; u.row = r.rowIndex; changed('combat'); lastAll = null; rerender(); } },
       h('td', {}, String(r.level)), h('td', {}, `${rowName(r.row)} · ${ATTITUDES[r.row.att]}`), h('td', {}, String(r.row.hp)), h('td', {}, String(r.row.n)),
-      h('td', {}, pct(o[0] / n)), h('td', {}, pct(o[1] / n)), h('td', {}, pct(o[2] / n)), h('td', {}, pct(o[3] / n)), h('td', {}, `${fmt(meanLen)} s`)));
+      h('td', {}, pct(o[0] / n)), h('td', {}, pct(o[1] / n)), h('td', {}, pct(o[2] / n)), h('td', {}, pct(o[3] / n)), h('td', {}, `${fmt(meanLen)} s`), h('td', {}, fmt(r.stats.xp / n / 10, 1))));
   }
   tc.append(h('div', { class: 'scroll' }, tbl));
   cards.append(tc);
