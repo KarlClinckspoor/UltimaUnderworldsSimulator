@@ -38,6 +38,8 @@ export interface Stats {
   specialHealed: number;              // HP the healing weapon gave back
   specialHeldTicks: number;           // ticks the holding weapon froze the monster
   targetRefused: number;              // targeted spells the monster was immune to (no mana paid)
+  draws: number;                      // game rand() draws taken (the generator's period is 2^32)
+  blockOverruns: number;              // worker jobs that used more draws than their block of the cycle
   ttkSum: number;                     // seconds, wins
   dps: number;                        // summed damage per second over all fights
 }
@@ -53,7 +55,7 @@ export function emptyStats(hpBins = 1, monBins = 1, durBins = 241): Stats {
     zoneHits: z(4), zoneDamage: z(4), zoneAbsorbed: [z(3), z(3), z(3), z(3)], zoneProtMisses: z(4), zoneMisses: z(4),
     easyHalved: 0, resistedPlayer: 0, srcAttempts: z(6), srcHits: z(6), srcCrits: z(6), srcDamage: z(6),
     defensiveCasts: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0,
-    specialTriggers: 0, specialHealed: 0, specialHeldTicks: 0, targetRefused: 0, ttkSum: 0, dps: 0,
+    specialTriggers: 0, specialHealed: 0, specialHeldTicks: 0, targetRefused: 0, draws: 0, blockOverruns: 0, ttkSum: 0, dps: 0,
   };
 }
 

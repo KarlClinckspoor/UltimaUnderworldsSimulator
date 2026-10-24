@@ -40,17 +40,18 @@ function queue(vals: number[]): R {
 }
 
 describe.skipIf(!out)('C cross-check', () => {
-  it('skill_check: ideal n/31 counts match the real rand() % 31 to within one 15-bit value', () => {
+  it("skill_check: the game-model counts equal the C code run over all 32768 values of rand()", () => {
     // 32768 = 31 * 1057 + 1: residue 0 has 1058 values, every other residue 1057.
     for (let d = -80; d <= 80; d++) {
-      const c = out.skill_check[d + 80];
-      const ts = gradeCounts(d, 0).counts;
+      expect(gradeCounts(d, 0, 'game').counts).toEqual(out.skill_check[d + 80]);
+      // and the ideal model is within one 15-bit value of it
+      const ts = gradeCounts(d, 0, 'ideal').counts;
       const g0 = gradeOfRoll(d, 0, 0);
-      for (let g = 0; g < 4; g++) expect(c[g]).toBe(ts[g] * 1057 + (g0 + 1 === g ? 1 : 0));
+      for (let g = 0; g < 4; g++) expect(out.skill_check[d + 80][g]).toBe(ts[g] * 1057 + (g0 + 1 === g ? 1 : 0));
     }
   });
-  it('d = 0 gives 2, 13, 13, 3 (the source comment)', () => {
-    expect(gradeCounts(0, 0).counts).toEqual([3, 13, 13, 2]);
+  it('d = 0 gives 2, 13, 13, 3 in 31 (the source comment)', () => {
+    expect(gradeCounts(0, 0, 'ideal').counts).toEqual([3, 13, 13, 2]);
   });
   it('pickloc agrees for every geometry and rand() residue', () => {
     const tops = [9, 14, 18, 20, 23, 28, 32];

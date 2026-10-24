@@ -10,14 +10,22 @@ const fx = (f: string) => new Uint8Array(readFileSync(join(__dirname, 'fixtures'
 const expected = (f: string) => JSON.parse(readFileSync(join(__dirname, 'fixtures', f), 'utf8'));
 
 describe('skill_check model', () => {
-  it('boundaries: scores 2/3, 15/16, 28/29', () => {
-    expect(gradeCounts(-28, 0).counts).toEqual([31, 0, 0, 0]);
-    expect(gradeCounts(-27, 0).counts).toEqual([30, 1, 0, 0]);
-    expect(gradeCounts(-14, 0).counts).toEqual([17, 13, 1, 0]);
-    expect(gradeCounts(-1, 0).counts).toEqual([4, 13, 13, 1]);
-    expect(gradeCounts(28, 0).counts).toEqual([0, 0, 1, 30]);
-    expect(gradeCounts(29, 0).counts).toEqual([0, 0, 0, 31]);
-    for (let d = -60; d <= 60; d++) expect(gradeCounts(d, 0).counts.reduce((a, b) => a + b)).toBe(31);
+  it('boundaries (ideal model, n/31): scores 2/3, 15/16, 28/29', () => {
+    expect(gradeCounts(-28, 0, 'ideal').counts).toEqual([31, 0, 0, 0]);
+    expect(gradeCounts(-27, 0, 'ideal').counts).toEqual([30, 1, 0, 0]);
+    expect(gradeCounts(-14, 0, 'ideal').counts).toEqual([17, 13, 1, 0]);
+    expect(gradeCounts(-1, 0, 'ideal').counts).toEqual([4, 13, 13, 1]);
+    expect(gradeCounts(28, 0, 'ideal').counts).toEqual([0, 0, 1, 30]);
+    expect(gradeCounts(29, 0, 'ideal').counts).toEqual([0, 0, 0, 31]);
+    for (let d = -60; d <= 60; d++) expect(gradeCounts(d, 0, 'ideal').counts.reduce((a, b) => a + b)).toBe(31);
+  });
+  it("the game's rand(): the same grades out of 32768, residue 0 weighted 1058", () => {
+    for (let d = -60; d <= 60; d++) {
+      const g = gradeCounts(d, 0, 'game');
+      expect(g.counts.reduce((a, b) => a + b)).toBe(32768);
+      expect(g.residues).toEqual(gradeCounts(d, 0, 'ideal').counts);
+    }
+    expect(gradeCounts(-1, 0, 'game').counts).toEqual([4 * 1057 + 1, 13 * 1057, 13 * 1057, 1057]);
   });
 });
 

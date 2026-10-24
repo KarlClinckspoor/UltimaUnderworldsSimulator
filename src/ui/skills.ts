@@ -1,5 +1,6 @@
 // Skills tab: exact odds of every skill_check call site outside combat (plan Part A).
-import { gradeCounts, gradeOfRoll, pPass } from '../core/skillcheck';
+import { gradeCounts, gradeOfRoll, gradeProbs, pPass } from '../core/skillcheck';
+import { faceProbs, modProbs, setRandModel } from '../core/randdist';
 import { maxWeight, type Character } from '../core/character';
 import { armour as ARMOUR, SK, weapons, worldOf } from '../data/gameData';
 import { changed, state } from '../state';
@@ -83,6 +84,8 @@ export function renderSkills(root: HTMLElement) {
   const autoV = chk.value(c, p), autoT = chk.target(c, p);
   const value = ui.value ?? autoV, target = ui.target ?? autoT;
   const rerender = () => renderSkills(root);
+  setRandModel(state.combat.rand);
+  const game = state.combat.rand === 'game';
 
   // ---- catalogue
   const list = h('div', { class: 'check-list' });
@@ -102,24 +105,33 @@ export function renderSkills(root: HTMLElement) {
         : numInput(p, chk.param.min, chk.param.max, (v) => { paramVals[chk.id] = v; ui.target = null; ui.value = null; rerender(); })) : null,
     h('button', { class: 'btn ghost', onclick: () => { ui.value = null; ui.target = null; rerender(); } }, 'Use character'),
     h('button', { class: 'btn', title: 'Keep this scenario on the charts for comparison', onclick: () => { ui.pinned.push({ label: `${chk.label} ${value}/${target}`, value, target }); rerender(); } }, 'Pin scenario'),
-    ui.pinned.length ? h('button', { class: 'btn ghost', onclick: () => { ui.pinned = []; rerender(); } }, `Clear ${ui.pinned.length} pinned`) : null);
+    ui.pinned.length ? h('button', { class: 'btn ghost', onclick: () => { ui.pinned = []; rerender(); } }, `Clear ${ui.pinned.length} pinned`) : null,
+    h('label', { class: 'lab' }, h('span', {}, 'Random numbers'), select(state.combat.rand, [['game', "the game's rand() (n/32768)"], ['ideal', 'ideal (n/31)']],
+      (v) => { state.combat.rand = v; changed('combat'); rerender(); })));
 
   const gc = gradeCounts(value, target);
   const gradeCard = card('Grade odds', `skill_check(${value}, ${target}): score = ${value} − ${target} + rand() % 31`);
   const gbar = h('div');
   const scen = [...ui.pinned, { label: 'current', value, target }];
   groupedBars(gbar, GRADE_LABELS, scen.map((s, i) => ({ name: s.label, color: i === scen.length - 1 ? C.accent : C.series[i % C.series.length],
-    values: gradeCounts(s.value, s.target).counts.map((x) => x / 31) })), { yfmt: (v) => pct(v, 1), labels: true, yMax: 1 });
-  const tbl = h('table', { class: 'mini wide' }, h('tr', {}, ...GRADE_LABELS.map((g) => h('th', {}, g))),
-    h('tr', {}, ...gc.counts.map((n) => h('td', {}, `${n}/31 = ${pct(n / 31)}`))));
+    values: gradeProbs(s.value, s.target) })), { yfmt: (v) => pct(v, 1), labels: true, yMax: 1 });
+  const ideal = gradeCounts(value, target, 'ideal'), real = gradeCounts(value, target, 'game');
+  const ppm = (x: number) => `${x >= 0 ? '+' : '−'}${Math.abs(x * 1e6).toFixed(0)} ppm`;
+  const tbl = h('table', { class: 'mini wide' }, h('tr', {}, h('th', {}, ''), ...GRADE_LABELS.map((g) => h('th', {}, g))),
+    h('tr', { class: game ? 'on' : '' }, h('td', {}, "game's rand()"), ...real.counts.map((n) => h('td', {}, `${n}/32768 = ${pct(n / 32768, 3)}`))),
+    h('tr', { class: game ? '' : 'on' }, h('td', {}, 'ideal'), ...ideal.counts.map((n) => h('td', {}, `${n}/31 = ${pct(n / 31, 3)}`))),
+    h('tr', {}, h('td', { class: 'muted' }, 'difference'), ...real.counts.map((n, i) => h('td', { class: 'muted' }, ppm(n / 32768 - ideal.counts[i] / 31)))));
+  void gc;
   gradeCard.append(gbar, tbl, h('p', { class: 'effect' }, h('b', {}, `${chk.label} · ${chk.where}: `), chk.effect));
 
   // score distribution
-  const scoreCard = card('The 31 equally likely scores', 'thresholds at 3, 16 and 29');
+  const scoreCard = card('The 31 scores', game ? "thresholds at 3, 16 and 29 · with the game's rand(), rand() % 31 = 0 comes up 1058 times in 32768, every other residue 1057"
+    : 'thresholds at 3, 16 and 29 · ideal model: each residue 1/31');
+  const w31 = modProbs(31);
   const sc = h('div');
   const scores = Array.from({ length: 31 }, (_, r) => value - target + r);
   stackedBars(sc, scores.map(String), [0, 1, 2, 3].map((g) => ({ name: GRADE_LABELS[g], color: GRADE_COLORS[g],
-    values: scores.map((_, r) => (gradeOfRoll(value, target, r) + 1 === g ? 1 / 31 : 0)) })), { height: 180, yfmt: (v) => pct(v, 1),
+    values: scores.map((_, r) => (gradeOfRoll(value, target, r) + 1 === g ? w31[r] : 0)) })), { height: 180, yfmt: (v) => pct(v, 2),
     tip: (cat, s) => `score ${cat}: ${s.name}` });
   scoreCard.append(sc);
 
@@ -129,8 +141,8 @@ export function renderSkills(root: HTMLElement) {
   const xs = Array.from({ length: 61 }, (_, i) => i - 10);
   lineChart(cv, [...ui.pinned.map((s, i) => ({ name: s.label, color: C.series[i % C.series.length], points: xs.map((x) => [x, pPass(x, s.target)] as [number, number]), dashed: true })),
     { name: 'success or critical', color: C.accent, points: xs.map((x) => [x, pPass(x, target)] as [number, number]) },
-    { name: 'critical', color: C.win, points: xs.map((x) => [x, gradeCounts(x, target).counts[3] / 31] as [number, number]) },
-    { name: 'failure (−1)', color: C.death, points: xs.map((x) => [x, gradeCounts(x, target).counts[0] / 31] as [number, number]) }],
+    { name: 'critical', color: C.win, points: xs.map((x) => [x, gradeProbs(x, target)[3]] as [number, number]) },
+    { name: 'failure (−1)', color: C.death, points: xs.map((x) => [x, gradeProbs(x, target)[0]] as [number, number]) }],
   { yDomain: [0, 1], marker: value, xLabel: 'value', yfmt: (v) => pct(v, 0) });
   curveCard.append(cv, h('ul', { class: 'legend' }, ...[[C.accent, 'success or critical'], [C.win, 'critical'], [C.death, 'failure (−1)'], ...ui.pinned.map((pp, i) => [C.series[i % C.series.length], pp.label + ' (dashed)'])].map(([col, l]) => h('li', {}, h('i', { class: 'sw', style: `background:${col}` }), l))));
 
@@ -145,7 +157,7 @@ export function renderSkills(root: HTMLElement) {
   const cards = h('div', { class: 'cards' }, gradeCard, scoreCard, curveCard, heatCard);
   if (chk.extra) { const ex = card('Details', chk.label); chk.extra(c, p, ex); cards.append(ex); }
   root.append(h('div', { class: 'skills-layout' }, h('div', { class: 'catalogue' }, h('h3', {}, 'Every skill check'),
-    h('p', { class: 'hint' }, 'Exact odds (n/31), filled in from the character. The combat rolls are on the Combat tab.'), list),
+    h('p', { class: 'hint' }, `Exact odds (${game ? "n/32768, the game's rand()" : 'n/31, ideal'}), filled in from the character. The combat rolls are on the Combat tab.`), list),
   h('div', { class: 'skills-main' }, ctrls, cards)));
 }
 
@@ -153,31 +165,31 @@ function castingTable(c: Character, _p: number, el: HTMLElement) {
   const t = h('table', { class: 'mini wide' }, h('tr', {}, ...['Circle', 'Target', 'Cast', 'Fizzle (0)', 'Backfire (−1)', 'Backfire damage', 'Allowed?'].map((x) => h('th', {}, x))));
   const mm = ((c.skills[SK.Mana] + 1) * c.int) >> 3;
   for (let circle = 1; circle <= 8; circle++) {
-    const g = gradeCounts(c.skills[SK.Casting], 3 * circle).counts;
+    const g = gradeProbs(c.skills[SK.Casting], 3 * circle);
     const why = [Math.floor((c.level + 1) / 2) < circle ? `level ${2 * circle - 1}` : '', 3 * circle > mm ? `${3 * circle} mana` : '',
       worldOf(c.dungeonLevel) === 0 && circle > 3 ? 'to leave Britannia' : ''].filter(Boolean).join(', ');
-    t.append(h('tr', {}, h('td', {}, String(circle)), h('td', {}, String(3 * circle)), h('td', {}, pct((g[2] + g[3]) / 31)), h('td', {}, pct(g[1] / 31)),
-      h('td', {}, pct(g[0] / 31)), h('td', {}, circle >> 1 ? `${circle >> 1}d8, mean ${(4.5 * (circle >> 1)).toFixed(1)}` : 'none'), h('td', { class: why ? 'warn' : '' }, why ? `needs ${why}` : 'yes')));
+    t.append(h('tr', {}, h('td', {}, String(circle)), h('td', {}, String(3 * circle)), h('td', {}, pct(g[2] + g[3])), h('td', {}, pct(g[1])),
+      h('td', {}, pct(g[0])), h('td', {}, circle >> 1 ? `${circle >> 1}d8, mean ${(4.5 * (circle >> 1)).toFixed(1)}` : 'none'), h('td', { class: why ? 'warn' : '' }, why ? `needs ${why}` : 'yes')));
   }
   el.append(t, h('p', { class: 'hint' }, 'A critical (2) casts like a success; the self-damage comes from the −1.'));
 }
 function loreLevels(c: Character, _p: number, el: HTMLElement) {
-  const g = gradeCounts(c.skills[SK.Lore], 8).counts;
-  el.append(h('p', {}, `Lore level 1: ${pct((g[0] + g[1]) / 31)} · level 2: ${pct(g[2] / 31)} · level 3: ${pct(g[3] / 31)}`));
+  const g = gradeProbs(c.skills[SK.Lore], 8);
+  el.append(h('p', {}, `Lore level 1: ${pct(g[0] + g[1])} · level 2: ${pct(g[2])} · level 3: ${pct(g[3])}`));
 }
 function lockNote(c: Character, p: number, el: HTMLElement) {
   const v = c.skills[SK['Pick Lock']] + 1;
   if (p >= 15) el.append(h('p', { class: 'warn' }, 'z 15: never opens.'));
   else if (p === 14) el.append(h('p', { class: 'warn' }, `z 14: fails outright for values below 32, so Pick Lock ${c.skills[SK['Pick Lock']]} (+1) never opens it.`));
   else {
-    const g = gradeCounts(v, 3 * p).counts.map((x) => x / 31);
+    const g = gradeProbs(v, 3 * p);
     const saved = pPass(c.dex, 20);
     el.append(h('p', {}, `Opens with ${pct(g[2] + g[3])} per try; fumbles ${pct(g[0])}, of which DEX ${c.dex} vs 20 saves the pick ${pct(saved)}: the pick breaks ${pct(g[0] * (1 - saved))} of tries.`));
   }
 }
 function repairTable(c: Character, p: number, el: HTMLElement) {
   const sk = c.skills[SK.Repair];
-  const g = gradeCounts(sk, p).counts.map((x) => x / 31);
+  const g = gradeProbs(sk, p);
   const rows: [string, number][] = [];
   rows.push(['full repair (2)', g[3]], [`+${3 + Math.trunc(sk / 5)} quality (1)`, g[2]], ['nothing (0)', g[1]]);
   el.append(h('p', {}, 'Per quality of the item (the destruction chance depends on it):'));
@@ -194,20 +206,21 @@ function swimNote(c: Character, _p: number, el: HTMLElement) {
   el.append(h('p', {}, `Max weight ${maxWeight(c)} (STR × 13 + 300). Load = weight × 32 / max weight, e.g. carrying half the maximum gives 16.`));
   const t = h('table', { class: 'mini wide' }, h('tr', {}, ...['Load', 'P(no swim_count rise)', 'Expected drowning damage per tick'].map((x) => h('th', {}, x))));
   for (const load of [0, 4, 8, 16, 24, 32]) {
-    const g = gradeCounts(c.skills[SK.Swimming], load).counts.map((x) => x / 31);
+    const g = gradeProbs(c.skills[SK.Swimming], load);
     // hurt = 2 - grade; damage rollem(2, hurt + 2) when hurt != 0 -> mean 2 * (hurt + 3) / 2
     let ed = 0;
-    [-1, 0, 1, 2].forEach((gr, i) => { const hurt = 2 - gr; if (hurt) ed += g[i] * (hurt + 3); });
+    // damage rollem(2, hurt + 2): 2 + two faces of (rand() * sides) / 0x8000
+    [-1, 0, 1, 2].forEach((gr, i) => { const hurt = 2 - gr; if (hurt) ed += g[i] * (2 + 2 * faceProbs(hurt + 2).reduce((m, p, f) => m + p * f, 0)); });
     t.append(h('tr', {}, h('td', {}, String(load)), h('td', {}, pct(g[2] + g[3])), h('td', {}, fmt(ed, 2))));
   }
   el.append(t);
 }
 function mushroomNote(c: Character, _p: number, el: HTMLElement) {
-  const g = gradeCounts(c.int, 20).counts.map((x) => x / 31);
+  const g = gradeProbs(c.int, 20);
   el.append(h('p', {}, `As the code reads (any grade but 0): ${pct(1 - g[1])}. As probably intended (grade > 0): ${pct(g[2] + g[3])}.`));
 }
 function chargenDist(_c: Character, p: number, el: HTMLElement) {
-  const g = gradeCounts(p, 20).counts.map((x) => x / 31);
+  const g = gradeProbs(p, 20);
   const conv = (n: number) => {
     let d = new Map<number, number>([[0, 1]]);
     for (let i = 0; i < n; i++) {

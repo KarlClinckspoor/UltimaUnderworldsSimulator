@@ -10,7 +10,8 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const shots = join(root, 'test', 'screenshots');
 mkdirSync(shots, { recursive: true });
-const server = spawn('npx', ['vite', 'preview', '--port', '4179', '--strictPort'], { cwd: root, stdio: 'pipe' });
+// vite itself, not through npx, so that server.kill() stops it and node can exit
+const server = spawn(process.execPath, [join(root, 'node_modules', 'vite', 'bin', 'vite.js'), 'preview', '--port', '4179', '--strictPort'], { cwd: root, stdio: 'pipe' });
 await new Promise((r) => setTimeout(r, 2500));
 const errors = [];
 const browser = await chromium.launch();
