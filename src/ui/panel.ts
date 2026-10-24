@@ -8,6 +8,7 @@ import { pPass } from '../core/skillcheck';
 import { armour as ARMOUR, RUNES, SK, SKILLS, spells } from '../data/gameData';
 import { changed, state } from '../state';
 import { clear, h, numInput, pct, select, toggle } from './dom';
+import { describeEnchant, ENCHANT_NAME_NOTE } from '../core/enchantNames';
 
 const RES_NAMES: [number, string][] = [[0x40, 'missiles'], [0x08, 'fire'], [0x10, 'poison'], [0x03, 'magic (chance)']];
 
@@ -24,13 +25,14 @@ function itemsForSlot(c: Character, s: number): number[] {
   return [];
 }
 
+// options show the name the game gives ("of ...") and what the code does
+const encOpt = (isWeapon: boolean, effect: number): [string, string] => {
+  const d = describeEnchant(isWeapon, { major: 12, effect })!;
+  return [`12:${effect}`, `"${d.gameName}": ${d.effect}`];
+};
 const ENCH_GROUPS: { label: string; opts: [string, string][] }[] = [
-  { label: 'Weapon (class 12)', opts: [
-    ...Array.from({ length: 8 }, (_, i) => [`12:${i}`, `Accuracy +${i + 1} to hit`] as [string, string]),
-    ...Array.from({ length: 8 }, (_, i) => [`12:${i + 8}`, `Damage +${i + 1}`] as [string, string])] },
-  { label: 'Worn item (class 12)', opts: [
-    ...Array.from({ length: 8 }, (_, i) => [`12:${i}`, `Protection: monsters -${i + 1} to hit here`] as [string, string]),
-    ...Array.from({ length: 8 }, (_, i) => [`12:${i + 8}`, `Toughness +${i + 1} armour`] as [string, string])] },
+  { label: 'Weapon (class 12): the game\'s name, then what it does', opts: Array.from({ length: 16 }, (_, i) => encOpt(true, i)) },
+  { label: 'Worn item (class 12): the game\'s name, then what it does', opts: Array.from({ length: 16 }, (_, i) => encOpt(false, i)) },
   { label: 'Spell effects on a worn item', opts: [
     ['2:2', 'Resist Blows (+2 armour, all)'], ['2:3', 'Thick Skin (+3 armour, all)'], ['2:5', 'Iron Flesh (+5 armour, all)'],
     ['3:1', 'Protection (monsters -3 to hit)'], ['3:5', 'Missile Protection'], ['3:6', 'Flameproof'], ['3:7', 'Poison Resistance'],
@@ -142,11 +144,14 @@ export function renderPanel(root: HTMLElement) {
       row.append(h('span', { class: 'eq-q', title: 'quality 0..63: armour value = (quality × protection ≫ 6) + 1' }, 'q ',
         numInput(e.quality, 1, 63, (v) => set(() => (e.quality = v)))));
       row.append(enchSelect(c, s, e.ench, (en) => set(() => (e.ench = en))));
+      if (e.ench?.major === 12 && (e.ench.effect & 8) && s > 4 && s !== weaponSlot(c))
+        row.append(h('p', { class: 'warn eq-note' }, '⚠ Toughness on a shield or ring goes twice to the torso and not at all to the arms (player_affected_by adds it to the first of its two locations each time); the simulator does the same.'));
     }
     eq.append(row);
   }
   root.append(h('div', { class: 'panel-sec' }, h('h4', {}, 'Equipment'), eq,
     h('p', { class: 'hint' }, `Hands follow the save's lefty bit (${c.lefty}): the weapon is in slot ${weaponSlot(c)}, the shield in slot ${shieldSlot(c)}. Enchantments on shoulders and on the weapon only act through the weapon's own to-hit/damage (ObjWorn).`),
+    h('details', { class: 'hint ench-note' }, h('summary', {}, 'Enchantment names: are "Accuracy" and "Damage" swapped? Not in UW1'), h('p', {}, ENCHANT_NAME_NOTE)),
     toggle('Swap hands (lefty bit)', c.lefty === 0, (v) => set(() => { c.lefty = v ? 0 : 1; }))));
 
   // ---- runes & buffs

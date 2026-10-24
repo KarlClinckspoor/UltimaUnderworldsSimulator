@@ -71,3 +71,12 @@ describe('PLAYER.DAT reader (against uw1-data/tools/read_playerdat.py)', () => {
     expect(readPlayerDat(data).problems.length).toBeGreaterThan(0);
   });
 });
+
+describe('enchantment names (STRINGS.PAK block 6 against DoPlayerWeapon)', () => {
+  it('UW1 names match the effects, Unsurpassed is the strongest', async () => {
+    const { describeEnchant } = await import('../src/core/enchantNames');
+    expect(describeEnchant(true, { major: 12, effect: 7 })).toMatchObject({ gameName: 'Unsurpassed Accuracy', effect: '+8 to hit', misleading: null });
+    expect(describeEnchant(true, { major: 12, effect: 9 })).toMatchObject({ gameName: 'Damage', effect: '+2 damage' });
+    expect(describeEnchant(false, { major: 12, effect: 11 })!.gameName).toBe('Major Toughness');
+  });
+});
