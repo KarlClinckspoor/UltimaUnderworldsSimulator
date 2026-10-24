@@ -1,4 +1,4 @@
-// Typed view of src/data/game.json (built by tools/compact-data.mjs).
+// Typed view of src/data/game.json (built by tools/compact-data.mjs from the UW2 extracts).
 import raw from './game.json';
 
 export interface Weapon { id: number; name: string; slash: number; bash: number; stab: number;
@@ -11,19 +11,21 @@ export interface CreatureRec {
   passive: number; flier: number; speed: number; equip: number; defence: number; attacks: Attack[];
   nerve: number; arms: { present: number; item: number }[]; firesMissile: number | null;
   offensive: number; exp: number; spells: number[]; caster: number; locks: number; noise: number;
-  poison: number; blood: number; ignoresFights: number;
+  race: number; poison: number; blood: number; ignoresFights: number;
+  seqLen: number[] | null;   // CR.AN sequence lengths: 2 combat stance, 3..5 attacks, 6 cast / fire
 }
-export interface SpellRec { index: number; circle: number | null; cls: number; className: string | null;
+export interface SpellRec { index: number; name: string | null; circle: number | null; cls: number; className: string | null;
   minor: number; flags: number; runes: number[]; words: string; missile: number | null; heal: string | null }
 export interface EnemyRow { c: number; hp: number; pw: number; att: number; n: number; placed: number; trap: number;
   spawnP?: number[]; objs: number[]; authored: number }
-export interface LevelRec { level: number; rows: EnemyRow[] }
+export interface LevelRec { level: number; world: number; worldName: string; levelInWorld: number; rows: EnemyRow[] }
+export interface WeaponFrames { lefty: number; kind: number; frmtot: number[]; wframe: number[][] }
 export interface ItemRec { name: string; height: number; radius: number; resist: number; qualclass: number }
 
 interface Raw {
   items: [string, number, number, number, number][];
   weapons: Weapon[]; missiles: MissileRec[]; armour: ArmourRec[]; creatures: CreatureRec[];
-  spells: SpellRec[]; levels: LevelRec[];
+  spells: SpellRec[]; levels: LevelRec[]; weaponFrames: WeaponFrames[];
 }
 const R = raw as unknown as Raw;
 
@@ -35,6 +37,14 @@ export const armour = R.armour;
 export const creatures = R.creatures;
 export const spells = R.spells;
 export const levels = R.levels;
+export const weaponFrames = R.weaponFrames;
+
+/** (level - 1) / 8: eight levels to a world (SKILLCHK.C player_get_exp, RUNES.C player_cast). */
+export const worldOf = (level: number) => Math.trunc((level - 1) / 8);
+export const WORLD_NAMES = ['Britannia', 'Prison Tower', 'Killorn Keep', 'Ice Caverns', 'Talorus',
+  'Scintillus Academy', 'Tomb of Praecor Loth', 'Pits of Carnage', 'Ethereal Void', 'Levels 73-80'];
+export const worlds = WORLD_NAMES.map((name, w) => ({ world: w, name, levels: levels.filter((L) => L.world === w) }))
+  .filter((w) => w.levels.length > 0);
 
 export const SKILLS = ['Attack', 'Defense', 'Barehand', 'Sword', 'Axe', 'Mace', 'Missile', 'Mana', 'Lore',
   'Casting', 'Traps', 'Search', 'Track', 'Stealth', 'Repair', 'Charisma', 'Pick Lock', 'Acrobat', 'Appraise',

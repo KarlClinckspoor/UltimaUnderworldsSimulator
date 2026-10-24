@@ -8,7 +8,7 @@ export interface R {
   rollem(dice: number, sides: number): number;
 }
 
-/** pickloc (COMBAT.C:107): hit location 0..3 from the defender's bottom/top and the blow's. */
+/** pickloc (COMBAT.C:98): hit location 0..3 from the defender's bottom/top and the blow's. */
 export function pickloc(dz: number, dtop: number, az: number, atop: number, r: R): number {
   const dmid = (dz + dtop) >> 1;
   const amid = (az + atop) >> 1;
@@ -78,7 +78,12 @@ export function creatureArmourAt(armour: number[], hitloc: number, powerful: boo
 
 export const DMG_MAGIC = 0x03, DMG_PHYSICAL = 0x04, DMG_FIRE = 0x08, DMG_POISON = 0x10, DMG_COLD = 0x20, DMG_MISSILE = 0x40;
 
-/** check_res (DAMAGE.C:154). */
+/** Fire on a cold-resistant object, or cold on a fire-resistant one that does not also resist cold,
+    does double damage, capped at 0xFF (check_res, DAMAGE.C:224; UW2 only). */
+export const checkResDoubles = (res: number, type: number) =>
+  ((type & DMG_FIRE) && (res & DMG_COLD)) || ((type & DMG_COLD) && (res & DMG_FIRE) && (res & 0x28) !== 0x28);
+
+/** check_res (DAMAGE.C:210). damage is a byte. */
 export function checkRes(res: number, damage: number, type: number, r: R): number {
   if (type & res) {
     if (type & DMG_MAGIC) {
@@ -87,10 +92,11 @@ export function checkRes(res: number, damage: number, type: number, r: R): numbe
     }
     if (res & type) return 0;
   }
+  if (checkResDoubles(res, type)) damage = damage < 0x7f ? damage << 1 : 0xff;
   return damage;
 }
 
-/** Probability that check_res lets damage through. */
+/** Probability that check_res lets damage through (the doubling is separate: checkResDoubles). */
 export function checkResPass(res: number, type: number): number {
   if (!(type & res)) return 1;
   let p = 1;
@@ -99,7 +105,10 @@ export function checkResPass(res: number, type: number): number {
   return p;
 }
 
-/** should_i_flee (AI.C:1359). Arguments are bytes in the game. */
+/** is_sharp (COMBAT.C:275): a weapon or missile item other than the cudgel..mace range (7..9) and the sling. */
+export const isSharp = (itemId: number) => itemId < 0x20 && !(itemId >= 7 && itemId < 10) && itemId !== 0x18;
+
+/** should_i_flee (AI.C:1358). Arguments are bytes in the game. */
 export function shouldIFlee(maxhp: number, hp: number, nerve: number, damage: number, r: R): boolean {
   maxhp &= 0xff; hp &= 0xff; damage &= 0xff;
   if ((maxhp * 3) >> 2 < hp) return false;

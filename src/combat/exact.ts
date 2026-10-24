@@ -4,7 +4,7 @@
 
 import { gradeCounts } from '../core/skillcheck';
 import { ATK_CHARGE, checkResPass, creatureArmourAt, damageRollDist, DMG_PHYSICAL, meleeProbe, picklocDist } from './blow';
-import { chooseSwing, PLAYER_HEIGHT, swingKindOf, type FightSettings, type MonsterProfile, type PlayerProfile } from './setup';
+import { chooseSwing, PLAYER_HEIGHT, poisonBonus, swingKindOf, type FightSettings, type MonsterProfile, type PlayerProfile } from './setup';
 
 export interface BlowDist {
   pMiss: number;      // grade 0 or -1
@@ -28,11 +28,13 @@ function finish(out: number[], pMiss: number, pCrit: number, zones: number[]): B
   return { pMiss, pCrit, dist: out, mean, zones };
 }
 
-/** The player's melee blow on the monster (DoPlayerWeapon + do_attack + do_damage). */
+/** The player's melee blow on the monster (DoPlayerWeapon + do_attack + do_damage), a special weapon's
+    extra power left aside. */
 export function playerBlowDist(P: PlayerProfile, M: MonsterProfile, S: FightSettings): BlowDist {
   const m = P.melee;
   const cell = chooseSwing(m, S.swing);
-  const base = m.base[swingKindOf(cell)] + m.strBonus + m.ench;
+  let base = m.base[swingKindOf(cell)] + m.strBonus + m.ench;
+  if (m.poison && M.blood) base = poisonBonus(base, P.casting); // frp_check, before the critical
   const probe = meleeProbe(0, PLAYER_HEIGHT, cell, m.wsize);
   const zones = picklocDist(0, M.height, probe.z, probe.top);
   const gc = gradeCounts(m.askill + S.hitangle, M.defence).counts.map((c) => c / 31);

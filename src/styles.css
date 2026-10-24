@@ -1,30 +1,34 @@
 :root {
-  --bg: #121317; --surface: #1a1c22; --surface2: #22252d; --border: #2e323c; --text: #e8e3d5; --muted: #9b9a92;
-  --accent: #d9a441; --accent-ink: #1a1408; --good: #2a9d78; --bad: #d1603d; --warn: #e0a030;
-  --grid: #2a2e37; --font: 'IBM Plex Sans', system-ui, sans-serif; --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* Labyrinth of Worlds: deep midnight blues, moonstone accent */
+  --bg: #070b14; --surface: #0c1220; --surface2: #131c30; --border: #1f2b46; --text: #d9e1f2; --muted: #8392b3;
+  --accent: #6db5ff; --accent-ink: #061120; --good: #39b58c; --bad: #e46b5b; --warn: #e3b24e;
+  --grid: #172139; --font: 'IBM Plex Sans', system-ui, sans-serif; --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --display: 'Cormorant SC', Georgia, serif;
   color-scheme: dark;
 }
-@media (prefers-color-scheme: light) {
-  :root { --bg: #f4f1e9; --surface: #fffdf8; --surface2: #f0ece2; --border: #d9d3c4; --text: #23211c; --muted: #6d6a60;
-    --accent: #a8731a; --accent-ink: #fffdf8; --grid: #e6e1d4; color-scheme: light; }
+/* The site is dark by design; <html data-theme="light"> opts into a pale blue variant. */
+:root[data-theme="light"] {
+  --bg: #edf1f8; --surface: #ffffff; --surface2: #e3e9f4; --border: #c5d0e3; --text: #111a2c; --muted: #58698a;
+  --accent: #1e6fc4; --accent-ink: #ffffff; --grid: #dde4f0; color-scheme: light;
 }
+:root[data-theme="light"] body { background: var(--bg); }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); }
+body { background: radial-gradient(1200px 500px at 20% -10%, #10203d 0%, transparent 60%), var(--bg); min-height: 100vh; }
 a { color: var(--accent); }
 h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 .hidden { display: none; }
 [hidden] { display: none !important; }
 
 .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 18px; border-bottom: 1px solid var(--border);
-  background: var(--surface); position: sticky; top: 0; z-index: 5; flex-wrap: wrap; }
+  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 5; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand h1 { font-family: var(--display); font-size: 24px; letter-spacing: .02em; line-height: 1.1; }
 .brand p { margin: 0; color: var(--muted); font-size: 12.5px; }
 .ankh { font-size: 26px; color: var(--accent); }
 .tabs { display: flex; gap: 6px; align-items: center; }
 .tab { background: none; border: 1px solid var(--border); color: var(--text); padding: 7px 18px; border-radius: 6px; cursor: pointer; font: 600 14px var(--font); }
-.tab.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tab.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
 
 .body { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 0; min-height: calc(100vh - 110px); }
 body.panel-closed .body { grid-template-columns: minmax(0, 1fr); }
@@ -79,7 +83,7 @@ td.muted { color: var(--muted); }
 .buff.off { color: var(--muted); }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 14px; margin-top: 14px; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; box-shadow: 0 1px 0 color-mix(in srgb, #fff 4%, transparent) inset; }
 .card header { margin-bottom: 6px; }
 .card h3 { font-size: 15px; }
 .card .sub { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
@@ -119,8 +123,11 @@ td.muted { color: var(--muted); }
 /* combat tab */
 .combat-layout { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 18px; }
 .picker h3 { font-size: 15px; }
+.world-tabs { display: flex; gap: 3px; margin: 4px 0 8px; flex-wrap: wrap; }
+.wld { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 3px 8px; cursor: pointer; font: 500 12px var(--font); }
+.wld.on { background: var(--surface2); color: var(--text); border-color: var(--accent); }
 .level-tabs { display: flex; gap: 3px; margin: 4px 0 8px; flex-wrap: wrap; }
-.lvl { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 5px; width: 28px; height: 28px; cursor: pointer; font: 600 13px var(--font); }
+.lvl { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 5px; min-width: 30px; height: 28px; padding: 0 6px; cursor: pointer; font: 600 13px var(--font); }
 .lvl.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .enemy-list { display: flex; flex-direction: column; gap: 2px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 4px; }
 .enemy { display: grid; grid-template-columns: 1fr auto; gap: 0 6px; background: none; border: 1px solid transparent; color: var(--text); text-align: left;

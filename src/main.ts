@@ -16,12 +16,12 @@ const collapse = h('button', { class: 'btn ghost collapse', title: 'Show or hide
 
 app.append(
   h('header', { class: 'top' },
-    h('div', { class: 'brand' }, h('span', { class: 'ankh', 'aria-hidden': 'true' }, '☥'), h('div', {}, h('h1', {}, 'Stygian Abyss Odds'),
-      h('p', {}, 'Ultima Underworld 1 skill checks and combat, from the game\'s own code'))),
+    h('div', { class: 'brand' }, h('span', { class: 'ankh', 'aria-hidden': 'true' }, '◈'), h('div', {}, h('h1', {}, 'Labyrinth of Worlds Odds'),
+      h('p', {}, 'Ultima Underworld II skill checks and combat, from the game\'s own code'))),
     h('nav', { class: 'tabs' }, collapse, tabBtn('skills', 'Skills'), tabBtn('combat', 'Combat'))),
   h('div', { class: 'body' }, panel, views.skills, views.combat),
   h('footer', {}, 'Rules ported from ', h('a', { href: 'https://github.com/abedegno/underworld-exhumed', target: '_blank', rel: 'noopener' }, 'abedegno/underworld-exhumed'),
-    '. Game data from the pristine OBJECTS.DAT, COMOBJ.DAT and LEV.ARK. Nothing leaves your browser.'));
+    ' (UW2 sources). Game data from the pristine UW2 OBJECTS.DAT, COMOBJ.DAT, LEV.ARK, WEAP.DAT, AS.AN and CR.AN. Nothing leaves your browser.'));
 
 const rendered = { skills: '', combat: '' };
 function render(why: string) {

@@ -1,7 +1,7 @@
 // Skills tab: exact odds of every skill_check call site outside combat (plan Part A).
 import { gradeCounts, gradeOfRoll, pPass } from '../core/skillcheck';
 import { maxWeight, type Character } from '../core/character';
-import { armour as ARMOUR, SK, weapons } from '../data/gameData';
+import { armour as ARMOUR, SK, weapons, worldOf } from '../data/gameData';
 import { changed, state } from '../state';
 import { card, clear, fmt, h, numInput, pct, select } from './dom';
 import { C, groupedBars, heatmap, lineChart, stackedBars } from './charts';
@@ -19,44 +19,57 @@ const durabilityItems: [number, string][] = [
   ...ARMOUR.filter((a) => a.durability < 255 && !a.name.startsWith('item')).map((a) => [a.durability, `${a.name} (${a.durability})`] as [number, string]),
 ].sort((a, b) => a[0] - b[0]);
 
+const world = (c: Character) => worldOf(c.dungeonLevel);
 const CHECKS: Check[] = [
-  { id: 'casting', label: 'Casting a spell', where: 'RUNES.C:249', value: (c) => c.skills[SK.Casting] + 5, target: (_, p) => 2 * p,
-    param: { label: 'circle', min: 1, max: 8, def: 1 }, effect: '2 or 1: the spell is cast · 0: it fails, no mana spent · -1: backfire (mana spent, circle/2 d8 damage, never below 3 HP). Needs level ≥ 2 × circle − 1 and mana ≥ 3 × circle first.',
+  { id: 'casting', label: 'Casting a spell', where: 'RUNES.C:238', value: (c) => c.skills[SK.Casting], target: (_, p) => 3 * p,
+    param: { label: 'circle', min: 1, max: 8, def: 1 }, effect: '2 or 1: the spell is cast · 0: "The incantation failed", no mana spent · -1: backfire (mana spent, (circle/2)d8 damage, never below 3 HP). First: level ≥ 2 × circle − 1, mana ≥ 3 × circle, and in Britannia (levels 1-8) no circle above 3. No +5 and a target of 3 × circle: casting is harder than in UW1.',
     extra: castingTable },
-  { id: 'track', label: 'Track (F9) / detect monster', where: 'SKILLS.C use_skill, SPELLS.C:700', value: (c) => c.skills[SK.Track], target: (_, p) => 15 - p,
-    param: { label: 'creature noise', min: 0, max: 15, def: 10 }, effect: '> 0: the creature is counted in its direction. One check per creature within 8 squares.' },
-  { id: 'lore', label: 'Lore: looking at an item', where: 'INTERACT.C:650', value: (c) => c.skills[SK.Lore], target: () => 10,
-    effect: 'Lore level = grade + 1, at least 1 (2 → 3, 1 → 2, 0 and −1 → 1); the best result is kept on the object.', extra: loreLevels },
-  { id: 'lore-barter', label: 'Lore: barter (strict side)', where: 'BARTER.C:408', value: (c) => c.skills[SK.Lore], target: () => 20,
-    effect: 'One side checks against 20 (lore 1 + [grade > 0]), the other against 15 (lore 1 + grade). Which side is which is not traced.' },
-  { id: 'lore-barter15', label: 'Lore: barter (other side)', where: 'BARTER.C:408', value: (c) => c.skills[SK.Lore], target: () => 15, effect: 'Lore level 1 + grade (0..3).' },
-  { id: 'look-trigger', label: 'Hidden look trigger', where: 'TRIGGER.C:126', value: (c) => c.skills[SK.Search], target: (_, p) => p,
-    param: { label: "trap's z", min: 1, max: 63, def: 8 }, effect: '≤ 0: not triggered. Only look triggers (type 5) with z > 0.' },
-  { id: 'detect-trap', label: 'Search: detect a trap', where: 'INTERACT.C:526', value: (c) => c.skills[SK.Search], target: () => 8, effect: '> 0: offers to disarm.' },
-  { id: 'disarm', label: 'Traps: disarm', where: 'INTERACT.C:533', value: (c) => c.skills[SK.Traps], target: () => 8, effect: '> 0: removed · 0: unable · −1: set off.' },
-  { id: 'remove-trap', label: 'Remove Trap spell', where: 'SPELLS.C:738', value: () => 45, target: () => 8, effect: 'As disarm, with a fixed value of 45.' },
-  { id: 'lockpick', label: 'Pick Lock', where: 'USEITEMS.C:1028', value: (c) => c.skills[SK['Pick Lock']], target: (_, p) => 3 * p,
-    param: { label: "lock's z", min: 0, max: 15, def: 3 }, effect: '> 0: opens. z 15 never opens; z 14 fails outright below 31, so never with Pick Lock (cap 30).', extra: lockNote },
-  { id: 'open-spell', label: 'Open spell', where: 'SPELLS.C:748', value: () => 45, target: (_, p) => 3 * p,
-    param: { label: "lock's z", min: 0, max: 15, def: 10 }, effect: '> 0: opens (45 passes the z 14 guard).' },
-  { id: 'repair', label: 'Repair at an anvil', where: 'WORLDEV.C:632', value: (c) => c.skills[SK.Repair], target: (_, p) => p,
+  { id: 'track', label: 'Track (skill key)', where: 'SPELLS2.C:613', value: (c) => c.skills[SK.Track], target: (_, p) => 15 - p,
+    param: { label: 'creature noise', min: 0, max: 15, def: 10 }, effect: '> 0: the creature is counted in its direction; 2 names it. One check per creature within 8 squares. UW2 has no Detect Monster spell.' },
+  { id: 'lore', label: 'Lore: looking at an item', where: 'INTERACT.C:547', value: (c) => c.skills[SK.Lore], target: () => 8,
+    effect: 'Lore level = grade + 1, at least 1 (2 → 3, 1 → 2, 0 and −1 → 1); the best result is kept on the object. Target 8 (UW1: 10).', extra: loreLevels },
+  { id: 'lore-barter', label: 'Lore: barter (NPC side)', where: 'BARTER.C:368', value: (c) => c.skills[SK.Lore], target: () => 20,
+    effect: 'Lore level 1 + [grade > 0] for the item on the NPC side of the trade.' },
+  { id: 'lore-barter15', label: 'Lore: barter (your side)', where: 'BARTER.C:369', value: (c) => c.skills[SK.Lore], target: () => 15, effect: 'Lore level 1 + grade (0..3).' },
+  { id: 'look-trigger', label: 'Hidden look trigger', where: 'TRIGGER.C:107', value: (c) => c.skills[SK.Search], target: (_, p) => p,
+    param: { label: "trigger's z", min: 1, max: 127, def: 8 }, effect: '≤ 0: not triggered. Only look triggers (type 5) with z > 0. The Reveal spell runs the check with Search 45.' },
+  { id: 'detect-trap', label: 'Search: detect a trap', where: 'SKILLS.C:885', value: (c) => c.skills[SK.Search], target: (c) => 10 + 2 * world(c),
+    effect: '> 0: offers to disarm. Target 10 + 2 × world (10 in Britannia … 26 on levels 73-80); set the dungeon level in the panel.' },
+  { id: 'detect-spell', label: 'Detect Trap spell', where: 'SPELLS.C:862', value: () => 45, target: (c) => 10 + 2 * world(c), effect: 'As the Search check, with a fixed value of 45.' },
+  { id: 'disarm', label: 'Traps: disarm', where: 'SKILLS.C:923', value: (c) => c.skills[SK.Traps], target: (c) => 8 + world(c),
+    effect: '> 0: removed · 0: "Unable to defuse trap" · −1: set off. Target 8 + world.' },
+  { id: 'remove-trap', label: 'Remove Trap spell', where: 'SPELLS.C:846', value: () => 45, target: (c) => 8 + world(c),
+    effect: 'As disarm, with a fixed value of 45; the detection roll before it (45 vs 10 + 2 × world) only stops the spell on a 0.' },
+  { id: 'lockpick', label: 'Pick Lock', where: 'OBJUSE.C:325', value: (c) => c.skills[SK['Pick Lock']] + 1, target: (_, p) => 3 * p,
+    param: { label: "lock's z", min: 0, max: 15, def: 3 }, effect: '> 0: opens · 0: fails · −1: a fumble: DEX vs 20 (> 0) or "You broke your pick". The value is Pick Lock + 1. z 15 never opens; z 14 needs a value of 32, so never with Pick Lock (cap 30 + 1).', extra: lockNote },
+  { id: 'open-spell', label: 'Open spell', where: 'SPELLS.C:856', value: () => 45, target: (_, p) => 3 * p,
+    param: { label: "lock's z", min: 0, max: 15, def: 10 }, effect: '> 0: opens (45 passes the z 14 guard). Mana is spent either way.' },
+  { id: 'repair', label: 'Repair at an anvil', where: 'WORLDEV.C:1013', value: (c) => c.skills[SK.Repair], target: (_, p) => p,
     param: { label: 'item durability', min: 1, max: 60, def: 5, options: durabilityItems },
     effect: '2: full repair · 1: +3 + skill/5 quality · 0: nothing · −1: destroyed if (rand & 63) > quality + skill, else −(4 + rand & 7) quality.', extra: repairTable },
-  { id: 'swim', label: 'Swimming (per tick)', where: 'PLAYTIME.C:201', value: (c) => c.skills[SK.Swimming], target: (_, p) => p,
-    param: { label: 'load = weight × 32 / max weight', min: 0, max: 32, def: 4 }, effect: 'grade < 1 adds rollem(3 − grade, 4) to swim_count; drowning damage rollem(2, hurt + 2) with hurt = 2 − grade.', extra: swimNote },
-  { id: 'fall', label: 'Acrobat: falling', where: 'PHYSICS.C:432', value: (c) => c.skills[SK.Acrobat], target: (_, p) => 2 * p,
-    param: { label: 'fall damage', min: 1, max: 40, def: 5 }, effect: '> 0: damage × (30 − Acrobat) / 30.' },
-  { id: 'mana-regen', label: 'Mana regeneration', where: 'PLAYTIME.C:125', value: (c) => c.skills[SK.Mana], target: () => 10, effect: 'mana + grade when grade > 0, every third duration check.' },
-  { id: 'hp-regen', label: 'HP regeneration', where: 'PLAYTIME.C:139', value: (c) => c.str, target: () => 15, effect: '> 0: +1 HP, every 24 ticks.' },
-  { id: 'mushroom', label: 'Mushroom', where: 'USEITEMS.C:622', value: (c) => c.int, target: () => 20,
-    effect: 'The result is tested as a truth value, so every grade except 0 counts (−1 included): then mana + 0..2. A quirk of the original.', extra: mushroomNote },
-  { id: 'drunk', label: 'Drink', where: 'USEITEMS.C:694', value: (c) => c.str, target: (_, p) => p, param: { label: 'drunk level', min: 0, max: 63, def: 10 },
-    effect: '−1: passes out · 0: short effect · other grades not traced.' },
-  { id: 'chargen', label: 'Character creation (one check)', where: 'SKILLS.C:173', value: (_, p) => p, target: () => 20,
+  { id: 'swim', label: 'Swimming (per check)', where: 'PLAYTIME.C:228', value: (c) => c.skills[SK.Swimming], target: (_, p) => p,
+    param: { label: 'load = weight × 32 / max weight', min: 0, max: 32, def: 4 }, effect: 'grade < 1 adds rollem(3 − grade, 4) to swim_count; a second roll sets the drowning damage rollem(2, hurt + 2) with hurt = 2 − grade once swim_count passes 0x78.', extra: swimNote },
+  { id: 'fall', label: 'Acrobat: falling', where: 'PHYSICS.C:610', value: (c) => c.skills[SK.Acrobat], target: (_, p) => 2 * p,
+    param: { label: 'fall damage', min: 1, max: 40, def: 5 }, effect: '> 0: damage × (30 − Acrobat) / 30. Damage of 3 or less is ignored; no fall damage at all in the Ethereal Void (levels 65-72).' },
+  { id: 'ice', label: 'Acrobat: thin ice', where: 'TRIGGER.C:1181', value: (c) => c.skills[SK.Acrobat], target: (_, p) => (p > 20 ? p : 0),
+    param: { label: 'carried weight / 12', min: 0, max: 60, def: 10 }, effect: 'Only a −1 breaks the ice under you (the tile drops one step). The target is weight / 12 when that is above 20, else 0.' },
+  { id: 'skill-trap', label: 'Skill trap', where: 'TRIGGER.C:378', value: (_, p) => p, target: () => 15,
+    param: { label: 'attribute or skill value', min: 0, max: 40, def: 15 }, effect: 'A trap with heading 1 rolls value against 3 × owner (others compare them outright): ≤ 0 fails and the trap\'s else-chain runs. Quality 0..2 an attribute, 3 the value 15, 4+ a skill. Owner is fixed at 5 here (target 15); edit the target for other traps.' },
+  { id: 'mana-regen', label: 'Mana regeneration', where: 'PLAYTIME.C:134', value: (c) => c.skills[SK.Mana], target: () => 10,
+    effect: 'mana + grade when grade > 0, every third duration check (every 60 game seconds). Nothing in Scintillus Academy (levels 41-48) except its level 1 and the far side of its level 8.' },
+  { id: 'hp-regen', label: 'HP regeneration', where: 'PLAYTIME.C:148', value: (c) => c.str, target: () => 15, effect: '> 0: +1 HP, every 30th duration check (every 10 game minutes; UW1: every 24th).' },
+  { id: 'mushroom', label: 'Mushroom', where: 'USEITEMS.C:222', value: (c) => c.int, target: () => 20,
+    effect: 'The result is tested as a truth value, so every grade except 0 counts (−1 included): then mana + 0..2. The same quirk as UW1.', extra: mushroomNote },
+  { id: 'drunk', label: 'Drink', where: 'USEITEMS.C:307', value: (c) => c.str, target: (_, p) => p, param: { label: 'drunk level', min: 0, max: 63, def: 10 },
+    effect: '−1: passes out · 0: wobbles (drunk / 6) · 2: +2 HP.' },
+  { id: 'halluc', label: 'Hallucination (special attack)', where: 'SPELLS.C:980', value: (c) => c.int, target: () => 20,
+    effect: '> 0 resists a mind-blast special (cases 3 and 4 of special_spells).' },
+  { id: 'chargen', label: 'Character creation (one check)', where: 'SKILLS.C:143', value: (_, p) => p, target: () => 20,
     param: { label: 'prime attribute', min: 10, max: 30, def: 20 }, effect: 'Each grade (−1..2) is added to the skill: three checks for a new skill, two for one already held.', extra: chargenDist },
 ];
 
 const GRADE_COLORS = [C.death, C.flee, C.blue, C.win];
+void maxWeight;
 const GRADE_LABELS = ['−1 failure', '0 near miss', '1 success', '2 critical'];
 
 let paramVals: Record<string, number> = {};
@@ -140,21 +153,27 @@ function castingTable(c: Character, _p: number, el: HTMLElement) {
   const t = h('table', { class: 'mini wide' }, h('tr', {}, ...['Circle', 'Target', 'Cast', 'Fizzle (0)', 'Backfire (−1)', 'Backfire damage', 'Allowed?'].map((x) => h('th', {}, x))));
   const mm = ((c.skills[SK.Mana] + 1) * c.int) >> 3;
   for (let circle = 1; circle <= 8; circle++) {
-    const g = gradeCounts(c.skills[SK.Casting] + 5, 2 * circle).counts;
-    const why = [Math.floor((c.level + 1) / 2) < circle ? `level ${2 * circle - 1}` : '', 3 * circle > mm ? `${3 * circle} mana` : ''].filter(Boolean).join(', ');
-    t.append(h('tr', {}, h('td', {}, String(circle)), h('td', {}, String(2 * circle)), h('td', {}, pct((g[2] + g[3]) / 31)), h('td', {}, pct(g[1] / 31)),
+    const g = gradeCounts(c.skills[SK.Casting], 3 * circle).counts;
+    const why = [Math.floor((c.level + 1) / 2) < circle ? `level ${2 * circle - 1}` : '', 3 * circle > mm ? `${3 * circle} mana` : '',
+      worldOf(c.dungeonLevel) === 0 && circle > 3 ? 'to leave Britannia' : ''].filter(Boolean).join(', ');
+    t.append(h('tr', {}, h('td', {}, String(circle)), h('td', {}, String(3 * circle)), h('td', {}, pct((g[2] + g[3]) / 31)), h('td', {}, pct(g[1] / 31)),
       h('td', {}, pct(g[0] / 31)), h('td', {}, circle >> 1 ? `${circle >> 1}d8, mean ${(4.5 * (circle >> 1)).toFixed(1)}` : 'none'), h('td', { class: why ? 'warn' : '' }, why ? `needs ${why}` : 'yes')));
   }
   el.append(t, h('p', { class: 'hint' }, 'A critical (2) casts like a success; the self-damage comes from the −1.'));
 }
 function loreLevels(c: Character, _p: number, el: HTMLElement) {
-  const g = gradeCounts(c.skills[SK.Lore], 10).counts;
+  const g = gradeCounts(c.skills[SK.Lore], 8).counts;
   el.append(h('p', {}, `Lore level 1: ${pct((g[0] + g[1]) / 31)} · level 2: ${pct(g[2] / 31)} · level 3: ${pct(g[3] / 31)}`));
 }
 function lockNote(c: Character, p: number, el: HTMLElement) {
+  const v = c.skills[SK['Pick Lock']] + 1;
   if (p >= 15) el.append(h('p', { class: 'warn' }, 'z 15: never opens.'));
-  else if (p === 14) el.append(h('p', { class: 'warn' }, `z 14: fails outright for values below 31, so Pick Lock ${c.skills[SK['Pick Lock']]} never opens it.`));
-  else el.append(h('p', {}, `Opens with ${pct(pPass(c.skills[SK['Pick Lock']], 3 * p))} per try.`));
+  else if (p === 14) el.append(h('p', { class: 'warn' }, `z 14: fails outright for values below 32, so Pick Lock ${c.skills[SK['Pick Lock']]} (+1) never opens it.`));
+  else {
+    const g = gradeCounts(v, 3 * p).counts.map((x) => x / 31);
+    const saved = pPass(c.dex, 20);
+    el.append(h('p', {}, `Opens with ${pct(g[2] + g[3])} per try; fumbles ${pct(g[0])}, of which DEX ${c.dex} vs 20 saves the pick ${pct(saved)}: the pick breaks ${pct(g[0] * (1 - saved))} of tries.`));
+  }
 }
 function repairTable(c: Character, p: number, el: HTMLElement) {
   const sk = c.skills[SK.Repair];
@@ -172,7 +191,7 @@ function repairTable(c: Character, p: number, el: HTMLElement) {
   void rows;
 }
 function swimNote(c: Character, _p: number, el: HTMLElement) {
-  el.append(h('p', {}, `Max weight ${maxWeight(c)} (STR × 20). Load = weight × 32 / max weight, e.g. carrying half the maximum gives 16.`));
+  el.append(h('p', {}, `Max weight ${maxWeight(c)} (STR × 13 + 300). Load = weight × 32 / max weight, e.g. carrying half the maximum gives 16.`));
   const t = h('table', { class: 'mini wide' }, h('tr', {}, ...['Load', 'P(no swim_count rise)', 'Expected drowning damage per tick'].map((x) => h('th', {}, x))));
   for (const load of [0, 4, 8, 16, 24, 32]) {
     const g = gradeCounts(c.skills[SK.Swimming], load).counts.map((x) => x / 31);

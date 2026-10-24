@@ -1,8 +1,8 @@
 // The shared character: attributes, skills, equipment slots 0..10, buffs and the derived
 // values the game computes in game/PLAYDATA.C FixPlayerEquips / player_affected_by /
-// parse_spells, and game/SKILLS.C player_compute.
+// parse_spells, and game/SKILLS.C player_compute (UW2 sources).
 
-import { armour as ARMOUR, items, SK, spells, weapons, type SpellRec } from '../data/gameData';
+import { armour as ARMOUR, items, SK, spells, weapons, worldOf, type SpellRec } from '../data/gameData';
 import type { PlayerDat } from './playerdat';
 
 export interface Enchant { major: number; effect: number }
@@ -19,7 +19,8 @@ export interface Character {
   mana: number;
   manaMax: number | null;    // null: derived (Mana + 1) * INT >> 3
   easy: boolean;
-  lefty: number;             // as stored (1 in both sample saves: weapon slot 7, shield slot 8)
+  lefty: number;             // as stored (1 in the sample save: weapon slot 7, shield slot 8)
+  dungeonLevel: number;      // 1..80, the level the character stands on (its world sets the casting and XP rules)
   runes: number[];
   equipment: Record<number, Equip>;   // slot -> item
   buffs: number[];           // spell indices pre-cast before the fight
@@ -42,7 +43,7 @@ export function defaultCharacter(): Character {
   skills[SK.Attack] = 10; skills[SK.Defense] = 6; skills[SK.Sword] = 8;
   return {
     name: 'Avatar', str: 23, dex: 19, int: 18, skills, level: 1, expRaw: 0, hp: 34, hpMax: null,
-    mana: 2, manaMax: null, easy: false, lefty: 1, runes: [], equipment: {}, buffs: [], payBuffMana: true,
+    mana: 2, manaMax: null, easy: false, lefty: 1, dungeonLevel: 1, runes: [], equipment: {}, buffs: [], payBuffMana: true,
     fullHp: true,
   };
 }
@@ -56,7 +57,7 @@ export function characterFromSave(p: PlayerDat): Character {
   return {
     name: p.name, str: p.str, dex: p.dex, int: p.int, skills: [...p.skills], level: p.level, expRaw: p.expRaw,
     hp: p.health, hpMax: p.maxHealth, mana: p.mana, manaMax: p.maxMana, easy: !!p.easy, lefty: p.lefty,
-    runes: [...p.runes], equipment, buffs: [], payBuffMana: true, fullHp: true,
+    dungeonLevel: p.dungeonLevel, runes: [...p.runes], equipment, buffs: [], payBuffMana: true, fullHp: true,
   };
 }
 
@@ -65,7 +66,7 @@ export const derivedMaxHp = (c: Character) => (30 + Math.floor((c.level * c.str)
 export const derivedMaxMana = (c: Character) => ((c.skills[SK.Mana] + 1) * c.int) >> 3;
 export const maxHp = (c: Character) => c.hpMax ?? derivedMaxHp(c);
 export const maxMana = (c: Character) => c.manaMax ?? derivedMaxMana(c);
-export const maxWeight = (c: Character) => c.str * 20;
+export const maxWeight = (c: Character) => c.str * 13 + 300;
 export const LEVEL_TABLE = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192];
 
 /** armor_val (PLAYDATA.C): (quality * protection >> 6) + 1; weapons and missiles give none. */
@@ -93,6 +94,8 @@ export interface Derived {
   defence: number;                  // the monsters' to-hit target
   defenceSkill: number;             // skill index used for half the defence
   hasted: boolean; timeStop: boolean;
+  valor: number;                    // Valor (protect minor 10): 10 + Casting / 5 added to the player's to-hit
+  poisonWeap: boolean;              // Poison Weapon (protect minor 11): sharp weapon vs a bleeding creature
   activeBuffs: number[];            // buffs that are castable and applied
   notes: string[];
 }
@@ -116,13 +119,15 @@ export function derive(c: Character): Derived {
   const defence = c.skills[SK.Defense] + (c.skills[defenceSkill] >> 1);
 
   const cmb = [0, 0, 0, 0];
-  let resist = 0, armourSpell = 0, hasted = false, timeStop = false;
+  let resist = 0, armourSpell = 0, hasted = false, timeStop = false, valor = 0, poisonWeap = false;
   const affect = (major: number, minor: number, slot: number) => {
     switch (major) {
       case 2: armourSpell = Math.max(armourSpell, minor); break;               // armour
       case 3:                                                                  // protect
         if (minor === 1) for (let z = 0; z < 4; z++) cmb[z] += 3;
         else if (minor >= 5 && minor <= 9) resist |= PROTECT_FLAGS[minor - 5];
+        else if (minor === 10) valor = 10 + Math.trunc(c.skills[SK.Casting] / 5);
+        else if (minor === 11) poisonWeap = true;
         break;
       case 11:                                                                 // xt
         if (minor === 0) timeStop = true;
@@ -165,7 +170,7 @@ export function derive(c: Character): Derived {
   if (c.payBuffMana && buffMana > mm) notes.push('The buffs cost more mana than the character has.');
   return {
     maxHp: mh, maxMana: mm, startHp: c.fullHp ? mh : Math.max(1, Math.min(mh, c.hp)), startMana, buffMana,
-    armour, armourParts, cmbModTH: cmb, resist, defence, defenceSkill, hasted, timeStop, activeBuffs, notes,
+    armour, armourParts, cmbModTH: cmb, resist, defence, defenceSkill, hasted, timeStop, valor, poisonWeap, activeBuffs, notes,
   };
 }
 
@@ -178,17 +183,22 @@ export function activeEffectOf(s: SpellRec): { major: number; minor: number } | 
   return null;
 }
 
-export const BUFF_SPELLS = [1, 17, 42, 6, 22, 27, 12, 46];
-export const ATTACK_SPELLS = [2, 15, 24, 31, 45];
+/** Buffs the character can carry into a fight (active spells, set_curmagic): Luck, Resist Blows, Valor, Speed,
+    Poison Weapon, Flameproof, Thick Skin, Missile Protection, Freeze Time, Iron Flesh. */
+export const BUFF_SPELLS = [1, 3, 9, 22, 26, 28, 29, 31, 58, 59];
+/** Spells that hurt a monster: missiles, area spells and the targeted (class 7) ones. */
+export const ATTACK_SPELLS = [2, 10, 16, 19, 21, 24, 33, 36, 41, 51, 56, 62];
 
 export interface SpellStatus { castable: boolean; reasons: string[]; circle: number; cost: number }
-/** player_cast's rules with full mana: runes in the bag, level for the circle, mana for the cost. */
-export function spellStatus(c: Character): Record<number, SpellStatus> {
+/** player_cast's rules (RUNES.C:219) with full mana: in Britannia (levels 1-8) nothing above circle 3, runes
+    in the bag, (level + 1) / 2 >= circle, 3 x circle mana. `at` is the level the spell is cast on. */
+export function spellStatus(c: Character, at = c.dungeonLevel): Record<number, SpellStatus> {
   const out: Record<number, SpellStatus> = {};
   const mm = maxMana(c);
   for (const s of spells) {
     if (!s.circle) continue;
     const reasons: string[] = [];
+    if (worldOf(at) === 0 && s.circle > 3) reasons.push('circle 4+ fails in Britannia (levels 1-8)');
     const missing = s.runes.filter((r) => !c.runes.includes(r));
     if (missing.length) reasons.push(`missing rune${missing.length > 1 ? 's' : ''} ${missing.map((r) => RUNE_NAMES[r]).join(', ')}`);
     if (Math.floor((c.level + 1) / 2) < s.circle) reasons.push(`needs level ${2 * s.circle - 1}`);
@@ -200,13 +210,15 @@ export function spellStatus(c: Character): Record<number, SpellStatus> {
 const RUNE_NAMES = ['An', 'Bet', 'Corp', 'Des', 'Ex', 'Flam', 'Grav', 'Hur', 'In', 'Jux', 'Kal', 'Lor', 'Mani',
   'Nox', 'Ort', 'Por', 'Quas', 'Rel', 'Sanct', 'Tym', 'Uus', 'Vas', 'Wis', 'Ylem'];
 
-export const SPELL_LABELS: Record<number, string> = {
-  0: 'Light', 1: 'Resist Blows (+2 armour)', 2: 'Magic Arrow', 6: 'Protection (-3 to be hit)', 8: 'Lesser Heal',
-  12: 'Speed (monsters at half rate)', 15: 'Lightning', 17: 'Thick Skin (+3 armour)', 19: 'Heal',
-  22: 'Flameproof (resist fire)', 24: 'Fireball', 27: 'Missile Protection (resist missiles)',
-  31: 'Sheet Lightning', 42: 'Iron Flesh (+5 armour)', 45: 'Flame Wind', 46: 'Freeze Time',
+export const SPELL_NOTES: Record<number, string> = {
+  1: '-3 to be hit', 3: '+2 armour', 9: 'Valor: +10 + Casting/5 to hit', 22: 'monsters at half rate',
+  26: 'sharp weapon vs a bleeding foe: x(1 + (Casting+30)/40)', 28: 'resist fire', 29: '+3 armour',
+  31: 'resist missiles', 58: 'monsters frozen', 59: '+5 armour',
+  2: 'missile, 8 dmg', 10: 'homing missile, 7 dmg', 16: 'target: Casting/2 + 10, bleeding foes', 19: 'missile, 16 dmg',
+  21: 'area: undead take 255 (liches half HP)', 24: 'area: 10 cold', 33: 'missile, 28 dmg', 36: 'target: undead take 255',
+  41: 'area: 6d5 magic per strike', 51: 'area around you: Casting/2 + 15', 56: 'area: 10d6 fire', 62: 'target: Casting x 3 + 110, bleeding foes',
 };
-export const spellLabel = (i: number) => `${spells[i]?.words ?? ''}${SPELL_LABELS[i] ? ' - ' + SPELL_LABELS[i] : ''}`;
+export const spellLabel = (i: number) => `${spells[i]?.name ?? spells[i]?.words ?? ''}${SPELL_NOTES[i] ? ' - ' + SPELL_NOTES[i] : ''}`;
 
 export const itemLabel = (id: number) => items[id]?.name ?? `item 0x${id.toString(16)}`;
 

@@ -1,6 +1,6 @@
 // Combat tab (plan Part B): one enemy N times, or every enemy in the game.
 import { ATTACK_SPELLS, derive, LEVEL_TABLE, spellLabel, spellStatus, ZONE_NAMES } from '../core/character';
-import { ATTITUDES, creatures, levels, type EnemyRow } from '../data/gameData';
+import { ATTITUDES, creatures, levels, WORLD_NAMES, worldOf, worlds, type EnemyRow } from '../data/gameData';
 import { combatCapable, monsterProfile, playerProfile, type FightSettings, type MonsterProfile, type PlayerProfile } from '../combat/setup';
 import { runJobs, splitJob, type RunHandle } from '../combat/pool';
 import type { Job } from '../combat/worker';
@@ -54,11 +54,16 @@ export function renderCombat(root: HTMLElement) {
       h('span', { class: `en-att att${r.att}` }, ATTITUDES[r.att]), r.n > 1 ? h('span', { class: 'en-n' }, `×${r.n}`) : null,
       r.trap ? h('span', { class: 'en-trap', title: `held by create-object traps (spawn chance ${r.spawnP?.map((p) => pct(p, 0)).join(', ')})` }, 'trap') : null));
   });
-  const levelTabs = h('div', { class: 'level-tabs' }, ...levels.map((x) => h('button', { class: `lvl ${x.level === u.level ? 'on' : ''}`,
-    onclick: () => set(() => { u.level = x.level; u.row = 0; }) }, String(x.level))));
+  const curWorld = worldOf(L.level);
+  const worldTabs = h('div', { class: 'world-tabs' }, ...worlds.map((w) => h('button', { class: `wld ${w.world === curWorld ? 'on' : ''}`,
+    title: `${w.name}: levels ${w.levels.map((x) => x.level).join(', ')}`,
+    onclick: () => set(() => { u.level = w.levels[0].level; u.row = 0; }) }, w.name)));
+  const levelTabs = h('div', { class: 'level-tabs' }, ...levels.filter((x) => x.world === curWorld).map((x) => h('button', { class: `lvl ${x.level === u.level ? 'on' : ''}`,
+    title: `level ${x.level} (${x.worldName} ${x.levelInWorld})`,
+    onclick: () => set(() => { u.level = x.level; u.row = 0; }) }, `${x.level}`)));
 
   // ---- controls
-  const st = spellStatus(c);
+  const st = spellStatus(c, u.level);
   const attackOpts: [number, string][] = [[-1, 'none']];
   for (const i of ATTACK_SPELLS) attackOpts.push([i, `${spellLabel(i)}${st[i]?.castable ? '' : ' (not castable: ' + st[i]?.reasons.join(', ') + ')'}`]);
   const swingOpts: [number, string][] = [[0, 'best swing'], ...[1, 2, 3].map((i) => [i, `cell ${i}: stab`] as [number, string]),
@@ -81,14 +86,14 @@ export function renderCombat(root: HTMLElement) {
   const out = h('div', { class: 'results' });
   const runBtn = h('button', { class: 'btn primary', disabled: !row || !combatCapable(creatures[row.c], row.hp) }, 'Simulate');
   const cancelBtn = h('button', { class: 'btn ghost', disabled: true }, 'Cancel');
-  const allBtn = h('button', { class: 'btn', title: 'Every combat-capable monster on levels 1-9' }, 'All enemies');
+  const allBtn = h('button', { class: 'btn', title: `Every combat-capable monster on the ${levels.length} levels of LEV.ARK` }, 'All enemies');
   const setRunning = (on: boolean) => { runBtn.disabled = on; allBtn.disabled = on; cancelBtn.disabled = !on; if (!on) progress.classList.remove('on'); };
   const onProg = (d: number, t: number) => { progress.classList.add('on'); (progress.firstChild as HTMLElement).style.width = `${(100 * d) / t}%`; progText.textContent = `${d.toLocaleString()} / ${t.toLocaleString()} fights`; };
   cancelBtn.onclick = () => { running?.cancel(); running = null; setRunning(false); progText.textContent = 'Cancelled.'; };
 
   runBtn.onclick = async () => {
     if (!row) return;
-    const P = playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null);
+    const P = playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null, u.level);
     const M = monsterProfile(row.c, row.hp, !!row.pw, row.att, u.level);
     const S = settings();
     const jobs = splitJob({ key: 'one', P, M, S, hpMode: hpMode(), seed: u.seed }, u.n);
@@ -105,10 +110,10 @@ export function renderCombat(root: HTMLElement) {
   };
   allBtn.onclick = async () => {
     const S = settings();
-    const P = playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null);
     const refs = allEnemies();
-    const jobs: Job[] = refs.map((r, i) => ({ key: String(i), P, M: monsterProfile(r.row.c, r.row.hp, !!r.row.pw, r.row.att, r.level), S,
-      hpMode: hpMode(), n: u.allN, seed: u.seed, stream: 1000 + i }));
+    // the fight is on the enemy's level: its world decides whether the attack spell can be cast at all
+    const jobs: Job[] = refs.map((r, i) => ({ key: String(i), P: playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null, r.level),
+      M: monsterProfile(r.row.c, r.row.hp, !!r.row.pw, r.row.att, r.level), S, hpMode: hpMode(), n: u.allN, seed: u.seed, stream: 1000 + i }));
     setRunning(true);
     const t0 = performance.now();
     running = runJobs(jobs, onProg);
@@ -129,13 +134,16 @@ export function renderCombat(root: HTMLElement) {
     toggle('Count flights as beaten', u.fleeCounts, (v) => { u.fleeCounts = v; changed('combat'); if (lastAll) renderAll(out, lastAll.results, rerender); }));
 
   const d = derive(c);
-  const notes = h('p', { class: 'hint' }, `Player: HP ${d.startHp}/${d.maxHp}, defence ${d.defence}, armour ${d.armour.join('/')} (torso/arms/legs/head)${d.activeBuffs.length ? ', buffs: ' + d.activeBuffs.map(spellLabel).join(', ') : ''}. Edit the character on the left.`);
+  const notes = h('p', { class: 'hint' }, `Player: HP ${d.startHp}/${d.maxHp}, defence ${d.defence}, armour ${d.armour.join('/')} (torso/arms/legs/head)${d.valor ? `, Valor +${d.valor}` : ''}${d.activeBuffs.length ? ', buffs: ' + d.activeBuffs.map(spellLabel).join(', ') : ''}. Edit the character on the left.`);
+  const blocked = u.mode === 'ranged' && u.attackSpell !== null && st[u.attackSpell] && !st[u.attackSpell].castable
+    ? h('p', { class: 'warn' }, `${spellLabel(u.attackSpell)} cannot be cast on level ${u.level}: ${st[u.attackSpell].reasons.join(', ')}.`) : null;
 
   root.append(h('div', { class: 'combat-layout' },
-    h('div', { class: 'picker' }, h('h3', {}, 'Enemy'), h('p', { class: 'hint' }, 'Dungeon level'), levelTabs, picker),
+    h('div', { class: 'picker' }, h('h3', {}, 'Enemy'), h('p', { class: 'hint' }, 'World'), worldTabs,
+      h('p', { class: 'hint' }, `${WORLD_NAMES[curWorld]} · level`), levelTabs, picker),
     h('div', { class: 'combat-main' },
       row ? h('div', { class: 'enemy-head' }, enemySummary(row)) : null,
-      ctrls, notes,
+      ctrls, notes, blocked,
       h('div', { class: 'row wrap run-row' }, runBtn, cancelBtn, allBtn, progress, progText), allCtrls, out)));
 
   if (lastSingle && lastSingle.key === configKey()) renderSingle(out, lastSingle.stats, lastSingle.P, lastSingle.M, lastSingle.S);
@@ -165,8 +173,8 @@ function enemySummary(r: EnemyRow) {
     M.caster ? `caster ${M.caster}${M.offensive ? '' : ' (no attack spells)'}: ${M.spells.map((s) => s.name).filter((n) => n !== '-').join(', ')}` : '',
     M.resist ? `resist 0x${M.resist.toString(16)}` : '', r.pw ? 'powerful: +7..12 to hit, +4..15 damage, armour ×5/3' : ''].filter(Boolean).join(' · ');
   return h('div', {},
-    h('h2', {}, rowName(r), h('small', {}, ` level ${state.combat.level} · ${ATTITUDES[r.att]} · stored HP ${r.hp} (average ${cr.avghit})`)),
-    h('p', { class: 'derived' }, `Defence ${cr.defence} · armour ${cr.armour.map((a) => (a === 255 ? '—' : a)).join('/')} · height ${M.height} · nerve ${cr.nerve} · XP ${cr.exp * 4}+2d${cr.exp}`),
+    h('h2', {}, rowName(r), h('small', {}, ` level ${state.combat.level} (${WORLD_NAMES[worldOf(state.combat.level)]} ${(state.combat.level - 1) % 8 + 1}) · ${ATTITUDES[r.att]} · stored HP ${r.hp} (average ${cr.avghit})`)),
+    h('p', { class: 'derived' }, `Defence ${cr.defence} · armour ${cr.armour.map((a) => (a === 255 ? '—' : a)).join('/')} · height ${M.height} · nerve ${cr.nerve} · XP (${cr.exp * 4}+2d${cr.exp})/2 · attack ${M.seqLen[3]}-frame sequence${cr.blood ? '' : ' · does not bleed'}${M.resist & 0x80 ? ' · undead' : ''}`),
     h('p', { class: 'derived' }, atk), extra ? h('p', { class: 'derived' }, extra) : null);
 }
 
@@ -175,7 +183,7 @@ function renderPreview(out: HTMLElement) {
   const u = state.combat;
   const L = levels.find((x) => x.level === u.level)!;
   const r = L.rows[u.row];
-  const P = playerProfile(state.character, null);
+  const P = playerProfile(state.character, null, u.level);
   const M = monsterProfile(r.c, r.hp, !!r.pw, r.att, state.combat.level);
   clear(out);
   out.append(h('div', { class: 'cards' }, exactCard(P, M, settings())));
@@ -279,9 +287,16 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   cards.append(mc);
 
   if (P.attackSpell && S.mode === 'ranged') {
-    const cc = card(`Casting ${P.attackSpell.words}`, `circle ${P.attackSpell.circle}, ${P.attackSpell.cost} mana · Casting + 5 against ${2 * P.attackSpell.circle}`);
+    const cc = card(`Casting ${P.attackSpell.name}`, `circle ${P.attackSpell.circle}, ${P.attackSpell.cost} mana · Casting against ${3 * P.attackSpell.circle} · ${P.attackSpell.delayTicks} ticks between casts`);
     cc.append(h('p', {}, `Per fight: ${fmt(s.casts / n, 2)} casts, ${fmt(s.fizzles / n, 2)} fizzles, ${fmt(s.backfires / n, 2)} backfires (${fmt(s.selfDamage / n, 2)} self-damage), ${fmt(s.manaSpent / n, 1)} mana spent, ${fmt(s.manaLeft / n, 1)} left at the end.`));
+    if (s.targetRefused) cc.append(h('p', { class: 'warn' }, `${fmt(s.targetRefused / n, 2)} casts per fight had no effect: ${M.name} is not a valid target (no mana paid).`));
     cards.append(cc);
+  }
+  if (P.melee.specweap && S.mode === 'melee') {
+    const names = ['', 'healing', 'undead slaying', 'fireball', 'holding', 'door opening', 'door opening'];
+    const sc = card(`Special weapon: ${names[P.melee.specweap] ?? 'power ' + P.melee.specweap}`, 'fires after a hit on a critical (every hit for the second door-opener)');
+    sc.append(h('p', {}, `Fired ${fmt(s.specialTriggers / n, 2)} times per fight${s.specialHealed ? `, healing ${fmt(s.specialHealed / n, 1)} HP` : ''}${s.specialHeldTicks ? `, holding the monster ${fmt(s.specialHeldTicks / n / 16, 1)} s` : ''}.`));
+    cards.append(sc);
   }
   cards.append(exactCard(P, M, S));
   out.append(cards);
@@ -290,7 +305,7 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
 /** Experience: only kills pay (player_killed_a). Raw units are tenths of the displayed XP. */
 function xpCard(s: Stats, P: PlayerProfile, M: MonsterProfile) {
   const n = s.n, kills = s.outcomes[0];
-  const el = card('Experience', 'awarded only for a kill, as player_killed_a and player_get_exp do it; fled monsters give nothing');
+  const el = card('Experience', 'awarded only for a kill, as player_killed_a and player_get_exp do it (UW2 halves every gain); fled monsters give nothing');
   const perFight = s.xp / n / 10, total = s.xp / 10;
   el.append(h('p', { class: 'lead' }, `${fmt(total, 0)} XP over ${n.toLocaleString()} fights`,
     h('small', { class: 'muted' }, ` · ${fmt(perFight, 2)} per fight · ${kills ? fmt(s.xp / kills / 10, 1) : '–'} per kill (${kills.toLocaleString()} kills)`)));
@@ -300,12 +315,12 @@ function xpCard(s: Stats, P: PlayerProfile, M: MonsterProfile) {
     const need = Math.max(0, next - P.expRaw);
     lines.push(`Level ${P.level + 1} at ${next / 10} XP: ${fmt(need / 10, 0)} to go from ${Math.floor(P.expRaw / 10)}, about ${fmt(need / (s.xp / n), 0)} such fights.`);
   }
-  if (s.xp > 0) lines.push(` A skill point every 300 XP: about ${fmt(3000 / (s.xp / n), 0)} fights per point.`);
+  if (s.xp > 0) lines.push(` A skill point every 150 XP: about ${fmt(1500 / (s.xp / n), 0)} fights per point.`);
   el.append(h('p', {}, ...lines));
   const notes: string[] = [];
-  if (s.xpHalved) notes.push(`Halved (+1) in ${pct(s.xpHalved / Math.max(1, kills))} of kills: level ${P.level} is above twice dungeon level ${M.dungeonLevel} plus two.`);
-  if (s.xpWrapped) notes.push(`The powerful bonus wrapped in 16 bits in ${pct(s.xpWrapped / Math.max(1, kills))} of kills (DOS UW1 computes exp × (24..47) in an int); ${s.xpNegative ? `${pct(s.xpNegative / Math.max(1, kills))} of kills took experience away. ` : ''}Without the wrap the kills would give ${fmt(s.xpNominal / Math.max(1, kills) / 10, 1)} XP each.`);
-  if (P.expRaw > 0x17700) notes.push('Experience above 9600: the game ignores further gains.');
+  if (s.xpHalved) notes.push(`Halved again (+1) in ${pct(s.xpHalved / Math.max(1, kills))} of kills: level ${P.level} is above twice world ${worldOf(M.dungeonLevel)} plus two.`);
+  if (s.xpWrapped) notes.push(`The powerful bonus overflowed a 16-bit int in ${pct(s.xpWrapped / Math.max(1, kills))} of kills; ${s.xpNegative ? `${pct(s.xpNegative / Math.max(1, kills))} of kills took experience away. ` : ''}Without the overflow the kills would give ${fmt(s.xpNominal / Math.max(1, kills) / 10, 1)} XP each.`);
+  if (P.expRaw > 0x17700) notes.push('Experience above 9600: no more levels, though the XP still counts (to 52428.8).');
   for (const t of notes) el.append(h('p', { class: 'warn' }, t));
   return el;
 }
@@ -332,10 +347,11 @@ function renderAll(out: HTMLElement, res: AllResult[], rerender: () => void) {
     h('p', { class: 'hint' }, 'A monster that flees escapes in this model (nobody moves); in the game you may chase it. Use the switch above to count flights as beaten.'));
   cards.append(head);
 
-  const sc = card('Win probability by enemy', 'grouped by dungeon level; colour = the most common other outcome; click a point to open it');
+  const sc = card('Win probability by enemy', 'grouped by dungeon level (world.level); colour = the most common other outcome; click a point to open it');
   const sBox = h('div');
-  const groups = levels.map((L) => `L${L.level}`);
-  stripChart(sBox, res.map((r) => ({ x: 0, y: winP(r), group: r.level - 1, color: winP(r) >= 0.999 ? C.win : u.fleeCounts ? (r.stats.outcomes[1] >= r.stats.outcomes[3] ? C.death : C.timeout) : OUTCOME_COLORS[worst(r)],
+  const groups = levels.map((L) => `${L.world}.${L.levelInWorld}`);
+  const gi = new Map(levels.map((L, i) => [L.level, i]));
+  stripChart(sBox, res.map((r) => ({ x: 0, y: winP(r), group: gi.get(r.level)!, color: winP(r) >= 0.999 ? C.win : u.fleeCounts ? (r.stats.outcomes[1] >= r.stats.outcomes[3] ? C.death : C.timeout) : OUTCOME_COLORS[worst(r)],
     label: `L${r.level} ${rowDesc(r.row)}: win ${pct(winP(r))}, death ${pct(r.stats.outcomes[1] / r.stats.n)}, flee ${pct(r.stats.outcomes[2] / r.stats.n)}, timeout ${pct(r.stats.outcomes[3] / r.stats.n)}`,
     onClick: () => { u.level = r.level; u.row = r.rowIndex; changed('combat'); lastAll = null; rerender(); } })), groups, thr, { yLabel: 'P(win)' });
   sc.append(sBox, h('ul', { class: 'legend' }, ...[[C.win, 'always won'], [C.death, 'deaths'], [C.flee, 'flees'], [C.timeout, 'timeouts']].map(([c, l]) => h('li', {}, h('i', { class: 'sw', style: `background:${c}` }), l))));
@@ -369,7 +385,7 @@ function renderAll(out: HTMLElement, res: AllResult[], rerender: () => void) {
     const o = r.stats.outcomes, n = r.stats.n;
     const meanLen = r.stats.durSum.reduce((a, b) => a + b, 0) / n;
     tbl.append(h('tr', { class: winP(r) >= thr ? 'ok' : 'bad', onclick: () => { u.level = r.level; u.row = r.rowIndex; changed('combat'); lastAll = null; rerender(); } },
-      h('td', {}, String(r.level)), h('td', {}, `${rowName(r.row)} · ${ATTITUDES[r.row.att]}`), h('td', {}, String(r.row.hp)), h('td', {}, String(r.row.n)),
+      h('td', { title: `${WORLD_NAMES[worldOf(r.level)]} ${(r.level - 1) % 8 + 1}` }, String(r.level)), h('td', {}, `${rowName(r.row)} · ${ATTITUDES[r.row.att]}`), h('td', {}, String(r.row.hp)), h('td', {}, String(r.row.n)),
       h('td', {}, pct(o[0] / n)), h('td', {}, pct(o[1] / n)), h('td', {}, pct(o[2] / n)), h('td', {}, pct(o[3] / n)), h('td', {}, `${fmt(meanLen)} s`), h('td', {}, fmt(r.stats.xp / n / 10, 1))));
   }
   tc.append(h('div', { class: 'scroll' }, tbl));

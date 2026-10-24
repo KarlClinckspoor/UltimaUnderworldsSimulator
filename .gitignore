@@ -2,3 +2,4 @@ node_modules/
 dist/
 test/c/build/
 test/screenshots/
+__pycache__/

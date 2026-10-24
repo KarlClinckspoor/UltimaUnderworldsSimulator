@@ -12,7 +12,7 @@ export interface CombatUi extends FightSettings {
 export interface SkillsUi { check: string; value: number | null; target: number | null; pinned: { label: string; value: number; target: number }[] }
 export interface AppState { tab: 'skills' | 'combat'; panelOpen: boolean; character: Character; combat: CombatUi; skills: SkillsUi }
 
-const CHAR_KEY = 'uw1sim.character.v1';
+const CHAR_KEY = 'uw2sim.character.v1';
 
 function loadCharacter(): Character {
   try {

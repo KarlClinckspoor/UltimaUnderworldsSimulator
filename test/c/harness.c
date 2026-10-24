@@ -1,6 +1,7 @@
 /* C cross-check harness (plan sections 6 and B10). The functions below are copied
-   verbatim from abedegno/underworld-exhumed (uw1/src/game/SKILLCHK.C skill_check,
-   combat/COMBAT.C pickloc and the dice of do_damage, combat/DAMAGE.C check_res,
+   verbatim from abedegno/underworld-exhumed, UW2 sources (uw2/src/game/SKILLCHK.C
+   skill_check and the arithmetic of player_get_exp, combat/COMBAT.C pickloc, the dice of
+   do_damage and the poison-weapon term of frp_check, combat/DAMAGE.C check_res,
    critter/AI.C should_i_flee, sys/UTIL.C rollem); only rand() is replaced by a queue
    of chosen values so every input can be enumerated. Prints one JSON object. */
 #include <stdio.h>
@@ -77,7 +78,7 @@ int damage_dice(int damage)
     return damage;
 }
 
-/* ---- DAMAGE.C (res passed in instead of ComObjData[OBJ_ITEM(obj)].resist) */
+/* ---- DAMAGE.C:210 (res passed in instead of ComObjData[OBJ_ITEM(obj)].resist) */
 unsigned char check_res(unsigned char res, unsigned char damage, unsigned char type)
 {
     if (type & res)
@@ -91,6 +92,56 @@ unsigned char check_res(unsigned char res, unsigned char damage, unsigned char t
         if (res & type)
             return 0;
     }
+    if ((type & 8 && res & 0x20) || (type & 0x20 && res & 8 && (res & 0x28) != 0x28))
+    {
+        if (damage < 0x7F)
+            damage = damage << 1;
+        else
+            damage = 0xFF;
+    }
+    return damage;
+}
+
+/* ---- SKILLCHK.C:63 player_get_exp, the arithmetic on a gain n for a player of `level`
+   on dungeon level PlayerLevel with experience exp (the panel and skill-point side effects
+   left out). Returns the new experience. int is 16 bits in the game: emulated with short. */
+typedef unsigned long uint32;
+uint32 get_exp_after(short n, int level, int PlayerLevel, uint32 exp)
+{
+    uint32 pexp = exp;
+    if (n > 0)
+        n = (n + rand() % 2) / 2;
+    if (n < 0)
+    {
+        if (-n > pexp)
+            pexp = 0;
+        else
+            pexp += n;
+        return pexp;
+    }
+    if (((PlayerLevel - 1) / 8 * 2 + 2) < level)
+        n = n / 2 + 1;
+    if (pexp + n > 0x7FFF0L)
+        return pexp;
+    pexp += n;
+    return pexp;
+}
+
+/* ---- COMBAT.C:942 player_killed_a's amount for creature exp `cexp`, powerful or not */
+short killed_exp(int cexp, int powerful)
+{
+    short exp;
+    exp = cexp;
+    exp = exp * 4 + rollem(2, exp);
+    if (powerful)
+        exp = (int32)exp * (rand() % 24 + 24) / 16;
+    return exp;
+}
+
+/* ---- COMBAT.C:320 frp_check's Poison Weapon term */
+short poison_damage(short damage, int casting)
+{
+    damage += damage * (casting + 30) / 40;
     return damage;
 }
 
@@ -156,7 +207,32 @@ int main(void)
                 q[0] = r; qi = 0;
                 printf("%d", check_res(i, 10, types[a]) ? 1 : 0);
             }
-    printf("\",\"dice\":[");
+    printf("\",\"get_exp\":[");
+    for (d = 0, n = 0; d < 3 * 4 * 4; d++) {
+        static const int ns[] = { 0, 1, 7, 100, -5, -1000, 32767 };
+        static const int levels[] = { 1, 3, 5, 16 };
+        static const int plevels[] = { 1, 9, 41, 73 };
+        static const uint32 exps[] = { 0, 4, 96000, 524270 };
+        for (i = 0; i < 7; i++)
+            for (r = 0; r < 2; r++) {
+                q[0] = r; qi = 0;
+                printf("%s%lu", n++ ? "," : "", get_exp_after((short)ns[i], levels[d % 4], plevels[d / 4 % 4], exps[d / 16]));
+            }
+    }
+    printf("],\"killed_exp\":[");
+    for (d = 0, n = 0; d < 6; d++) {
+        static const int cexps[] = { 0, 5, 29, 438, 999, 1859 };
+        for (r = 0; r < 24; r += 23)
+            for (a = 0; a < 2; a++) {
+                q[0] = 0x3FFF; q[1] = 0x7FFF; q[2] = r; qi = 0;
+                printf("%s%d", n++ ? "," : "", killed_exp(cexps[d], a));
+            }
+    }
+    printf("],\"poison\":[");
+    for (d = 0, n = 0; d <= 60; d += 3)
+        for (a = 0; a <= 30; a += 5)
+            printf("%s%d", n++ ? "," : "", poison_damage(d, a));
+    printf("],\"dice\":[");
     for (d = 0, n = 0; d <= 60; d++)
         for (r = 0; r < 20; r++) {
             for (i = 0; i < 16; i++) q[i] = lcg15();

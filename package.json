@@ -1,9 +1,9 @@
 {
-  "name": "uw1-combat-simulator",
+  "name": "uw2-combat-simulator",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Client-side Ultima Underworld 1 skill check and combat simulator, rules ported from abedegno/underworld-exhumed",
+  "description": "Client-side Ultima Underworld II skill check and combat simulator, rules ported from abedegno/underworld-exhumed",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

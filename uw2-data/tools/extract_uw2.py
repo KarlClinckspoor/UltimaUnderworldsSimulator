@@ -1,30 +1,42 @@
 #!/usr/bin/env python3
-"""Extract UW1 data tables to JSON.
+"""Extract Ultima Underworld 2 data tables to JSON.
 
 Usage:
-  python3 -I extract_uw1.py --objects OBJECTS.DAT --levark LEV.ARK --items items.h --out DIR
+  python3 -I extract_uw2.py --objects OBJECTS.DAT --comobj COMOBJ.DAT --levark LEV.ARK \
+      --items items.h --spells-c SPELLS.C [--weap WEAP.DAT --asan AS.AN --cran CR.AN] --out DIR
 
-Reads:
-  OBJECTS.DAT  (docs/FORMATS.md "OBJECTS.DAT"; uw1/src/include/object.h, critter.h)
-  LEV.ARK      (docs/FORMATS.md "LEV.ARK"; uw1/src/include/level.h, object.h)
-  items.h      (uw1/src/include/items.h, only for item names)
+Reads (docs/FORMATS.md; uw2/src/include/object.h, critter.h, level.h; sys/ARC.C, sys/LZSS.C):
+  OBJECTS.DAT  the same 0xDE2-byte layout as UW1
+  COMOBJ.DAT   the same 5634-byte layout as UW1
+  LEV.ARK      UW2 archive: 320 blocks with flags, lengths and LZSS compression; level blocks
+               (level - 1) decompress to 0x7E08 bytes, the first 0x7C08 laid out as UW1's
+  items.h      uw2/src/include/items.h, for item names (the comment text)
+  SPELLS.C     uw2/src/combat/SPELLS.C, for the 69-entry spells[] table and its names
+  WEAP.DAT     the player's weapon animation frames (PANELS.C), 8 x 0x61 bytes
+  AS.AN, CR.AN the critters' animation pages and sequence lengths (CRPAGES.C, AI.C set_cur_seq_len)
 
-Writes DIR/objects.json and DIR/level-monsters.json. No game data is bundled with
-the tool; the two outputs are derived from the shipped, pristine DATA files.
+Writes DIR/objects.json, comobj.json, spells.json, level-monsters.json and animation.json.
+No game data is bundled with the tool.
 """
 import argparse, json, re, struct, sys, os
 
 # ---------------------------------------------------------------- items.h names
 def load_item_names(path):
+    """ITEM_ defines of uw2/src/include/items.h: the identifier, and the comment's text when there is one."""
     names = {}
-    for m in re.finditer(r"#define\s+ITEM_(\w+)\s+0x([0-9A-Fa-f]+)", open(path).read()):
-        names[int(m.group(2), 16)] = m.group(1)
+    for m in re.finditer(r"#define\s+ITEM_(\w+)\s+0x([0-9A-Fa-f]+)\s*(?:/\*\s*(.*?)\s*\*/)?", open(path).read()):
+        names[int(m.group(2), 16)] = (m.group(1), m.group(3))
     return names
 
-def pretty(name):
-    # ITEM_GOBLIN_46 -> "Goblin (0x46)" keeps the repo's disambiguating suffix visible
-    m = re.match(r"^(.*)_([0-9A-F]{2})$", name)
-    words = (m.group(1) if m else name).replace("_", " ").title()
+def pretty(entry):
+    ident, comment = entry
+    m = re.match(r"^(.*)_([0-9A-F]{2})$", ident)
+    if comment:
+        words = re.sub(r"^(an?|the|some)\s+", "", comment.strip(), flags=re.I)
+        words = words[:1].upper() + words[1:]
+    else:
+        words = (m.group(1) if m else ident).replace("_", " ").title()
+    # ITEM_GOBLIN_49 -> "Goblin (0x49)" keeps the port's disambiguating suffix visible
     return f"{words} (0x{m.group(2)})" if m else words
 
 # ---------------------------------------------------------------- OBJECTS.DAT
@@ -143,20 +155,59 @@ def parse_objects(data, item_names):
     return out
 
 # ---------------------------------------------------------------- LEV.ARK
-LEVEL_SIZE = 0x7C08
-MAGIC = 0x7577   # bytes 'w','u' little endian; FORMATS.md calls it "uw" (0x7577)
+LEVEL_SIZE = 0x7E08   # UW2 struct LevelBlock (MAP.C:50); UW1's 0x7C08 plus overlays and timers
+MAGIC = 0x7577        # at 0x7C06 in both games
+NUM_LEVELS = 80       # 8 levels to a world, 10 worlds; 42 blocks are shipped
+
+def lzss_decode(src):
+    """sys/LZSS.C decode: 4096-byte ring filled with spaces to 4077, writing from 4078; flag byte low
+    bit first; 1 = literal, 0 = (b0, b1): position b0 | (b1 & 0xF0) << 4, length (b1 & 0x0F) + 3.
+    Decodes until the input ends (ACLZW.C:41 ignores the stored length)."""
+    N, F = 4096, 18
+    ring = bytearray(b" " * N)
+    r = N - F
+    out = bytearray()
+    i, n = 0, len(src)
+    flags = 0
+    while True:
+        flags >>= 1
+        if not (flags & 0x100):
+            if i >= n: break
+            flags = src[i] | 0xFF00; i += 1
+        if flags & 1:
+            if i >= n: break
+            c = src[i]; i += 1
+            out.append(c); ring[r] = c; r = (r + 1) & (N - 1)
+        else:
+            if i + 1 >= n: break
+            b0, b1 = src[i], src[i + 1]; i += 2
+            pos = b0 | ((b1 & 0xF0) << 4)
+            ln = (b1 & 0x0F) + 3
+            for k in range(ln):
+                c = ring[(pos + k) & (N - 1)]
+                out.append(c); ring[r] = c; r = (r + 1) & (N - 1)
+    return bytes(out)
 
 def arc_blocks(data):
+    """UW2 archive (sys/ARC.C): word n, long hdr, n offsets at 6, flags at 6+4n (bit 1 = stored
+    compressed), stored lengths at 6+8n, room at 6+12n. A compressed block is a long (the
+    uncompressed length) then an LZSS stream."""
     n = struct.unpack_from("<H", data, 0)[0]
-    offs = list(struct.unpack_from(f"<{n}I", data, 2))
-    present = sorted(o for o in offs if o)
+    offs = struct.unpack_from(f"<{n}I", data, 6)
+    flags = struct.unpack_from(f"<{n}I", data, 6 + 4 * n)
+    lens = struct.unpack_from(f"<{n}I", data, 6 + 8 * n)
     def block(i):
         o = offs[i]
-        if not o:
+        if not o or not lens[i]:
             return None
-        nxt = [p for p in present if p > o]
-        end = nxt[0] if nxt else len(data)
-        return data[o:end]
+        raw = data[o:o + lens[i]]
+        if flags[i] & 2:
+            full = struct.unpack_from("<I", raw, 0)[0]
+            out = lzss_decode(raw[4:])
+            if len(out) != full:
+                raise SystemExit(f"block {i}: LZSS gave {len(out)} bytes, header says {full}")
+            return out
+        return raw
     return n, offs, block
 
 def obj_fields(b):
@@ -169,6 +220,10 @@ def obj_fields(b):
 
 GOALS = {}  # goal numbers are not named in the sources read; reported as numbers
 
+# (PlayerLevel - 1) / 8 (SKILLCHK.C player_get_exp and many others): eight levels to a world.
+WORLD_NAMES = ["Britannia (Castle British)", "Prison Tower", "Killorn Keep", "Ice Caverns", "Talorus",
+               "Scintillus Academy", "Tomb of Praecor Loth", "Pits of Carnage", "Ethereal Void", "Levels 73-80"]
+
 def parse_levels(data, objects, item_names):
     n, offs, block = arc_blocks(data)
     creatures = objects["creatures"]
@@ -178,7 +233,7 @@ def parse_levels(data, objects, item_names):
 
     levels = []
     problems = []
-    for level in range(1, 10):
+    for level in range(1, NUM_LEVELS + 1):
         blk = block(level - 1)
         if blk is None:
             continue
@@ -329,6 +384,8 @@ def parse_levels(data, objects, item_names):
             t["hp_values"][str(m["hp"])] = t["hp_values"].get(str(m["hp"]), 0) + 1
         levels.append({
             "level": level,
+            "world": (level - 1) // 8, "world_name": WORLD_NAMES[(level - 1) // 8],
+            "level_in_world": (level - 1) % 8 + 1,
             "block_index": level - 1,
             "monster_count": len(monsters),
             "placed_count": sum(1 for m in monsters if m["placed_on_map"]),
@@ -343,21 +400,32 @@ def parse_levels(data, objects, item_names):
 
 def parse_spells(spells_c, objects):
     src = open(spells_c).read()
-    blk = src[src.index("struct Spell far spells[NUM_SPELLS] = {"):]
+    blk = src[src.index("struct Spell far spells[69] = {"):]
     blk = blk[:blk.index("};")]
-    ents = re.findall(r"\{\s*0x([0-9A-Fa-f]+),\s*0x([0-9A-Fa-f]+),\s*0x([0-9A-Fa-f]+)\s*\}", blk)
+    # each row: three entries then a comment "/* 0 Create Food, Luck, Magic Arrow */"
+    ents, names = [], []
+    for line in blk.splitlines():
+        es = re.findall(r"\{\s*0x([0-9A-Fa-f]+),\s*0x([0-9A-Fa-f]+),\s*0x([0-9A-Fa-f]+)\s*\}", line)
+        if not es:
+            continue
+        m = re.search(r"/\*\s*(\d+)\s+(.*?)\s*\*/", line)
+        row = [x.strip() for x in m.group(2).split(",")] if m else [None] * len(es)
+        assert m is None or int(m.group(1)) == len(ents), line
+        ents += es
+        names += row
     cls_names = {0: "light", 1: "motion", 2: "armour", 3: "protect", 4: "heal", 5: "missile", 6: "area",
-                 7: "single-target area", 8: "create", 9: "backfire", 10: "mana", 11: "special effect (xt)",
+                 7: "targeted (class 7)", 8: "create", 9: "backfire", 10: "mana", 11: "special effect (xt)",
                  13: "special", 14: "cutscene"}
-    missile_items = [7, 5, 4, 6]       # release_missile: sub 1..4 -> Missile[] index
+    missile_items = [7, 5, 4, 6, 11, 12]   # release_missile (SPELLS.C:248): sub 1..6 -> Missile[] index
     out = []
     for i, (c, rn, sub) in enumerate(ents):
         c, rn, sub = int(c, 16), int(rn, 16), int(sub, 16)
         cls = (c & 0xF8) >> 3
-        e = {"index": i, "circle": i // 6 + 1 if i < 48 else None, "player_spell": i < 48,
+        # RUNES.C: circle = index / 8 + 1 for the player's 64 spells; 64..68 are cast by creatures or items
+        e = {"index": i, "name": names[i], "circle": i // 8 + 1 if i < 64 else None, "player_spell": i < 64,
              "class": cls, "class_name": cls_names.get(cls), "minor": sub & 0x3F, "flags": sub & 0xC0,
              "runes_packed": rn, "raw": [c, rn, sub]}
-        if cls == 5 and 1 <= (sub & 0x3F) <= 4:
+        if cls == 5 and 1 <= (sub & 0x3F) <= 6:
             mi = missile_items[(sub & 0x3F) - 1]
             e["missile_index"] = mi
             e["missile_damage"] = objects["missiles"][mi]["damage"]
@@ -368,9 +436,10 @@ def parse_spells(spells_c, objects):
         if cls == 4:
             e["heal_dice"] = "all" if (sub & 0x3F) == 15 else f"{sub & 0x3F}d8"
         out.append(e)
-    return {"source": "uw1/src/combat/SPELLS.C spells[] (code data, same for every player)",
-            "notes": ["Spell names are in STRINGS.PAK block 6 and are not parsed; indices 0..47 are the player's, "
-                      "six per circle; 48..52 appear only in creature records.",
+    return {"source": "uw2/src/combat/SPELLS.C spells[] (code data, same for every player); names from its comments "
+                      "(STRINGS.PAK block 6, 256 + index)",
+            "notes": ["Indices 0..63 are the player's, eight per circle (RUNES.C: circle = index / 8 + 1); 64..68 are "
+                      "cast by creatures, traps and items only.",
                       "Creatures pay no mana and have no cooldown: see level-monsters.json notes."],
             "spells": out}
 
@@ -411,10 +480,45 @@ def parse_comobj(data, item_names):
             "raw_hex": r.hex(),
         })
     return {"source": "COMOBJ.DAT", "size": len(data),
-            "notes": ["Field names follow uw1/src/include/object.h struct ComObj (provisional except where cited there).",
+            "notes": ["Field names follow uw2/src/include/object.h struct ComObj (provisional except where cited there).",
                       "resist: check_res (DAMAGE.C) cancels damage whose type bits it shares; the magic bits 0x03 are a chance "
                       "rand()%3 < (resist & 3). qualclass: damage_object shifts damage to the item right by it; 3 = indestructible."],
             "items": out}
+
+# ---------------------------------------------------------------- WEAP.DAT, AS.AN, CR.AN
+WEAP_KINDS = ["sword", "axe", "mace", "launcher"]   # FixPlayerEquips: load_weapon(skill + 0xFD) = skill - 3; launchers 3; fist -1
+SEQ_NAMES = ["idle", "walk", "combat stance", "attack 1", "attack 2", "attack 3", "cast / fire", "die"]
+
+def parse_animation(weap, asan, cran):
+    """WEAP.DAT (PANELS.C do_weapload): 8 records of 0x61 bytes at ((1 - lefty) * 4 + weapid) * 0x61:
+    picture count, frmtot[3] (frames per swing kind), wframe[0x1F] (the frame of each step, 9 per
+    swing kind: index kind * 9 + step), weap_x[0x1F], weap_y[0x1F].
+    AS.AN (CRPAGES.C preload_cr): 64 x struct Grs3d {page, b1}. CR.AN: 256 x 64-byte struct Seq, len at
+    byte 7, indexed page * 8 + seq (AI.C set_cur_seq_len)."""
+    out = {"source": "DATA/WEAP.DAT, CRIT/AS.AN, CRIT/CR.AN", "weapon_frames": [], "creature_sequences": []}
+    if weap is not None:
+        if len(weap) != 8 * 0x61:
+            raise SystemExit(f"WEAP.DAT: expected {8 * 0x61} bytes, got {len(weap)}")
+        for rec in range(8):
+            r = weap[rec * 0x61:(rec + 1) * 0x61]
+            lefty = 1 - rec // 4
+            out["weapon_frames"].append({
+                "record": rec, "lefty": lefty, "weapid": rec % 4, "kind": WEAP_KINDS[rec % 4],
+                "picture_count": r[0], "frmtot": list(r[1:4]),
+                "wframe": [list(r[4 + 9 * k: 4 + 9 * k + 9]) for k in range(3)], "wframe_raw": list(r[4:4 + 0x1F]),
+                "weap_x": list(r[0x23:0x23 + 0x1F]), "weap_y": list(r[0x42:0x42 + 0x1F]),
+            })
+    if asan is not None and cran is not None:
+        if len(asan) != 0x80 or len(cran) != 0x4000:
+            raise SystemExit(f"AS.AN/CR.AN: expected 0x80 and 0x4000 bytes, got {len(asan)} and {len(cran)}")
+        for t in range(64):
+            page = asan[2 * t]
+            # 64 bytes per sequence: 8 view angles of 7 frame bytes + the length (AI.C struct Seq, len at 7)
+            lens = [cran[(page * 8 + sq) * 64 + 7] for sq in range(8)] if page < 32 else None
+            frames = [[b for b in cran[(page * 8 + sq) * 64:(page * 8 + sq) * 64 + 7] if b != 0xFF] for sq in range(8)] if page < 32 else None
+            out["creature_sequences"].append({"creature_index": t, "item_id": 0x40 + t, "page": page, "b1": asan[2 * t + 1],
+                                              "seq_len": lens, "frames_angle0": frames, "seq_names": SEQ_NAMES})
+    return out
 
 def main():
     ap = argparse.ArgumentParser()
@@ -424,6 +528,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--spells-c", help="uw1/src/combat/SPELLS.C, to emit spells.json")
     ap.add_argument("--comobj", help="COMOBJ.DAT, to emit comobj.json")
+    ap.add_argument("--weap", help="DATA/WEAP.DAT, for animation.json")
+    ap.add_argument("--asan", help="CRIT/AS.AN, for animation.json")
+    ap.add_argument("--cran", help="CRIT/CR.AN, for animation.json")
     a = ap.parse_args()
     item_names = load_item_names(a.items)
     objects = parse_objects(open(a.objects, "rb").read(), item_names)
@@ -433,28 +540,33 @@ def main():
         json.dump(parse_comobj(open(a.comobj, "rb").read(), item_names), open(os.path.join(a.out, "comobj.json"), "w"), indent=1)
     if a.spells_c:
         json.dump(parse_spells(a.spells_c, objects), open(os.path.join(a.out, "spells.json"), "w"), indent=1)
+    if a.weap or (a.asan and a.cran):
+        rd = lambda f: open(f, "rb").read() if f else None
+        json.dump(parse_animation(rd(a.weap), rd(a.asan), rd(a.cran)), open(os.path.join(a.out, "animation.json"), "w"), indent=1)
     lm = parse_levels(open(a.levark, "rb").read(), objects, item_names)
     lm["notes"] = [
-        "Per-level monster instances from the pristine LEV.ARK. hp is the object's stored hit points (byte 0x08).",
-        "combat.attacks[].to_hit_base = attacks[].chance + equip/2 (critter_attack, COMBAT.C:801); "
-        "damage_base = attacks[].damage + STR/5 (COMBAT.C:799). Powerful adds the ranges shown.",
-        "Creature names come from the port's items.h (descriptive, with the item id suffix where the original "
-        "name repeats); the game's own strings are in STRINGS.PAK, not parsed.",
+        "Per-level monster instances from the pristine UW2 LEV.ARK (LZSS blocks decoded). hp is the object's stored hit points (byte 0x08).",
+        "combat.attacks[].to_hit_base = attacks[].chance + equip/2 (critter_attack, COMBAT.C:904); "
+        "damage_base = attacks[].damage + STR/5 (COMBAT.C:903). Powerful adds the ranges shown.",
+        "Creature names come from the port's items.h comments (with the item id suffix where the name repeats); "
+        "the game's own strings are in STRINGS.PAK, not parsed.",
         "hp is as stored in the file. A critter generated at run time gets avghit * (16 + rand() % 24) / 32 "
-        "(CREATURE.C:86); hp_authored marks stored values outside that range. The creature table's STR is 0 for "
-        "every creature in this OBJECTS.DAT, so the STR / 5 damage term is always 0 for monsters.",
+        "(CREATURE.C); hp_authored marks stored values outside that range.",
         "goal, attitude and old_goal are raw numbers; their meaning is not named in the sources read.",
         "placed_on_map: the monster is on a tile's object chain. Otherwise it is held (via its link) by a "
         "create-object trap, item 0x187, which copies it onto the map when it fires; spawn_probability is "
         "(63 - trap_quality) / 63 from TRIGGER.C:297. Free-list slots that still hold creature bytes are not "
         "counted as monsters.",
         "creature records: passive, remains, armour (255 = none at that location?) and similar fields keep the "
-        "port's provisional names; see uw1/src/include/critter.h.",
+        "port's provisional names; see uw2/src/include/critter.h.",
+        "UW2: levels are numbered 1..80, eight to a world ((level - 1) / 8); the shipped LEV.ARK holds 42 of them. "
+        "A create-object trap linked to an 'adventurer' (0x7F) makes a random monster scaled by the level and the "
+        "player's level (TRIGGER.C) and is not listed.",
     ]
     json.dump(lm, open(os.path.join(a.out, "level-monsters.json"), "w"), indent=1)
     print("wrote", a.out)
     for L in lm["levels"]:
-        print(f"level {L['level']}: {L['monster_count']} monsters, {len(L['by_type'])} types, "
+        print(f"level {L['level']} ({L['world_name']} {L['level_in_world']}): {L['monster_count']} monsters, {len(L['by_type'])} types, "
               f"placed {L['placed_count']}, trap-spawned {L['trap_spawned_count']}, other off-map {L['other_offmap_count']}, "
               f"stale free slots {len(L['free_slots_with_stale_creature_bytes'])}")
     for p in lm["problems"]:

@@ -2,9 +2,9 @@
 import * as d3 from 'd3';
 
 export const C = {
-  win: '#2a9d78', death: '#d1603d', flee: '#e0a030', timeout: '#8a8f98',
-  accent: '#d9a441', blue: '#4f8fd0', purple: '#a275c9', teal: '#3fb3b0', pink: '#d27aa8',
-  series: ['#4f8fd0', '#e0a030', '#2a9d78', '#d1603d', '#a275c9', '#3fb3b0', '#d27aa8', '#8a8f98'],
+  win: '#39b58c', death: '#e46b5b', flee: '#e3b24e', timeout: '#6f7d9c',
+  accent: '#6db5ff', blue: '#8aa4f0', purple: '#b48ce8', teal: '#4fd1c5', pink: '#ec8fbd',
+  series: ['#8aa4f0', '#e3b24e', '#39b58c', '#e46b5b', '#b48ce8', '#4fd1c5', '#ec8fbd', '#6f7d9c'],
 };
 export const OUTCOME_COLORS = [C.win, C.death, C.flee, C.timeout];
 

@@ -6,6 +6,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { gradeCounts, gradeOfRoll } from '../src/core/skillcheck';
 import { checkRes, pickloc, rollDamage, shouldIFlee, type R } from '../src/combat/blow';
+import { getExpAfter, killedExp } from '../src/combat/fight';
+import { poisonBonus } from '../src/combat/setup';
 
 function compiler(): string | null {
   for (const cc of ['cc', 'gcc', 'clang']) {
@@ -71,6 +73,26 @@ describe.skipIf(!out)('C cross-check', () => {
       s += checkRes(res, 10, t, queue([r])) ? 1 : 0;
     expect(s).toBe(out.check_res);
   });
+  it('player_get_exp agrees (halving, the world rule, the floor and the cap)', () => {
+    const ns = [0, 1, 7, 100, -5, -1000, 32767], levels = [1, 3, 5, 16], plevels = [1, 9, 41, 73], exps = [0, 4, 96000, 524270];
+    const got: number[] = [];
+    for (let d = 0; d < 48; d++) for (const n of ns) for (let r = 0; r < 2; r++) {
+      const level = levels[d % 4], pl = plevels[Math.trunc(d / 4) % 4], exp = exps[Math.trunc(d / 16)];
+      got.push(getExpAfter(n, level, pl, exp, queue([r])).exp);
+    }
+    expect(got).toEqual(out.get_exp);
+  });
+  it('player_killed_a agrees (dice, the powerful factor, the 16-bit store)', () => {
+    const cexps = [0, 5, 29, 438, 999, 1859];
+    const got: number[] = [];
+    for (const ce of cexps) for (let r = 0; r < 24; r += 23) for (let pw = 0; pw < 2; pw++) got.push(killedExp(ce, !!pw, queue([0x3fff, 0x7fff, r])).exp);
+    expect(got).toEqual(out.killed_exp);
+  });
+  it('the poison weapon term agrees', () => {
+    const got: number[] = [];
+    for (let d = 0; d <= 60; d += 3) for (let a = 0; a <= 30; a += 5) got.push(poisonBonus(d, a));
+    expect(got).toEqual(out.poison);
+  });
   it('the damage dice agree', () => {
     let lcg = 12345;
     const lcg15 = () => { lcg = (Math.imul(lcg, 1103515245) + 12345) >>> 0; return (lcg >>> 16) & 0x7fff; };
@@ -82,3 +104,4 @@ describe.skipIf(!out)('C cross-check', () => {
     expect(got).toEqual(out.dice);
   });
 });
+

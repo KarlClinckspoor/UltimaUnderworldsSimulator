@@ -5,11 +5,11 @@ import {
 } from '../core/character';
 import { readPlayerDat } from '../core/playerdat';
 import { pPass } from '../core/skillcheck';
-import { armour as ARMOUR, RUNES, SK, SKILLS, spells } from '../data/gameData';
+import { armour as ARMOUR, RUNES, SK, SKILLS, spells, WORLD_NAMES, worldOf } from '../data/gameData';
 import { changed, state } from '../state';
 import { clear, h, numInput, pct, select, toggle } from './dom';
 
-const RES_NAMES: [number, string][] = [[0x40, 'missiles'], [0x08, 'fire'], [0x10, 'poison'], [0x03, 'magic (chance)']];
+const RES_NAMES: [number, string][] = [[0x40, 'missiles'], [0x08, 'fire'], [0x10, 'poison'], [0x20, 'cold'], [0x03, 'magic (chance)']];
 
 function itemsForSlot(c: Character, s: number): number[] {
   const byCat = (cats: number[]) => ARMOUR.filter((a) => cats.includes(a.category) && !a.name.startsWith('item')).map((a) => a.id);
@@ -25,15 +25,20 @@ function itemsForSlot(c: Character, s: number): number[] {
 }
 
 const ENCH_GROUPS: { label: string; opts: [string, string][] }[] = [
-  { label: 'Weapon (class 12)', opts: [
-    ...Array.from({ length: 8 }, (_, i) => [`12:${i}`, `Accuracy +${i + 1} to hit`] as [string, string]),
-    ...Array.from({ length: 8 }, (_, i) => [`12:${i + 8}`, `Damage +${i + 1}`] as [string, string])] },
+  { label: 'Weapon (class 12, DoPlayerWeapon)', opts: [
+    ...Array.from({ length: 4 }, (_, i) => [`12:${i}`, `Damage +${2 * i + 1}`] as [string, string]),
+    ...Array.from({ length: 4 }, (_, i) => [`12:${i + 4}`, `Accuracy +${2 * (i + 4) - 7} to hit`] as [string, string]),
+    ['12:8', 'Special: healing (heals you by the damage, on a critical)'], ['12:9', 'Special: undead slaying (on a critical)'],
+    ['12:10', 'Special: fireball (10d6 on the target, on a critical)'], ['12:11', 'Special: holding (paralyzes, on a critical)'],
+    ['12:12', 'Special: door opening (no combat effect)'], ['12:13', 'Special: door opening, every hit (no combat effect)'],
+    ['12:14', 'Special 7 (no effect)'], ['12:15', 'Special 8 (no effect)']] },
   { label: 'Worn item (class 12)', opts: [
     ...Array.from({ length: 8 }, (_, i) => [`12:${i}`, `Protection: monsters -${i + 1} to hit here`] as [string, string]),
     ...Array.from({ length: 8 }, (_, i) => [`12:${i + 8}`, `Toughness +${i + 1} armour`] as [string, string])] },
   { label: 'Spell effects on a worn item', opts: [
     ['2:2', 'Resist Blows (+2 armour, all)'], ['2:3', 'Thick Skin (+3 armour, all)'], ['2:5', 'Iron Flesh (+5 armour, all)'],
-    ['3:1', 'Protection (monsters -3 to hit)'], ['3:5', 'Missile Protection'], ['3:6', 'Flameproof'], ['3:7', 'Poison Resistance'],
+    ['3:1', 'Luck (monsters -3 to hit)'], ['3:5', 'Missile Protection'], ['3:6', 'Flameproof'], ['3:7', 'Poison Resistance'],
+    ['3:8', 'Resist Magic'], ['3:9', 'Resist Cold'], ['3:10', 'Valor (+10 + Casting/5 to hit)'], ['3:11', 'Poison Weapon'],
     ['11:2', 'Speed (Haste)']] },
 ];
 
@@ -85,7 +90,7 @@ export function renderPanel(root: HTMLElement) {
     h('span', {}, ' or drop it here'), file,
     h('button', { class: 'btn ghost', title: 'Reset to a fresh level-1 character', onclick: () => set(() => { state.character = defaultCharacter(); }) }, 'Reset'));
   root.append(h('div', { class: 'panel-sec' }, drop, status,
-    h('p', { class: 'hint' }, 'Read in your browser only. From the save: attributes, skills, HP, mana, runes and equipment slots 0-10 (the pack is ignored).')));
+    h('p', { class: 'hint' }, 'A UW2 save (SAVEn\\PLAYER.DAT), read in your browser only: attributes, skills, HP, mana, level, runes, the dungeon level and equipment slots 0-10 (the pack is ignored).')));
 
   // ---- attributes
   const lvFromXp = levelFromExp(c.expRaw);
@@ -97,12 +102,14 @@ export function renderPanel(root: HTMLElement) {
       lab('INT', numInput(c.int, 1, 40, (v) => set(() => (c.int = v)))),
       lab('Level', numInput(c.level, 1, 16, (v) => set(() => (c.level = v)))),
       lab('HP now', numInput(c.hp, 1, 255, (v) => set(() => (c.hp = v)))),
-      lab('Mana now', numInput(c.mana, 0, 255, (v) => set(() => (c.mana = v))))),
+      lab('Mana now', numInput(c.mana, 0, 255, (v) => set(() => (c.mana = v)))),
+      lab('Dungeon level', numInput(c.dungeonLevel, 1, 80, (v) => set(() => (c.dungeonLevel = v))))),
+    h('p', { class: 'derived' }, `Level ${c.dungeonLevel}: ${WORLD_NAMES[worldOf(c.dungeonLevel)]} ${(c.dungeonLevel - 1) % 8 + 1} (world ${worldOf(c.dungeonLevel)}). The world sets the casting rule (no circle 4+ in Britannia) and the XP halving; a fight uses the enemy's level.`),
     h('div', { class: 'row wrap' },
-      toggle('Easy mode', c.easy, (v) => set(() => (c.easy = v)), 'PLAYER.DAT byte 0xB4: +7 to hit, damage taken halved'),
+      toggle('Easy mode', c.easy, (v) => set(() => (c.easy = v)), 'PLAYER.DAT byte 0x301: +7 to hit, damage taken halved'),
       toggle('Start at full HP & mana', c.fullHp, (v) => set(() => (c.fullHp = v)))),
     h('p', { class: 'derived' },
-      `Max HP ${d.maxHp} (30 + level × STR / 5 = ${derivedMaxHp(c)}) · max mana ${d.maxMana} ((Mana+1) × INT ≫ 3 = ${derivedMaxMana(c)}) · carry ${maxWeight(c)}`,
+      `Max HP ${d.maxHp} (30 + level × STR / 5 = ${derivedMaxHp(c)}) · max mana ${d.maxMana} ((Mana+1) × INT ≫ 3 = ${derivedMaxMana(c)}) · carry ${maxWeight(c)} (STR × 13 + 300)`,
       c.expRaw ? ` · XP ${Math.floor(c.expRaw / 10)} (level ${lvFromXp} by XP)` : ''),
   ));
 
@@ -119,7 +126,7 @@ export function renderPanel(root: HTMLElement) {
       ...ZONE_NAMES.map((z, i) => h('tr', {}, h('td', {}, z), h('td', {}, String(d.armour[i])),
         h('td', { class: 'muted' }, `${d.armourParts[i].items}/${d.armourParts[i].spell}/${d.armourParts[i].toughness}`), h('td', {}, String(d.cmbModTH[i]))))),
     h('p', { class: 'derived' }, `Defence (monsters roll against it): Defense ${c.skills[SK.Defense]} + ${SKILLS[d.defenceSkill]} ${c.skills[d.defenceSkill]} / 2 = `, h('b', {}, String(d.defence))),
-    h('p', { class: 'derived' }, `Resists: ${resNames.length ? resNames.join(', ') : 'nothing'}${d.hasted ? ' · Hasted' : ''}${d.timeStop ? ' · Time stopped' : ''}`),
+    h('p', { class: 'derived' }, `Resists: ${resNames.length ? resNames.join(', ') : 'nothing'}${d.hasted ? ' · Hasted' : ''}${d.timeStop ? ' · Time stopped' : ''}${d.valor ? ` · Valor +${d.valor} to hit` : ''}${d.poisonWeap ? ' · Poison Weapon' : ''}`),
     ...d.notes.map((n) => h('p', { class: 'warn' }, n)),
   ));
 
@@ -159,8 +166,8 @@ export function renderPanel(root: HTMLElement) {
     const s = st[idx];
     const sp = spells[idx];
     const on = c.buffs.includes(idx);
-    const odds = pPass(c.skills[SK.Casting] + 5, 2 * sp.circle!);
-    buffs.append(h('label', { class: `buff ${s.castable ? '' : 'off'}`, title: s.castable ? `cast odds ${pct(odds)} (Casting + 5 vs ${2 * sp.circle!})` : s.reasons.join('; ') },
+    const odds = pPass(c.skills[SK.Casting], 3 * sp.circle!);
+    buffs.append(h('label', { class: `buff ${s.castable ? '' : 'off'}`, title: s.castable ? `cast odds ${pct(odds)} (Casting vs ${3 * sp.circle!})` : s.reasons.join('; ') },
       h('input', { type: 'checkbox', checked: on, disabled: !s.castable && !on, onchange: (e: Event) => set(() => {
         c.buffs = (e.target as HTMLInputElement).checked ? [...c.buffs, idx] : c.buffs.filter((x) => x !== idx);
       }) }),
@@ -168,7 +175,7 @@ export function renderPanel(root: HTMLElement) {
   }
   root.append(h('div', { class: 'panel-sec' }, h('h4', {}, 'Runes'), rb, h('h4', {}, 'Buffs (pre-cast at 100%)'), buffs,
     toggle(`Pay buff mana from the starting mana (${d.buffMana})`, c.payBuffMana, (v) => set(() => (c.payBuffMana = v))),
-    h('p', { class: 'hint' }, 'A spell is offered when its runes are in the bag, (level + 1) / 2 ≥ circle and 3 × circle ≤ max mana; at most three are active.')));
+    h('p', { class: 'hint' }, 'A spell is offered when its runes are in the bag, (level + 1) / 2 ≥ circle, 3 × circle ≤ max mana and, on levels 1-8, its circle is at most 3; at most three are active.')));
 }
 
 const lab = (t: string, input: HTMLElement) => h('label', { class: 'lab' }, h('span', {}, t), input);
