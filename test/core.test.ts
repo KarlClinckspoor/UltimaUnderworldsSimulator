@@ -100,3 +100,16 @@ describe('worlds', () => {
     expect(levels.find((L) => L.level === 17)?.worldName).toBe('Killorn Keep');
   });
 });
+
+describe('enchantment names (STRINGS.PAK block 6 against DoPlayerWeapon)', () => {
+  it('UW2 names its damage enchantments "Accuracy" and its to-hit ones "Damage"', async () => {
+    const { describeEnchant } = await import('../src/core/enchantNames');
+    const unsurpassedAcc = describeEnchant(true, { major: 12, effect: 3 })!;
+    expect(unsurpassedAcc.gameName).toBe('Unsurpassed Accuracy');
+    expect(unsurpassedAcc.effect).toBe('+7 damage');
+    expect(unsurpassedAcc.misleading).toContain('adds 7 damage');
+    expect(describeEnchant(true, { major: 12, effect: 4 })!.effect).toBe('+1 to hit');
+    expect(describeEnchant(true, { major: 12, effect: 11 })!.gameName).toBe('Stone Strike');
+    expect(describeEnchant(false, { major: 12, effect: 15 })).toMatchObject({ gameName: 'Unsurpassed Toughness', misleading: null });
+  });
+});

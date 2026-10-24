@@ -1,5 +1,5 @@
 // Combat tab (plan Part B): one enemy N times, or every enemy in the game.
-import { ATTACK_SPELLS, derive, LEVEL_TABLE, spellLabel, spellStatus, ZONE_NAMES } from '../core/character';
+import { ATTACK_SPELLS, derive, weaponSlot, LEVEL_TABLE, spellLabel, spellStatus, ZONE_NAMES } from '../core/character';
 import { ATTITUDES, creatures, levels, WORLD_NAMES, worldOf, worlds, type EnemyRow } from '../data/gameData';
 import { combatCapable, monsterProfile, playerProfile, type FightSettings, type MonsterProfile, type PlayerProfile } from '../combat/setup';
 import { runJobs, splitJob, type RunHandle } from '../combat/pool';
@@ -8,6 +8,7 @@ import { DEALT_PARTS, DUR_BIN, OUTCOMES, SOURCES, wilson, type Stats } from '../
 import { monsterBlowDist, monsterExpectedBlow, playerBlowDist } from '../combat/exact';
 import type { HpMode } from '../combat/fight';
 import { changed, state } from '../state';
+import { describeEnchant } from '../core/enchantNames';
 import { setRandModel } from '../core/randdist';
 import { LCG_PERIOD } from '../core/rng';
 import { card, clear, fmt, h, numInput, pct, select, toggle } from './dom';
@@ -139,6 +140,9 @@ export function renderCombat(root: HTMLElement) {
 
   const d = derive(c);
   const notes = h('p', { class: 'hint' }, `Player: HP ${d.startHp}/${d.maxHp}, defence ${d.defence}, armour ${d.armour.join('/')} (torso/arms/legs/head)${d.valor ? `, Valor +${d.valor}` : ''}${d.activeBuffs.length ? ', buffs: ' + d.activeBuffs.map(spellLabel).join(', ') : ''}. Edit the character on the left.`);
+  const wEnc = c.equipment[weaponSlot(c)]?.ench;
+  const wInfo = wEnc ? describeEnchant(true, wEnc) : null;
+  const misnamed = wInfo?.misleading ? h('p', { class: 'warn' }, `⚠ ${wInfo.misleading} The simulation uses what it does.`) : null;
   const blocked = u.mode === 'ranged' && u.attackSpell !== null && st[u.attackSpell] && !st[u.attackSpell].castable
     ? h('p', { class: 'warn' }, `${spellLabel(u.attackSpell)} cannot be cast on level ${u.level}: ${st[u.attackSpell].reasons.join(', ')}.`) : null;
 
@@ -147,7 +151,7 @@ export function renderCombat(root: HTMLElement) {
       h('p', { class: 'hint' }, `${WORLD_NAMES[curWorld]} · level`), levelTabs, picker),
     h('div', { class: 'combat-main' },
       row ? h('div', { class: 'enemy-head' }, enemySummary(row)) : null,
-      ctrls, notes, blocked,
+      ctrls, notes, misnamed, blocked,
       h('div', { class: 'row wrap run-row' }, runBtn, cancelBtn, allBtn, progress, progText), allCtrls, out)));
 
   if (lastSingle && lastSingle.key === configKey()) renderSingle(out, lastSingle.stats, lastSingle.P, lastSingle.M, lastSingle.S);

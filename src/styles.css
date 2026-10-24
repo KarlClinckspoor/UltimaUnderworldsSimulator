@@ -71,7 +71,8 @@ table.wide { width: 100%; }
 td.muted { color: var(--muted); }
 table.mini tr.on td { color: var(--text); font-weight: 600; }
 .equip { display: flex; flex-direction: column; gap: 6px; }
-.eq-row { display: grid; grid-template-columns: 92px 1fr; gap: 4px 6px; align-items: center; }
+.eq-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 4px 6px; align-items: center; }
+.eq-row select { width: 100%; min-width: 0; }
 .eq-row select.ench, .eq-q { grid-column: 2; }
 .eq-q { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
 .eq-slot { font-size: 12px; color: var(--muted); }
@@ -167,3 +168,7 @@ table.sortable tr:hover td { background: var(--surface2); }
   .view { padding: 12px 16px 30px; }
   .cards { grid-template-columns: 1fr; }
 }
+
+.eq-note { grid-column: 2; margin: 0; font-size: 12px; }
+.ench-note summary { cursor: pointer; color: var(--warn); }
+.ench-note p { margin: 6px 0 0; }
