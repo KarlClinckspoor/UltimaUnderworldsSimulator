@@ -41,7 +41,7 @@ export function changed(why: string) {
 }
 
 const HASH_COMBAT: (keyof CombatUi)[] = ['level', 'row', 'mode', 'distance', 'hitangle', 'swing', 'timeLimit', 'n',
-  'hpMode', 'hpSet', 'seed', 'attackSpell', 'rangedHitChance', 'aimTicks'];
+  'hpMode', 'hpSet', 'seed', 'attackSpell', 'rangedHitChance', 'aimTicks', 'rand'];
 function writeHash() {
   const p = new URLSearchParams();
   p.set('tab', state.tab);

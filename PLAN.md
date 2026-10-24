@@ -12,6 +12,15 @@ Reference: https://github.com/abedegno/underworld-exhumed, read at the current d
 
 Skills tab: no Monte Carlo, no worker; every number is an exact count. Combat tab: Monte Carlo in workers (the user asked for N simulated fights), with exact per-blow distributions used to test it (B10). PLAYER.DAT reader, character panel and dependency tables are in sections 3 and 4.
 
+## Random numbers: the game's own generator (2026-10-24, supersedes the roll model of section 1)
+
+The simulator now draws from the game's generator by default instead of the ideal n/31 model. UW.EXE links Borland/Turbo C++'s `rand()`: `seed = seed × 0x015A4E35 + 1 (mod 2^32)`, result bits 16–30 (0..32767). Every call site uses the draw in the game's form: `rand() % n`, `rand() & mask`, and `rollem`'s `(rand() × sides) / 0x8000`. So the small inhomogeneities are in: `rand() % 31` gives residue 0 in 1058 of 32768 draws and the others in 1057 (a d=0 skill check is 3172 / 13741 / 13741 / 2114 out of 32768 instead of 3/13/13/2 out of 31); the attack slot's `rand() % 100` favours 0..67 (328 vs 327); a missile's `rand() % 192` favours 0..127 (171 vs 170); a d6 face comes up 5461 or 5462 times. The exact distributions (Skills tab, the one-blow card, the tests) use the same weights (`core/randdist.ts`).
+
+- `core/rng.ts`: the Borland LCG with jump-ahead. A run split over k workers gives each a disjoint block of 2^32 / k draws of the one cycle; the stats count draws, and the Combat tab reports the share of the period used and warns if a job overran its block. Model-only randomness (the missile hit-chance setting) has its own stream and never shifts the game's sequence.
+- Checked call for call against vectors measured on UW.EXE (`test/vectors`, from underworld-exhumed's `uw1/vectors/`: `skill_check`, `rollem`, `pickloc`, `check_res`): the same 32-bit state in gives the same result and the same state out, for every row. The C harness test now requires the game-model counts to equal the C code run over all 32768 values exactly.
+- The ideal model stays as an option (Skills and Combat tabs, "Random numbers") for comparison; the Skills tab shows both and the difference in ppm.
+- Does it matter in long runs? The bias is per draw and does not grow with N; a large N only makes it measurable. Measured (Karl's save, 400,000 fights per model): Skeleton win 95.156% vs 95.133% (±0.034% each), Goblin 0x47 6.182% vs 6.193% (±0.038%), Giant Spider 17.611% vs 17.669% (±0.060%): no difference beyond noise. The game-model simulation matches the game-model exact one-blow mean over 1.8–3.9 million swings (|z| < 1), so the generator's serial structure does not show either. 400,000 such fights use 22–45 million draws, 0.5–1% of the period.
+
 # Part A. Skills tab
 
 ## 1. The exact model
@@ -27,7 +36,7 @@ Skills tab: no Monte Carlo, no worker; every number is an exact count. Combat ta
 
 Check: d = 0 gives 2, 13, 13, 3, as the source comment states. This is the only place the rule lives; the test in section 6 verifies it against the real C.
 
-**Roll model.** Ideal uniform: r is one of 31 equally likely values, every probability is n/31. The real `rand() % 31` on a 15-bit `rand()` is off by at most 1/32768 per outcome (residue 0 has 1058 of 32768, the others 1057); this is deliberately ignored. Counts stay integers; display as fraction and percent.
+**Roll model** (superseded: see "Random numbers" above; the ideal model remains an option). Ideal uniform: r is one of 31 equally likely values, every probability is n/31. The real `rand() % 31` on a 15-bit `rand()` is off by at most 1/32768 per outcome (residue 0 has 1058 of 32768, the others 1057); this is deliberately ignored. Counts stay integers; display as fraction and percent.
 
 **Compound outcomes** are exact too, by integer convolution (BigInt, denominators 31^k): sums of independent checks (character creation), per-tick drowning, repair outcomes with their extra random draws, and the random bonuses listed below.
 

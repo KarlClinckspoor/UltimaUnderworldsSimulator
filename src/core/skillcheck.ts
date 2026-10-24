@@ -1,15 +1,18 @@
 // The game's one dice roll (game/SKILLCHK.C skill_check):
 //   score = value - target + rand() % 31
 //   score > 28 -> 2, > 15 -> 1, > 2 -> 0, else -1
-// Exact counts out of 31 under the ideal uniform roll model (plan section 1).
+// Exact counts under the chosen random model (core/randdist.ts): out of 32768 with the game's
+// Borland rand(), where residue 0 of rand() % 31 comes up 1058 times and every other one 1057;
+// out of 31 under the ideal model.
 
-import type { Rng } from './rng';
+import type { Rng, RandModel } from './rng';
+import { modCounts, randModel } from './randdist';
 
 export type Grade = -1 | 0 | 1 | 2;
 export const GRADES: Grade[] = [-1, 0, 1, 2];
 export const GRADE_NAMES: Record<Grade, string> = { [-1]: 'failure', 0: 'near miss', 1: 'success', 2: 'critical' };
 
-/** One roll, as the game does it (rand() % 31 replaced by an ideal uniform draw). */
+/** One roll, as the game does it. */
 export function skillCheck(value: number, target: number, rng: Rng): Grade {
   const score = value - target + rng.int(31);
   if (score > 28) return 2;
@@ -18,7 +21,7 @@ export function skillCheck(value: number, target: number, rng: Rng): Grade {
   return -1;
 }
 
-/** Grade of a known roll r (0..30). */
+/** Grade of a known residue r = rand() % 31 (0..30). */
 export function gradeOfRoll(value: number, target: number, r: number): Grade {
   const score = value - target + r;
   if (score > 28) return 2;
@@ -27,32 +30,34 @@ export function gradeOfRoll(value: number, target: number, r: number): Grade {
   return -1;
 }
 
-/** Number of rolls r in 0..30 with score >= t, where d = value - target. */
-function C(d: number, t: number): number {
-  return Math.max(0, Math.min(31, d + 31 - t));
-}
-
 export interface GradeCounts {
-  /** counts out of 31, indexed by grade + 1: [-1, 0, 1, 2] */
+  /** counts indexed by grade + 1: [-1, 0, 1, 2], out of `total` */
   counts: [number, number, number, number];
+  total: number;   // 32768 (game) or 31 (ideal)
+  /** the residues r = rand() % 31 in each grade (for display) */
+  residues: [number, number, number, number];
   d: number;
+  model: RandModel;
 }
 
-/** Exact counts of each grade out of 31 for value - target = d. */
-export function gradeCounts(value: number, target: number): GradeCounts {
+/** Exact counts of each grade for value - target = d. */
+export function gradeCounts(value: number, target: number, m: RandModel = randModel()): GradeCounts {
   const d = value - target;
-  const c29 = C(d, 29), c16 = C(d, 16), c3 = C(d, 3);
-  return { d, counts: [31 - c3, c3 - c16, c16 - c29, c29] };
+  const w = modCounts(31, m);
+  const counts: [number, number, number, number] = [0, 0, 0, 0];
+  const residues: [number, number, number, number] = [0, 0, 0, 0];
+  for (let r = 0; r < 31; r++) { const g = gradeOfRoll(d, 0, r) + 1; counts[g] += w[r]; residues[g]++; }
+  return { d, counts, total: m === 'ideal' ? 31 : 32768, residues, model: m };
 }
 
-export const countOf = (gc: GradeCounts, g: Grade) => gc.counts[g + 1];
-export const probOf = (gc: GradeCounts, g: Grade) => gc.counts[g + 1] / 31;
-/** P(grade >= 1), the usual "hit" or "pass". */
-export const pPass = (value: number, target: number) => {
-  const gc = gradeCounts(value, target);
-  return (gc.counts[2] + gc.counts[3]) / 31;
+/** Probability vector over grades [-1, 0, 1, 2]. */
+export const gradeProbs = (value: number, target: number, m: RandModel = randModel()): number[] => {
+  const g = gradeCounts(value, target, m);
+  return g.counts.map((c) => c / g.total);
 };
-
-/** Probability vector over grades [-1,0,1,2]. */
-export const gradeProbs = (value: number, target: number): number[] =>
-  gradeCounts(value, target).counts.map((c) => c / 31);
+export const probOf = (gc: GradeCounts, g: Grade) => gc.counts[g + 1] / gc.total;
+/** P(grade >= 1), the usual "hit" or "pass". */
+export const pPass = (value: number, target: number, m: RandModel = randModel()) => {
+  const p = gradeProbs(value, target, m);
+  return p[2] + p[3];
+};

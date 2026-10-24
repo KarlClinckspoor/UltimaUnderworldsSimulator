@@ -5,6 +5,7 @@
 import { creatures, heightOf, items, missiles, resistOf, SK, spells, weapons, type Attack, type CreatureRec } from '../data/gameData';
 import { derive, spellStatus, weaponSlot, type ArmourParts, type Character } from '../core/character';
 import { SWING_KIND } from './blow';
+import type { RandModel } from '../core/rng';
 
 export const PLAYER_HEIGHT = 23; // ComObjData[ITEM_ADVENTURER].height
 
@@ -57,9 +58,10 @@ export interface FightSettings {
   timeLimit: number;       // seconds of game time
   rangedHitChance: number; // 0..1, missiles and missile spells
   aimTicks: number;        // aiming time per launcher shot or spell, in 1/16 s
+  rand: RandModel;         // 'game': Borland rand() as the game draws it; 'ideal': exactly uniform
 }
 export const defaultSettings = (): FightSettings => ({
-  mode: 'melee', distance: 3, hitangle: 0, swing: 0, timeLimit: 120, rangedHitChance: 1, aimTicks: 16,
+  mode: 'melee', distance: 3, hitangle: 0, swing: 0, timeLimit: 120, rangedHitChance: 1, aimTicks: 16, rand: 'game',
 });
 
 function meleeFrom(c: Character, itemId: number | null, quality: number, ench: { major: number; effect: number } | null): MeleeProfile {

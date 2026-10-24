@@ -4,6 +4,7 @@ import { renderPanel } from './ui/panel';
 import { renderSkills } from './ui/skills';
 import { renderCombat } from './ui/combat';
 import { h } from './ui/dom';
+import { setRandModel } from './core/randdist';
 
 readHash();
 const app = document.getElementById('app')!;
@@ -25,6 +26,7 @@ app.append(
 
 const rendered = { skills: '', combat: '' };
 function render(why: string) {
+  setRandModel(state.combat.rand);
   document.body.classList.toggle('panel-closed', !state.panelOpen);
   for (const b of document.querySelectorAll<HTMLButtonElement>('.tab')) b.classList.toggle('on', b.dataset.tab === state.tab);
   views.skills.hidden = state.tab !== 'skills';
@@ -34,7 +36,7 @@ function render(why: string) {
     rendered.skills = rendered.combat = '';
   }
   // render the visible tab lazily; keep the hidden one as it was
-  const key = JSON.stringify(state.character);
+  const key = JSON.stringify([state.character, state.combat.rand]);
   if (rendered[state.tab] !== key) {
     rendered[state.tab] = key;
     if (state.tab === 'skills') renderSkills(views.skills); else renderCombat(views.combat);

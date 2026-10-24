@@ -203,10 +203,11 @@ describe('experience (player_killed_a, player_get_exp)', () => {
   });
   it('only kills pay: XP sums over wins only', () => {
     const P2 = playerProfile(karl(), null);
-    const M = monsterProfile(cIndex('Goblin (0x46)'), 15, false, 0, 1);
+    const M = monsterProfile(cIndex('Giant Rat (0x43)'), 8, false, 0, 1); // exp 8, a full-HP rat that fights on
     const S = defaultSettings();
     const st = simulate(newStats(P2, M, S), P2, M, S, { kind: 'stored' }, 2000, makeRng(3));
-    expect(st.xp / st.outcomes[0]).toBeGreaterThanOrEqual(5 * 4 + 2);
-    expect(st.xp / st.outcomes[0]).toBeLessThanOrEqual(5 * 4 + 10);
+    expect(st.outcomes[0]).toBeGreaterThan(500);
+    expect(st.xp / st.outcomes[0]).toBeGreaterThanOrEqual(8 * 4 + 2);
+    expect(st.xp / st.outcomes[0]).toBeLessThanOrEqual(8 * 4 + 16);
   });
 });

@@ -94,7 +94,9 @@ export function newStats(p: PlayerProfile, m: MonsterProfile, s: FightSettings):
 /** Runs n fights and adds them to st. */
 export function simulate(st: Stats, P: PlayerProfile, M: MonsterProfile, S: FightSettings, hpMode: HpMode,
   n: number, rng: Rng): Stats {
+  const d0 = rng.draws;
   for (let i = 0; i < n; i++) fight(st, P, M, S, hpMode, rng);
+  st.draws += rng.draws - d0;
   return st;
 }
 

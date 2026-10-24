@@ -49,12 +49,12 @@ export function runJobs(jobs: Job[], onProgress: (done: number, total: number) =
 }
 
 /** Splits one enemy's N fights into a few jobs on independent streams. */
-export function splitJob(base: Omit<Job, 'n' | 'stream'>, n: number, parts = size()): Job[] {
+export function splitJob(base: Omit<Job, 'n' | 'stream' | 'streams'>, n: number, parts = size()): Job[] {
   const k = Math.max(1, Math.min(parts, Math.ceil(n / 500)));
   const out: Job[] = [];
   for (let i = 0; i < k; i++) {
     const m = Math.floor(n / k) + (i < n % k ? 1 : 0);
-    if (m > 0) out.push({ ...base, n: m, stream: i + 1 });
+    if (m > 0) out.push({ ...base, n: m, stream: i, streams: k });
   }
   return out;
 }

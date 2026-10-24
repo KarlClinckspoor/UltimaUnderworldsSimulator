@@ -1,5 +1,8 @@
 // One blow, as combat/COMBAT.C and combat/DAMAGE.C do it. Every function takes a random
-// source R so the C cross-check can feed the same rand() values to both versions.
+// source R so the C cross-check can feed the same rand() values to both versions. The exact
+// distributions (…Dist, …Pass) use the weights of the chosen random model (core/randdist.ts).
+
+import { faceProbs, modProbs, pModBelow } from '../core/randdist';
 
 export interface R {
   /** rand() % n */
@@ -21,16 +24,17 @@ export function pickloc(dz: number, dtop: number, az: number, atop: number, r: R
   return 1;
 }
 
-/** Exact distribution of pickloc over locations 0..3 (ideal uniform rand). */
+/** Exact distribution of pickloc over locations 0..3. */
 export function picklocDist(dz: number, dtop: number, az: number, atop: number): number[] {
   const dmid = (dz + dtop) >> 1;
   const amid = (az + atop) >> 1;
   if (dz + 1 > amid) return [0, 0, 1, 0];
   if (dtop - 1 < amid) return [0, 0, 0, 1];
+  const m2 = modProbs(2), m3 = modProbs(3);
   const p = [0, 0, 0, 0];
   let rest: number;
-  if (amid < dmid) { p[2] = 1 / 2; rest = 1 / 2; } else { p[3] = 1 / 3; rest = 2 / 3; }
-  p[0] += rest * 2 / 3; p[1] += rest / 3;
+  if (amid < dmid) { p[2] = m2[1]; rest = m2[0]; } else { p[3] = m3[0]; rest = 1 - m3[0]; }
+  p[0] += rest * (1 - m3[0]); p[1] += rest * m3[0];
   return p;
 }
 
@@ -56,8 +60,9 @@ export function damageRollDist(damage: number): number[] {
   const quot = Math.trunc(damage / 6), rem = damage % 6;
   let dist = [1];
   const add = (sides: number) => {
+    const fp = faceProbs(sides);
     const out = new Array(dist.length + sides).fill(0);
-    for (let v = 0; v < dist.length; v++) if (dist[v]) for (let f = 1; f <= sides; f++) out[v + f] += dist[v] / sides;
+    for (let v = 0; v < dist.length; v++) if (dist[v]) for (let f = 1; f <= sides; f++) out[v + f] += dist[v] * fp[f - 1];
     dist = out;
   };
   for (let i = 0; i < quot; i++) add(6);
@@ -94,7 +99,7 @@ export function checkRes(res: number, damage: number, type: number, r: R): numbe
 export function checkResPass(res: number, type: number): number {
   if (!(type & res)) return 1;
   let p = 1;
-  if (type & DMG_MAGIC) { p = 1 - (res & 3) / 3; type &= 0xfc; }
+  if (type & DMG_MAGIC) { p = 1 - pModBelow(3, res & 3); type &= 0xfc; }
   if (res & type) return 0;
   return p;
 }

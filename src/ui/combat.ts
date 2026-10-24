@@ -8,6 +8,8 @@ import { DEALT_PARTS, DUR_BIN, OUTCOMES, SOURCES, wilson, type Stats } from '../
 import { monsterBlowDist, monsterExpectedBlow, playerBlowDist } from '../combat/exact';
 import type { HpMode } from '../combat/fight';
 import { changed, state } from '../state';
+import { setRandModel } from '../core/randdist';
+import { LCG_PERIOD } from '../core/rng';
 import { card, clear, fmt, h, numInput, pct, select, toggle } from './dom';
 import { C, groupedBars, histogram, lineChart, OUTCOME_COLORS, shareBar, stackedBars, stripChart } from './charts';
 
@@ -29,7 +31,7 @@ function hpMode(): HpMode {
 function settings(): FightSettings {
   const u = state.combat;
   return { mode: u.mode, distance: u.distance, hitangle: u.hitangle, swing: u.swing, timeLimit: u.timeLimit,
-    rangedHitChance: u.rangedHitChance, aimTicks: u.aimTicks };
+    rangedHitChance: u.rangedHitChance, aimTicks: u.aimTicks, rand: u.rand };
 }
 const configKey = () => { const { threshold, fleeCounts, ...rest } = state.combat; void threshold; void fleeCounts; return JSON.stringify([state.character, rest]); };
 
@@ -39,6 +41,7 @@ export function renderCombat(root: HTMLElement) {
   const c = state.character;
   const rerender = () => renderCombat(root);
   const set = (f: () => void) => { f(); changed('combat'); rerender(); };
+  setRandModel(u.rand);
   const L = levels.find((x) => x.level === u.level) ?? levels[0];
   if (u.row >= L.rows.length) u.row = 0;
   const row = L.rows[u.row];
@@ -75,6 +78,7 @@ export function renderCombat(root: HTMLElement) {
     lab('Fights (N)', numInput(u.n, 10, 1_000_000, (v) => set(() => (u.n = v)))),
     lab('Time limit (s)', numInput(u.timeLimit, 5, 600, (v) => set(() => (u.timeLimit = v)))),
     lab('Seed', numInput(u.seed, 0, 2 ** 31 - 1, (v) => set(() => (u.seed = v)))),
+    lab('Random numbers', select(u.rand, [['game', "the game's Borland rand()"], ['ideal', 'ideal uniform (comparison)']], (v) => set(() => (u.rand = v)))),
   );
   const progress = h('div', { class: 'progress' }, h('i'));
   const progText = h('span', { class: 'prog-text' });
@@ -108,7 +112,7 @@ export function renderCombat(root: HTMLElement) {
     const P = playerProfile(c, u.mode === 'ranged' ? u.attackSpell : null);
     const refs = allEnemies();
     const jobs: Job[] = refs.map((r, i) => ({ key: String(i), P, M: monsterProfile(r.row.c, r.row.hp, !!r.row.pw, r.row.att, r.level), S,
-      hpMode: hpMode(), n: u.allN, seed: u.seed, stream: 1000 + i }));
+      hpMode: hpMode(), n: u.allN, seed: u.seed, stream: i, streams: refs.length }));
     setRunning(true);
     const t0 = performance.now();
     running = runJobs(jobs, onProg);
@@ -284,7 +288,20 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
     cards.append(cc);
   }
   cards.append(exactCard(P, M, S));
+  cards.append(randCard(s, S));
   out.append(cards);
+}
+
+/** How many of the game's random draws the run used, against the generator's period. */
+function randCard(s: Stats, S: FightSettings) {
+  const el = card('Random numbers', S.rand === 'game'
+    ? "Borland rand() as the game has it: seed × 0x015A4E35 + 1, bits 16-30; every call site uses the draw the game's way"
+    : 'ideal uniform draws (a comparison; the game is not like this)');
+  const per = s.draws / Math.max(1, s.n);
+  el.append(h('p', {}, `${s.draws.toLocaleString()} draws, ${fmt(per, 0)} per fight${S.rand === 'game' ? ` · ${pct(s.draws / LCG_PERIOD, 3)} of the generator's period of 2^32` : ''}.`));
+  if (S.rand === 'game') el.append(h('p', { class: 'hint' }, 'The run is split into equal blocks of the one 2^32-long sequence, one per worker, so no draw is used twice. The bias of the game\'s draws is per draw and does not grow with N; a larger N only makes it easier to see (rand() % 31 gives residue 0 one draw in 1058/32768 instead of 1/31, +0.09%; rand() % 100, the attack slot, favours 0-67 by 0.3%).'));
+  if (s.blockOverruns) el.append(h('p', { class: 'warn' }, `${s.blockOverruns} job(s) used more draws than their block of the cycle, so parts of the sequence were read twice. Lower N or the number of enemies.`));
+  return el;
 }
 
 /** Experience: only kills pay (player_killed_a). Raw units are tenths of the displayed XP. */

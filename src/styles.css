@@ -65,6 +65,7 @@ table.mini th { text-align: left; color: var(--muted); font-weight: 500; padding
 table.mini td { padding: 3px 8px 3px 0; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
 table.wide { width: 100%; }
 td.muted { color: var(--muted); }
+table.mini tr.on td { color: var(--text); font-weight: 600; }
 .equip { display: flex; flex-direction: column; gap: 6px; }
 .eq-row { display: grid; grid-template-columns: 92px 1fr; gap: 4px 6px; align-items: center; }
 .eq-row select.ench, .eq-q { grid-column: 2; }
