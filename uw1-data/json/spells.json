@@ -1,0 +1,1093 @@
+{
+ "source": "uw1/src/combat/SPELLS.C spells[] (code data, same for every player)",
+ "notes": [
+  "Spell names are in STRINGS.PAK block 6 and are not parsed; indices 0..47 are the player's, six per circle; 48..52 appear only in creature records.",
+  "Creatures pay no mana and have no cooldown: see level-monsters.json notes."
+ ],
+ "spells": [
+  {
+   "index": 0,
+   "circle": 1,
+   "player_spell": true,
+   "class": 0,
+   "class_name": "light",
+   "minor": 3,
+   "flags": 128,
+   "runes_packed": 8568,
+   "raw": [
+    0,
+    8568,
+    131
+   ],
+   "runes": [
+    8,
+    11
+   ],
+   "rune_words": "In Lor"
+  },
+  {
+   "index": 1,
+   "circle": 1,
+   "player_spell": true,
+   "class": 2,
+   "class_name": "armour",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 1298,
+   "raw": [
+    16,
+    1298,
+    2
+   ],
+   "runes": [
+    1,
+    8,
+    18
+   ],
+   "rune_words": "Bet In Sanct"
+  },
+  {
+   "index": 2,
+   "circle": 1,
+   "player_spell": true,
+   "class": 5,
+   "class_name": "missile",
+   "minor": 1,
+   "flags": 0,
+   "runes_packed": 14648,
+   "raw": [
+    41,
+    14648,
+    1
+   ],
+   "missile_index": 7,
+   "missile_damage": 8,
+   "missile_type": 15,
+   "runes": [
+    14,
+    9
+   ],
+   "rune_words": "Ort Jux"
+  },
+  {
+   "index": 3,
+   "circle": 1,
+   "player_spell": true,
+   "class": 8,
+   "class_name": "create",
+   "minor": 1,
+   "flags": 0,
+   "runes_packed": 8599,
+   "raw": [
+    64,
+    8599,
+    1
+   ],
+   "runes": [
+    8,
+    12,
+    23
+   ],
+   "rune_words": "In Mani Ylem"
+  },
+  {
+   "index": 4,
+   "circle": 1,
+   "player_spell": true,
+   "class": 3,
+   "class_name": "protect",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 18680,
+   "raw": [
+    24,
+    18680,
+    2
+   ],
+   "runes": [
+    18,
+    7
+   ],
+   "rune_words": "Sanct Hur"
+  },
+  {
+   "index": 5,
+   "circle": 1,
+   "player_spell": true,
+   "class": 1,
+   "class_name": "motion",
+   "minor": 1,
+   "flags": 0,
+   "runes_packed": 20984,
+   "raw": [
+    8,
+    20984,
+    1
+   ],
+   "runes": [
+    20,
+    15
+   ],
+   "rune_words": "Uus Por"
+  },
+  {
+   "index": 6,
+   "circle": 2,
+   "player_spell": true,
+   "class": 3,
+   "class_name": "protect",
+   "minor": 1,
+   "flags": 0,
+   "runes_packed": 600,
+   "raw": [
+    24,
+    600,
+    1
+   ],
+   "runes": [
+    0,
+    18
+   ],
+   "rune_words": "An Sanct"
+  },
+  {
+   "index": 7,
+   "circle": 2,
+   "player_spell": true,
+   "class": 1,
+   "class_name": "motion",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 17519,
+   "raw": [
+    8,
+    17519,
+    2
+   ],
+   "runes": [
+    17,
+    3,
+    15
+   ],
+   "rune_words": "Rel Des Por"
+  },
+  {
+   "index": 8,
+   "circle": 2,
+   "player_spell": true,
+   "class": 4,
+   "class_name": "heal",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 8236,
+   "raw": [
+    32,
+    8236,
+    2
+   ],
+   "runes": [
+    8,
+    1,
+    12
+   ],
+   "rune_words": "In Bet Mani",
+   "heal_dice": "2d8"
+  },
+  {
+   "index": 9,
+   "circle": 2,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 1,
+   "flags": 0,
+   "runes_packed": 22936,
+   "raw": [
+    88,
+    22936,
+    1
+   ],
+   "runes": [
+    22,
+    12
+   ],
+   "rune_words": "Wis Mani"
+  },
+  {
+   "index": 10,
+   "circle": 2,
+   "player_spell": true,
+   "class": 7,
+   "class_name": "single-target area",
+   "minor": 1,
+   "flags": 0,
+   "runes_packed": 16472,
+   "raw": [
+    56,
+    16472,
+    1
+   ],
+   "runes": [
+    16,
+    2
+   ],
+   "rune_words": "Quas Corp"
+  },
+  {
+   "index": 11,
+   "circle": 2,
+   "player_spell": true,
+   "class": 8,
+   "class_name": "create",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 8504,
+   "raw": [
+    64,
+    8504,
+    3
+   ],
+   "runes": [
+    8,
+    9
+   ],
+   "rune_words": "In Jux"
+  },
+  {
+   "index": 12,
+   "circle": 3,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 0,
+   "flags": 0,
+   "runes_packed": 18031,
+   "raw": [
+    88,
+    18031,
+    0
+   ],
+   "runes": [
+    17,
+    19,
+    15
+   ],
+   "rune_words": "Rel Tym Por"
+  },
+  {
+   "index": 13,
+   "circle": 3,
+   "player_spell": true,
+   "class": 3,
+   "class_name": "protect",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 1611,
+   "raw": [
+    24,
+    1611,
+    3
+   ],
+   "runes": [
+    1,
+    18,
+    11
+   ],
+   "rune_words": "Bet Sanct Lor"
+  },
+  {
+   "index": 14,
+   "circle": 3,
+   "player_spell": true,
+   "class": 0,
+   "class_name": "light",
+   "minor": 5,
+   "flags": 128,
+   "runes_packed": 16760,
+   "raw": [
+    0,
+    16760,
+    133
+   ],
+   "runes": [
+    16,
+    11
+   ],
+   "rune_words": "Quas Lor"
+  },
+  {
+   "index": 15,
+   "circle": 3,
+   "player_spell": true,
+   "class": 5,
+   "class_name": "missile",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 14552,
+   "raw": [
+    41,
+    14552,
+    2
+   ],
+   "missile_index": 5,
+   "missile_damage": 16,
+   "missile_type": 20,
+   "runes": [
+    14,
+    6
+   ],
+   "rune_words": "Ort Grav"
+  },
+  {
+   "index": 16,
+   "circle": 3,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 18744,
+   "raw": [
+    90,
+    18744,
+    2
+   ],
+   "runes": [
+    18,
+    9
+   ],
+   "rune_words": "Sanct Jux"
+  },
+  {
+   "index": 17,
+   "circle": 3,
+   "player_spell": true,
+   "class": 2,
+   "class_name": "armour",
+   "minor": 3,
+   "flags": 64,
+   "runes_packed": 8792,
+   "raw": [
+    16,
+    8792,
+    67
+   ],
+   "runes": [
+    8,
+    18
+   ],
+   "rune_words": "In Sanct"
+  },
+  {
+   "index": 18,
+   "circle": 4,
+   "player_spell": true,
+   "class": 1,
+   "class_name": "motion",
+   "minor": 4,
+   "flags": 64,
+   "runes_packed": 24056,
+   "raw": [
+    8,
+    24056,
+    68
+   ],
+   "runes": [
+    23,
+    15
+   ],
+   "rune_words": "Ylem Por"
+  },
+  {
+   "index": 19,
+   "circle": 4,
+   "player_spell": true,
+   "class": 4,
+   "class_name": "heal",
+   "minor": 4,
+   "flags": 0,
+   "runes_packed": 8600,
+   "raw": [
+    32,
+    8600,
+    4
+   ],
+   "runes": [
+    8,
+    12
+   ],
+   "rune_words": "In Mani",
+   "heal_dice": "4d8"
+  },
+  {
+   "index": 20,
+   "circle": 4,
+   "player_spell": true,
+   "class": 1,
+   "class_name": "motion",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 7672,
+   "raw": [
+    8,
+    7672,
+    3
+   ],
+   "runes": [
+    7,
+    15
+   ],
+   "rune_words": "Hur Por"
+  },
+  {
+   "index": 21,
+   "circle": 4,
+   "player_spell": true,
+   "class": 7,
+   "class_name": "single-target area",
+   "minor": 4,
+   "flags": 0,
+   "runes_packed": 13720,
+   "raw": [
+    56,
+    13720,
+    4
+   ],
+   "runes": [
+    13,
+    12
+   ],
+   "rune_words": "Nox Mani"
+  },
+  {
+   "index": 22,
+   "circle": 4,
+   "player_spell": true,
+   "class": 3,
+   "class_name": "protect",
+   "minor": 6,
+   "flags": 64,
+   "runes_packed": 18616,
+   "raw": [
+    24,
+    18616,
+    70
+   ],
+   "runes": [
+    18,
+    5
+   ],
+   "rune_words": "Sanct Flam"
+  },
+  {
+   "index": 23,
+   "circle": 4,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 312,
+   "raw": [
+    90,
+    312,
+    3
+   ],
+   "runes": [
+    0,
+    9
+   ],
+   "rune_words": "An Jux"
+  },
+  {
+   "index": 24,
+   "circle": 5,
+   "player_spell": true,
+   "class": 5,
+   "class_name": "missile",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 15544,
+   "raw": [
+    41,
+    15544,
+    3
+   ],
+   "missile_index": 4,
+   "missile_damage": 28,
+   "missile_type": 24,
+   "runes": [
+    15,
+    5
+   ],
+   "rune_words": "Por Flam"
+  },
+  {
+   "index": 25,
+   "circle": 5,
+   "player_spell": true,
+   "class": 7,
+   "class_name": "single-target area",
+   "minor": 2,
+   "flags": 0,
+   "runes_packed": 76,
+   "raw": [
+    56,
+    76,
+    2
+   ],
+   "runes": [
+    0,
+    2,
+    12
+   ],
+   "rune_words": "An Corp Mani"
+  },
+  {
+   "index": 26,
+   "circle": 5,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 4,
+   "flags": 0,
+   "runes_packed": 15063,
+   "raw": [
+    90,
+    15063,
+    4
+   ],
+   "runes": [
+    14,
+    22,
+    23
+   ],
+   "rune_words": "Ort Wis Ylem"
+  },
+  {
+   "index": 27,
+   "circle": 5,
+   "player_spell": true,
+   "class": 3,
+   "class_name": "protect",
+   "minor": 5,
+   "flags": 0,
+   "runes_packed": 6735,
+   "raw": [
+    24,
+    6735,
+    5
+   ],
+   "runes": [
+    6,
+    18,
+    15
+   ],
+   "rune_words": "Grav Sanct Por"
+  },
+  {
+   "index": 28,
+   "circle": 5,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 5,
+   "flags": 0,
+   "runes_packed": 4856,
+   "raw": [
+    90,
+    4856,
+    5
+   ],
+   "runes": [
+    4,
+    23
+   ],
+   "rune_words": "Ex Ylem"
+  },
+  {
+   "index": 29,
+   "circle": 5,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 6,
+   "flags": 0,
+   "runes_packed": 440,
+   "raw": [
+    88,
+    440,
+    6
+   ],
+   "runes": [
+    0,
+    13
+   ],
+   "rune_words": "An Nox"
+  },
+  {
+   "index": 30,
+   "circle": 6,
+   "player_spell": true,
+   "class": 4,
+   "class_name": "heal",
+   "minor": 15,
+   "flags": 0,
+   "runes_packed": 21772,
+   "raw": [
+    32,
+    21772,
+    15
+   ],
+   "runes": [
+    21,
+    8,
+    12
+   ],
+   "rune_words": "Vas In Mani",
+   "heal_dice": "all"
+  },
+  {
+   "index": 31,
+   "circle": 6,
+   "player_spell": true,
+   "class": 6,
+   "class_name": "area",
+   "minor": 2,
+   "flags": 64,
+   "runes_packed": 21958,
+   "raw": [
+    48,
+    21958,
+    66
+   ],
+   "runes": [
+    21,
+    14,
+    6
+   ],
+   "rune_words": "Vas Ort Grav"
+  },
+  {
+   "index": 32,
+   "circle": 6,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 10,
+   "flags": 0,
+   "runes_packed": 22063,
+   "raw": [
+    88,
+    22063,
+    10
+   ],
+   "runes": [
+    21,
+    17,
+    15
+   ],
+   "rune_words": "Vas Rel Por"
+  },
+  {
+   "index": 33,
+   "circle": 6,
+   "player_spell": true,
+   "class": 7,
+   "class_name": "single-target area",
+   "minor": 5,
+   "flags": 0,
+   "runes_packed": 143,
+   "raw": [
+    56,
+    143,
+    5
+   ],
+   "runes": [
+    0,
+    4,
+    15
+   ],
+   "rune_words": "An Ex Por"
+  },
+  {
+   "index": 34,
+   "circle": 6,
+   "player_spell": true,
+   "class": 0,
+   "class_name": "light",
+   "minor": 6,
+   "flags": 128,
+   "runes_packed": 21771,
+   "raw": [
+    0,
+    21771,
+    134
+   ],
+   "runes": [
+    21,
+    8,
+    11
+   ],
+   "rune_words": "Vas In Lor"
+  },
+  {
+   "index": 35,
+   "circle": 6,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 8,
+   "flags": 0,
+   "runes_packed": 14839,
+   "raw": [
+    90,
+    14839,
+    8
+   ],
+   "runes": [
+    14,
+    15,
+    23
+   ],
+   "rune_words": "Ort Por Ylem"
+  },
+  {
+   "index": 36,
+   "circle": 7,
+   "player_spell": true,
+   "class": 1,
+   "class_name": "motion",
+   "minor": 5,
+   "flags": 0,
+   "runes_packed": 21743,
+   "raw": [
+    8,
+    21743,
+    5
+   ],
+   "runes": [
+    21,
+    7,
+    15
+   ],
+   "rune_words": "Vas Hur Por"
+  },
+  {
+   "index": 37,
+   "circle": 7,
+   "player_spell": true,
+   "class": 7,
+   "class_name": "single-target area",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 8593,
+   "raw": [
+    56,
+    8593,
+    3
+   ],
+   "runes": [
+    8,
+    12,
+    17
+   ],
+   "rune_words": "In Mani Rel"
+  },
+  {
+   "index": 38,
+   "circle": 7,
+   "player_spell": true,
+   "class": 8,
+   "class_name": "create",
+   "minor": 4,
+   "flags": 0,
+   "runes_packed": 10648,
+   "raw": [
+    64,
+    10648,
+    4
+   ],
+   "runes": [
+    10,
+    12
+   ],
+   "rune_words": "Kal Mani"
+  },
+  {
+   "index": 39,
+   "circle": 7,
+   "player_spell": true,
+   "class": 3,
+   "class_name": "protect",
+   "minor": 4,
+   "flags": 64,
+   "runes_packed": 22091,
+   "raw": [
+    24,
+    22091,
+    68
+   ],
+   "runes": [
+    21,
+    18,
+    11
+   ],
+   "rune_words": "Vas Sanct Lor"
+  },
+  {
+   "index": 40,
+   "circle": 7,
+   "player_spell": true,
+   "class": 6,
+   "class_name": "area",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 21526,
+   "raw": [
+    48,
+    21526,
+    3
+   ],
+   "runes": [
+    21,
+    0,
+    22
+   ],
+   "rune_words": "Vas An Wis"
+  },
+  {
+   "index": 41,
+   "circle": 7,
+   "player_spell": true,
+   "class": 6,
+   "class_name": "area",
+   "minor": 1,
+   "flags": 128,
+   "runes_packed": 14352,
+   "raw": [
+    48,
+    14352,
+    129
+   ],
+   "runes": [
+    14,
+    0,
+    16
+   ],
+   "rune_words": "Ort An Quas"
+  },
+  {
+   "index": 42,
+   "circle": 8,
+   "player_spell": true,
+   "class": 2,
+   "class_name": "armour",
+   "minor": 5,
+   "flags": 64,
+   "runes_packed": 8882,
+   "raw": [
+    16,
+    8882,
+    69
+   ],
+   "runes": [
+    8,
+    21,
+    18
+   ],
+   "rune_words": "In Vas Sanct"
+  },
+  {
+   "index": 43,
+   "circle": 8,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 9,
+   "flags": 0,
+   "runes_packed": 22007,
+   "raw": [
+    88,
+    22007,
+    9
+   ],
+   "runes": [
+    21,
+    15,
+    23
+   ],
+   "rune_words": "Vas Por Ylem"
+  },
+  {
+   "index": 44,
+   "circle": 8,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 7,
+   "flags": 0,
+   "runes_packed": 14838,
+   "raw": [
+    88,
+    14838,
+    7
+   ],
+   "runes": [
+    14,
+    15,
+    22
+   ],
+   "rune_words": "Ort Por Wis"
+  },
+  {
+   "index": 45,
+   "circle": 8,
+   "player_spell": true,
+   "class": 6,
+   "class_name": "area",
+   "minor": 4,
+   "flags": 64,
+   "runes_packed": 5368,
+   "raw": [
+    48,
+    5368,
+    68
+   ],
+   "runes": [
+    5,
+    7
+   ],
+   "rune_words": "Flam Hur"
+  },
+  {
+   "index": 46,
+   "circle": 8,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 11,
+   "flags": 0,
+   "runes_packed": 632,
+   "raw": [
+    88,
+    632,
+    11
+   ],
+   "runes": [
+    0,
+    19
+   ],
+   "rune_words": "An Tym"
+  },
+  {
+   "index": 47,
+   "circle": 8,
+   "player_spell": true,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 12,
+   "flags": 0,
+   "runes_packed": 21826,
+   "raw": [
+    88,
+    21826,
+    12
+   ],
+   "runes": [
+    21,
+    10,
+    2
+   ],
+   "rune_words": "Vas Kal Corp"
+  },
+  {
+   "index": 48,
+   "circle": null,
+   "player_spell": false,
+   "class": 6,
+   "class_name": "area",
+   "minor": 5,
+   "flags": 0,
+   "runes_packed": 25368,
+   "raw": [
+    48,
+    25368,
+    5
+   ],
+   "runes": [],
+   "rune_words": ""
+  },
+  {
+   "index": 49,
+   "circle": null,
+   "player_spell": false,
+   "class": 5,
+   "class_name": "missile",
+   "minor": 4,
+   "flags": 0,
+   "runes_packed": 25368,
+   "raw": [
+    40,
+    25368,
+    4
+   ],
+   "missile_index": 6,
+   "missile_damage": 8,
+   "missile_type": 13,
+   "runes": [],
+   "rune_words": ""
+  },
+  {
+   "index": 50,
+   "circle": null,
+   "player_spell": false,
+   "class": 11,
+   "class_name": "special effect (xt)",
+   "minor": 13,
+   "flags": 0,
+   "runes_packed": 25368,
+   "raw": [
+    88,
+    25368,
+    13
+   ],
+   "runes": [],
+   "rune_words": ""
+  },
+  {
+   "index": 51,
+   "circle": null,
+   "player_spell": false,
+   "class": 10,
+   "class_name": "mana",
+   "minor": 3,
+   "flags": 0,
+   "runes_packed": 25368,
+   "raw": [
+    80,
+    25368,
+    3
+   ],
+   "runes": [],
+   "rune_words": ""
+  },
+  {
+   "index": 52,
+   "circle": null,
+   "player_spell": false,
+   "class": 10,
+   "class_name": "mana",
+   "minor": 9,
+   "flags": 0,
+   "runes_packed": 25368,
+   "raw": [
+    80,
+    25368,
+    9
+   ],
+   "runes": [],
+   "rune_words": ""
+  }
+ ]
+}

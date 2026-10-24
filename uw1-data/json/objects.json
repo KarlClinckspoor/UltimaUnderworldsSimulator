@@ -1,0 +1,6807 @@
+{
+ "source": "OBJECTS.DAT",
+ "size": 3554,
+ "header_word": 3841,
+ "melee_weapons": [
+  {
+   "index": 0,
+   "item_id": 0,
+   "name": "Hand Axe",
+   "damage_slash": 6,
+   "damage_bash": 4,
+   "damage_stab": 2,
+   "min_charge": 90,
+   "speed": 25,
+   "max_charge": 160,
+   "skill": 4,
+   "skill_name": "Axe",
+   "durability": 10
+  },
+  {
+   "index": 1,
+   "item_id": 1,
+   "name": "Battle Axe",
+   "damage_slash": 14,
+   "damage_bash": 7,
+   "damage_stab": 2,
+   "min_charge": 70,
+   "speed": 5,
+   "max_charge": 220,
+   "skill": 4,
+   "skill_name": "Axe",
+   "durability": 34
+  },
+  {
+   "index": 2,
+   "item_id": 2,
+   "name": "Axe",
+   "damage_slash": 10,
+   "damage_bash": 6,
+   "damage_stab": 8,
+   "min_charge": 80,
+   "speed": 13,
+   "max_charge": 190,
+   "skill": 4,
+   "skill_name": "Axe",
+   "durability": 25
+  },
+  {
+   "index": 3,
+   "item_id": 3,
+   "name": "Dagger",
+   "damage_slash": 4,
+   "damage_bash": 2,
+   "damage_stab": 5,
+   "min_charge": 100,
+   "speed": 30,
+   "max_charge": 145,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 5
+  },
+  {
+   "index": 4,
+   "item_id": 4,
+   "name": "Shortsword",
+   "damage_slash": 6,
+   "damage_bash": 3,
+   "damage_stab": 6,
+   "min_charge": 90,
+   "speed": 20,
+   "max_charge": 170,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 18
+  },
+  {
+   "index": 5,
+   "item_id": 5,
+   "name": "Longsword",
+   "damage_slash": 10,
+   "damage_bash": 4,
+   "damage_stab": 8,
+   "min_charge": 80,
+   "speed": 15,
+   "max_charge": 190,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 28
+  },
+  {
+   "index": 6,
+   "item_id": 6,
+   "name": "Broadsword",
+   "damage_slash": 13,
+   "damage_bash": 6,
+   "damage_stab": 10,
+   "min_charge": 70,
+   "speed": 9,
+   "max_charge": 205,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 34
+  },
+  {
+   "index": 7,
+   "item_id": 7,
+   "name": "Cudgel",
+   "damage_slash": 3,
+   "damage_bash": 6,
+   "damage_stab": 2,
+   "min_charge": 95,
+   "speed": 20,
+   "max_charge": 145,
+   "skill": 5,
+   "skill_name": "Mace",
+   "durability": 2
+  },
+  {
+   "index": 8,
+   "item_id": 8,
+   "name": "Light Mace",
+   "damage_slash": 6,
+   "damage_bash": 10,
+   "damage_stab": 4,
+   "min_charge": 85,
+   "speed": 15,
+   "max_charge": 175,
+   "skill": 5,
+   "skill_name": "Mace",
+   "durability": 15
+  },
+  {
+   "index": 9,
+   "item_id": 9,
+   "name": "Mace",
+   "damage_slash": 8,
+   "damage_bash": 16,
+   "damage_stab": 5,
+   "min_charge": 75,
+   "speed": 9,
+   "max_charge": 190,
+   "skill": 5,
+   "skill_name": "Mace",
+   "durability": 25
+  },
+  {
+   "index": 10,
+   "item_id": 10,
+   "name": "Shiny Sword",
+   "damage_slash": 14,
+   "damage_bash": 7,
+   "damage_stab": 11,
+   "min_charge": 70,
+   "speed": 11,
+   "max_charge": 190,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 255
+  },
+  {
+   "index": 11,
+   "item_id": 11,
+   "name": "Jeweled Axe",
+   "damage_slash": 13,
+   "damage_bash": 8,
+   "damage_stab": 5,
+   "min_charge": 75,
+   "speed": 8,
+   "max_charge": 200,
+   "skill": 4,
+   "skill_name": "Axe",
+   "durability": 255
+  },
+  {
+   "index": 12,
+   "item_id": 12,
+   "name": "Black Sword",
+   "damage_slash": 15,
+   "damage_bash": 7,
+   "damage_stab": 12,
+   "min_charge": 60,
+   "speed": 5,
+   "max_charge": 200,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 255
+  },
+  {
+   "index": 13,
+   "item_id": 13,
+   "name": "Jeweled Sword",
+   "damage_slash": 14,
+   "damage_bash": 7,
+   "damage_stab": 11,
+   "min_charge": 70,
+   "speed": 11,
+   "max_charge": 190,
+   "skill": 3,
+   "skill_name": "Sword",
+   "durability": 255
+  },
+  {
+   "index": 14,
+   "item_id": 14,
+   "name": "Jeweled Mace",
+   "damage_slash": 9,
+   "damage_bash": 17,
+   "damage_stab": 5,
+   "min_charge": 65,
+   "speed": 6,
+   "max_charge": 220,
+   "skill": 5,
+   "skill_name": "Mace",
+   "durability": 255
+  },
+  {
+   "index": 15,
+   "item_id": 15,
+   "name": "Fist",
+   "damage_slash": 2,
+   "damage_bash": 4,
+   "damage_stab": 3,
+   "min_charge": 90,
+   "speed": 15,
+   "max_charge": 140,
+   "skill": 6,
+   "skill_name": "Missile",
+   "durability": 255
+  }
+ ],
+ "missiles": [
+  {
+   "index": 0,
+   "item_id": 16,
+   "name": "Sling Stone",
+   "damage": 5,
+   "type": 15,
+   "ammo": -64,
+   "damage_type": 64
+  },
+  {
+   "index": 1,
+   "item_id": 17,
+   "name": "Crossbow Bolt (0x11)",
+   "damage": 10,
+   "type": 26,
+   "ammo": -64,
+   "damage_type": 64
+  },
+  {
+   "index": 2,
+   "item_id": 18,
+   "name": "Arrow (0x12)",
+   "damage": 8,
+   "type": 22,
+   "ammo": -64,
+   "damage_type": 64
+  },
+  {
+   "index": 3,
+   "item_id": 19,
+   "name": "Stone",
+   "damage": 8,
+   "type": 10,
+   "ammo": -64,
+   "damage_type": 64
+  },
+  {
+   "index": 4,
+   "item_id": 20,
+   "name": "Fireball",
+   "damage": 28,
+   "type": 24,
+   "ammo": -11,
+   "damage_type": 11
+  },
+  {
+   "index": 5,
+   "item_id": 21,
+   "name": "Lightning Bolt",
+   "damage": 16,
+   "type": 20,
+   "ammo": -35,
+   "damage_type": 35
+  },
+  {
+   "index": 6,
+   "item_id": 22,
+   "name": "Acid",
+   "damage": 8,
+   "type": 13,
+   "ammo": -16,
+   "damage_type": 16
+  },
+  {
+   "index": 7,
+   "item_id": 23,
+   "name": "Magic Missile",
+   "damage": 8,
+   "type": 15,
+   "ammo": -67,
+   "damage_type": 67
+  },
+  {
+   "index": 8,
+   "item_id": 24,
+   "name": "Sling",
+   "damage": 3,
+   "type": 15,
+   "ammo": 0,
+   "damage_type": null
+  },
+  {
+   "index": 9,
+   "item_id": 25,
+   "name": "Bow",
+   "damage": 3,
+   "type": 15,
+   "ammo": 2,
+   "damage_type": null
+  },
+  {
+   "index": 10,
+   "item_id": 26,
+   "name": "Crossbow",
+   "damage": 3,
+   "type": 15,
+   "ammo": 1,
+   "damage_type": null
+  },
+  {
+   "index": 11,
+   "item_id": 27,
+   "name": "item 0x1B",
+   "damage": 3,
+   "type": 15,
+   "ammo": -1,
+   "damage_type": 1
+  },
+  {
+   "index": 12,
+   "item_id": 28,
+   "name": "item 0x1C",
+   "damage": 3,
+   "type": 15,
+   "ammo": -1,
+   "damage_type": 1
+  },
+  {
+   "index": 13,
+   "item_id": 29,
+   "name": "item 0x1D",
+   "damage": 3,
+   "type": 15,
+   "ammo": -1,
+   "damage_type": 1
+  },
+  {
+   "index": 14,
+   "item_id": 30,
+   "name": "item 0x1E",
+   "damage": 3,
+   "type": 15,
+   "ammo": -1,
+   "damage_type": 1
+  },
+  {
+   "index": 15,
+   "item_id": 31,
+   "name": "Jeweled Bow",
+   "damage": 3,
+   "type": 15,
+   "ammo": 2,
+   "damage_type": null
+  }
+ ],
+ "armour": [
+  {
+   "index": 0,
+   "item_id": 32,
+   "name": "Leather Vest",
+   "protection": 2,
+   "durability": 8,
+   "byte2": 4,
+   "category": 1,
+   "category_name": "body armour"
+  },
+  {
+   "index": 1,
+   "item_id": 33,
+   "name": "Mail Shirt",
+   "protection": 4,
+   "durability": 22,
+   "byte2": 4,
+   "category": 1,
+   "category_name": "body armour"
+  },
+  {
+   "index": 2,
+   "item_id": 34,
+   "name": "Breastplate",
+   "protection": 6,
+   "durability": 34,
+   "byte2": 4,
+   "category": 1,
+   "category_name": "body armour"
+  },
+  {
+   "index": 3,
+   "item_id": 35,
+   "name": "Leather Leggings",
+   "protection": 2,
+   "durability": 4,
+   "byte2": 5,
+   "category": 3,
+   "category_name": "leggings"
+  },
+  {
+   "index": 4,
+   "item_id": 36,
+   "name": "Mail Leggings",
+   "protection": 4,
+   "durability": 12,
+   "byte2": 5,
+   "category": 3,
+   "category_name": "leggings"
+  },
+  {
+   "index": 5,
+   "item_id": 37,
+   "name": "Plate Leggings",
+   "protection": 6,
+   "durability": 20,
+   "byte2": 5,
+   "category": 3,
+   "category_name": "leggings"
+  },
+  {
+   "index": 6,
+   "item_id": 38,
+   "name": "Leather Gloves",
+   "protection": 1,
+   "durability": 2,
+   "byte2": 6,
+   "category": 4,
+   "category_name": "gloves"
+  },
+  {
+   "index": 7,
+   "item_id": 39,
+   "name": "Chain Gauntlets",
+   "protection": 3,
+   "durability": 9,
+   "byte2": 6,
+   "category": 4,
+   "category_name": "gloves"
+  },
+  {
+   "index": 8,
+   "item_id": 40,
+   "name": "Plate Gauntlets",
+   "protection": 5,
+   "durability": 15,
+   "byte2": 6,
+   "category": 4,
+   "category_name": "gloves"
+  },
+  {
+   "index": 9,
+   "item_id": 41,
+   "name": "Leather Boots",
+   "protection": 1,
+   "durability": 3,
+   "byte2": 7,
+   "category": 5,
+   "category_name": "boots"
+  },
+  {
+   "index": 10,
+   "item_id": 42,
+   "name": "Chain Boots",
+   "protection": 3,
+   "durability": 10,
+   "byte2": 7,
+   "category": 5,
+   "category_name": "boots"
+  },
+  {
+   "index": 11,
+   "item_id": 43,
+   "name": "Plate Boots",
+   "protection": 5,
+   "durability": 17,
+   "byte2": 7,
+   "category": 5,
+   "category_name": "boots"
+  },
+  {
+   "index": 12,
+   "item_id": 44,
+   "name": "Leather Cap",
+   "protection": 2,
+   "durability": 6,
+   "byte2": 7,
+   "category": 8,
+   "category_name": "hat"
+  },
+  {
+   "index": 13,
+   "item_id": 45,
+   "name": "Chain Cowl",
+   "protection": 4,
+   "durability": 15,
+   "byte2": 7,
+   "category": 8,
+   "category_name": "hat"
+  },
+  {
+   "index": 14,
+   "item_id": 46,
+   "name": "Helmet",
+   "protection": 6,
+   "durability": 24,
+   "byte2": 7,
+   "category": 8,
+   "category_name": "hat"
+  },
+  {
+   "index": 15,
+   "item_id": 47,
+   "name": "Dragon Skin Boots",
+   "protection": 3,
+   "durability": 255,
+   "byte2": 4,
+   "category": 5,
+   "category_name": "boots"
+  },
+  {
+   "index": 16,
+   "item_id": 48,
+   "name": "Crown (0x30)",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 4,
+   "category": 8,
+   "category_name": "hat"
+  },
+  {
+   "index": 17,
+   "item_id": 49,
+   "name": "Crown (0x31)",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 4,
+   "category": 8,
+   "category_name": "hat"
+  },
+  {
+   "index": 18,
+   "item_id": 50,
+   "name": "Crown (0x32)",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 4,
+   "category": 8,
+   "category_name": "hat"
+  },
+  {
+   "index": 19,
+   "item_id": 51,
+   "name": "item 0x33",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 20,
+   "item_id": 52,
+   "name": "item 0x34",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 21,
+   "item_id": 53,
+   "name": "item 0x35",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 22,
+   "item_id": 54,
+   "name": "Iron Ring",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 9,
+   "category_name": "ring"
+  },
+  {
+   "index": 23,
+   "item_id": 55,
+   "name": "Shiny Shield",
+   "protection": 3,
+   "durability": 255,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 24,
+   "item_id": 56,
+   "name": "Gold Ring",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 9,
+   "category_name": "ring"
+  },
+  {
+   "index": 25,
+   "item_id": 57,
+   "name": "Silver Ring",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 9,
+   "category_name": "ring"
+  },
+  {
+   "index": 26,
+   "item_id": 58,
+   "name": "Red Ring",
+   "protection": 0,
+   "durability": 255,
+   "byte2": 0,
+   "category": 9,
+   "category_name": "ring"
+  },
+  {
+   "index": 27,
+   "item_id": 59,
+   "name": "Tower Shield",
+   "protection": 3,
+   "durability": 30,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 28,
+   "item_id": 60,
+   "name": "Wooden Shield",
+   "protection": 1,
+   "durability": 5,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 29,
+   "item_id": 61,
+   "name": "Small Shield",
+   "protection": 2,
+   "durability": 17,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 30,
+   "item_id": 62,
+   "name": "Buckler",
+   "protection": 1,
+   "durability": 9,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  },
+  {
+   "index": 31,
+   "item_id": 63,
+   "name": "Jeweled Shield",
+   "protection": 2,
+   "durability": 255,
+   "byte2": 0,
+   "category": 0,
+   "category_name": "shield"
+  }
+ ],
+ "creatures": [
+  {
+   "index": 0,
+   "item_id": 64,
+   "name": "Rotworm",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 5,
+   "str": 0,
+   "dex": 7,
+   "int": 0,
+   "death": 0,
+   "blood": 1,
+   "corpse": 1,
+   "race": 1,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 2,
+   "run": 3,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 5,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 1,
+   "defence": 0,
+   "attacks": [
+    {
+     "chance": 2,
+     "damage": 3,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 2,
+   "nerve": 15,
+   "noise": 4,
+   "visibility": 8,
+   "hearing": 4,
+   "sight": 3,
+   "lazy": 3,
+   "alert": 4,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 6,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff0500070028010102030000000501000203640000000000002f84344300000000000000000600000000000049"
+  },
+  {
+   "index": 1,
+   "item_id": 65,
+   "name": "Flesh Slug",
+   "armour": [
+    0,
+    255,
+    255,
+    255
+   ],
+   "avghit": 7,
+   "str": 0,
+   "dex": 6,
+   "int": 0,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 2,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 1,
+   "run": 1,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 5,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 2,
+   "defence": 0,
+   "attacks": [
+    {
+     "chance": 2,
+     "damage": 3,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 2,
+     "damage": 3,
+     "prob": 50
+    }
+   ],
+   "range": 2,
+   "nerve": 13,
+   "noise": 5,
+   "visibility": 8,
+   "hearing": 3,
+   "sight": 2,
+   "lazy": 3,
+   "alert": 3,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 6,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "00ffffff07000600c8020101010000000502000203320000000203322d85233300000000000000000600000000000049"
+  },
+  {
+   "index": 2,
+   "item_id": 66,
+   "name": "Cave Bat",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 7,
+   "str": 0,
+   "dex": 30,
+   "int": 2,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 3,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 8,
+   "run": 12,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 2,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 4,
+   "defence": 7,
+   "attacks": [
+    {
+     "chance": 3,
+     "damage": 4,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 7,
+   "nerve": 4,
+   "noise": 3,
+   "visibility": 8,
+   "hearing": 14,
+   "sight": 10,
+   "lazy": 14,
+   "alert": 12,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 7,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff07001e02080381080c0000000204070304640000000000007483aece00000000000000000700000000000049"
+  },
+  {
+   "index": 3,
+   "item_id": 67,
+   "name": "Giant Rat (0x43)",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 8,
+   "str": 0,
+   "dex": 15,
+   "int": 4,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 4,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 4,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 4,
+   "defence": 6,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 4,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 3,
+   "nerve": 11,
+   "noise": 4,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 8,
+   "lazy": 10,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 8,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff08000f04c8042104060000000404060404640000000000003b84888a00000000000000000800000000000049"
+  },
+  {
+   "index": 4,
+   "item_id": 68,
+   "name": "Giant Spider",
+   "armour": [
+    2,
+    1,
+    1,
+    1
+   ],
+   "avghit": 20,
+   "str": 0,
+   "dex": 9,
+   "int": 7,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 5,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 5,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 4,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 3,
+   "defence": 6,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 7,
+     "prob": 50
+    },
+    {
+     "chance": 3,
+     "damage": 9,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 3,
+   "nerve": 9,
+   "noise": 5,
+   "visibility": 8,
+   "hearing": 6,
+   "sight": 5,
+   "lazy": 5,
+   "alert": 6,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 9,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "0201010114000907e8052103050000000403060407320309320000003985566500000000000000000900000000000049"
+  },
+  {
+   "index": 5,
+   "item_id": 69,
+   "name": "Acid Slug",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 12,
+   "str": 0,
+   "dex": 12,
+   "int": 0,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 2,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 1,
+   "run": 1,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 5,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 3,
+   "defence": 3,
+   "attacks": [
+    {
+     "chance": 3,
+     "damage": 6,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 4,
+     "damage": 5,
+     "prob": 50
+    }
+   ],
+   "range": 2,
+   "nerve": 12,
+   "noise": 3,
+   "visibility": 8,
+   "hearing": 4,
+   "sight": 3,
+   "lazy": 3,
+   "alert": 3,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 12,
+   "spells": [
+    49,
+    49,
+    255
+   ],
+   "caster": 24,
+   "locks": 0,
+   "raw_hex": "01ffffff0c000c00a8020101010000000503030306320000000405322c83343300000000000000000c003131ff310049"
+  },
+  {
+   "index": 6,
+   "item_id": 70,
+   "name": "Goblin (0x46)",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 21,
+   "str": 0,
+   "dex": 17,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 6,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 1,
+   "shrewd": 4,
+   "haggle": 9,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 5,
+   "defence": 8,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 6,
+     "prob": 40
+    },
+    {
+     "chance": 7,
+     "damage": 4,
+     "prob": 30
+    },
+    {
+     "chance": 6,
+     "damage": 5,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 7,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 9,
+   "lazy": 9,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 1,
+     "item": 7,
+     "name": "Cudgel",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 44,
+     "name": "Leather Cap",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 5,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "030202021500110aa80638040841690051050805062807041e06051e578a99890f590701870185050500000000000149"
+  },
+  {
+   "index": 7,
+   "item_id": 71,
+   "name": "Goblin (0x47)",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 21,
+   "str": 0,
+   "dex": 17,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 6,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 1,
+   "shrewd": 4,
+   "haggle": 9,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 6,
+   "defence": 9,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 8,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 5,
+     "prob": 30
+    },
+    {
+     "chance": 5,
+     "damage": 7,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 8,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 9,
+   "lazy": 9,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 1,
+     "item": 4,
+     "name": "Shortsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 44,
+     "name": "Leather Cap",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 5,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "030202021500110aa80638040841690051060904082808051e05071e588a9989095907028701a6650500000000000149"
+  },
+  {
+   "index": 8,
+   "item_id": 72,
+   "name": "Giant Rat (0x48)",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 13,
+   "str": 0,
+   "dex": 15,
+   "int": 4,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 4,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 4,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 4,
+   "defence": 8,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 6,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 3,
+   "nerve": 13,
+   "noise": 4,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 8,
+   "lazy": 11,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 22,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff0d000f04c8042104060000020404080406640000000000003d84889b00000000000000001600000000000049"
+  },
+  {
+   "index": 9,
+   "item_id": 73,
+   "name": "Vampire Bat",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 10,
+   "str": 0,
+   "dex": 28,
+   "int": 2,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 3,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 8,
+   "run": 12,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 2,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 5,
+   "defence": 9,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 5,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 7,
+   "nerve": 15,
+   "noise": 3,
+   "visibility": 8,
+   "hearing": 13,
+   "sight": 10,
+   "lazy": 14,
+   "alert": 12,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 27,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff0a001c02080381080c0000040205090505640000000000007f83adce00000000000000001b00000000000049"
+  },
+  {
+   "index": 10,
+   "item_id": 74,
+   "name": "Skeleton",
+   "armour": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "avghit": 20,
+   "str": 0,
+   "dex": 13,
+   "int": 8,
+   "death": 0,
+   "blood": 0,
+   "corpse": 4,
+   "race": 7,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 5,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 7,
+   "defence": 7,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 8,
+     "prob": 50
+    },
+    {
+     "chance": 7,
+     "damage": 6,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 4,
+   "nerve": 15,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 5,
+   "sight": 4,
+   "lazy": 5,
+   "alert": 3,
+   "arms": [
+    {
+     "present": 1,
+     "item": 4,
+     "name": "Shortsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 44,
+     "name": "Leather Cap",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 29,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "0303030314000d0880070c03050000005107070508320706320000004f86453509599102000022001d00000000000149"
+  },
+  {
+   "index": 11,
+   "item_id": 75,
+   "name": "Imp",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 15,
+   "str": 0,
+   "dex": 24,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 8,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 5,
+   "run": 7,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 2,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 5,
+   "defence": 6,
+   "attacks": [
+    {
+     "chance": 6,
+     "damage": 5,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 6,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 10,
+   "sight": 8,
+   "lazy": 13,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 37,
+   "spells": [
+    2,
+    2,
+    255
+   ],
+   "caster": 5,
+   "locks": 5,
+   "raw_hex": "02ffffff0f00180a080881050700000002050606056400000000000068888aad000000000000840025000202ff0b0549"
+  },
+  {
+   "index": 12,
+   "item_id": 76,
+   "name": "Goblin (0x4C)",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 25,
+   "str": 0,
+   "dex": 14,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 9,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 6,
+   "level": 2,
+   "shrewd": 4,
+   "haggle": 9,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 7,
+   "defence": 11,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 8,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 5,
+     "prob": 30
+    },
+    {
+     "chance": 6,
+     "damage": 7,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 12,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 1,
+     "item": 7,
+     "name": "Cudgel",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 60,
+     "name": "Wooden Shield",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 11,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "0302020219000e0aa80938040642690051070b04082808051e06071e5c8a79780f79c702870183050b00000000000149"
+  },
+  {
+   "index": 13,
+   "item_id": 77,
+   "name": "Goblin (0x4D)",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 27,
+   "str": 0,
+   "dex": 17,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 28,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 1,
+   "shrewd": 4,
+   "haggle": 9,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 5,
+   "defence": 8,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 8,
+     "prob": 40
+    },
+    {
+     "chance": 7,
+     "damage": 4,
+     "prob": 30
+    },
+    {
+     "chance": 6,
+     "damage": 5,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 11,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 9,
+   "lazy": 9,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 1,
+     "item": 16,
+     "name": "Sling Stone",
+     "fires_missile": true
+    },
+    {
+     "present": 1,
+     "item": 7,
+     "name": "Cudgel",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": 0,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 25,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "030202021b00110aa81c38040841690051050805082807041e06051e5b8a9989210f07028f0185051900000000000149"
+  },
+  {
+   "index": 14,
+   "item_id": 78,
+   "name": "Goblin (0x4E)",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 31,
+   "str": 0,
+   "dex": 14,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 28,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 6,
+   "level": 2,
+   "shrewd": 4,
+   "haggle": 9,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 7,
+   "defence": 11,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 8,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 5,
+     "prob": 30
+    },
+    {
+     "chance": 6,
+     "damage": 7,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 12,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 1,
+     "item": 16,
+     "name": "Sling Stone",
+     "fires_missile": true
+    },
+    {
+     "present": 1,
+     "item": 7,
+     "name": "Cudgel",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": 0,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 43,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "030202021f000e0aa81c38040642690051070b04082808051e06071e5c8a7978210fc7028f0183052b00000000000149"
+  },
+  {
+   "index": 15,
+   "item_id": 79,
+   "name": "item 0x4F",
+   "armour": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "avghit": 0,
+   "str": 0,
+   "dex": 0,
+   "int": 0,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 0,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 0,
+   "run": 0,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 0,
+   "defence": 0,
+   "attacks": [
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 0,
+   "nerve": 0,
+   "noise": 0,
+   "visibility": 8,
+   "hearing": 0,
+   "sight": 0,
+   "lazy": 0,
+   "alert": 0,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 0,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "000000000000000000000200000000000000000000000000000000000080000000000000000000000000000000000049"
+  },
+  {
+   "index": 16,
+   "item_id": 80,
+   "name": "Goblin (0x50)",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 25,
+   "str": 0,
+   "dex": 14,
+   "int": 10,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 9,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 6,
+   "level": 2,
+   "shrewd": 4,
+   "haggle": 9,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 7,
+   "defence": 11,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 9,
+     "prob": 40
+    },
+    {
+     "chance": 9,
+     "damage": 6,
+     "prob": 30
+    },
+    {
+     "chance": 7,
+     "damage": 8,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 9,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 1,
+     "item": 4,
+     "name": "Shortsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 61,
+     "name": "Small Shield",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 12,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "0302020219000e0aa80938040642690051070b05092809061e07081e598a7978097b2701350284650c00000000000149"
+  },
+  {
+   "index": 17,
+   "item_id": 81,
+   "name": "Mongbat",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 20,
+   "str": 0,
+   "dex": 23,
+   "int": 8,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 3,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 8,
+   "run": 12,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 2,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 10,
+   "defence": 10,
+   "attacks": [
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 8,
+     "damage": 6,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 7,
+   "nerve": 8,
+   "noise": 7,
+   "visibility": 8,
+   "hearing": 12,
+   "sight": 10,
+   "lazy": 14,
+   "alert": 6,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 57,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff14001708c80381080c000000020a0a0000000806640000007887ac6e00000000000000003900000000000049"
+  },
+  {
+   "index": 18,
+   "item_id": 82,
+   "name": "Bloodworm",
+   "armour": [
+    1,
+    255,
+    255,
+    255
+   ],
+   "avghit": 18,
+   "str": 0,
+   "dex": 8,
+   "int": 0,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 1,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 2,
+   "run": 3,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 5,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 8,
+   "defence": 5,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 7,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 2,
+   "nerve": 12,
+   "noise": 4,
+   "visibility": 8,
+   "hearing": 4,
+   "sight": 5,
+   "lazy": 4,
+   "alert": 3,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 54,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "01ffffff12000800a8010002030000040508050407640000000000002c84543400000000000000003600000000000049"
+  },
+  {
+   "index": 19,
+   "item_id": 83,
+   "name": "Wolf Spider",
+   "armour": [
+    2,
+    1,
+    1,
+    1
+   ],
+   "avghit": 20,
+   "str": 0,
+   "dex": 11,
+   "int": 5,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 5,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 5,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 4,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 10,
+   "defence": 10,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 8,
+     "prob": 50
+    },
+    {
+     "chance": 4,
+     "damage": 10,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 4,
+   "nerve": 6,
+   "noise": 3,
+   "visibility": 8,
+   "hearing": 6,
+   "sight": 5,
+   "lazy": 3,
+   "alert": 4,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 73,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "0201010114000b05c805210305000005040a0a050832040a320000004683564300000000000000004900000000000049"
+  },
+  {
+   "index": 20,
+   "item_id": 84,
+   "name": "Mountainman (0x54)",
+   "armour": [
+    4,
+    3,
+    3,
+    3
+   ],
+   "avghit": 30,
+   "str": 0,
+   "dex": 13,
+   "int": 15,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 10,
+   "passive": 0,
+   "remains": 5,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 7,
+   "level": 3,
+   "shrewd": 14,
+   "haggle": 8,
+   "patience": 14,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 11,
+   "defence": 11,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 11,
+     "prob": 40
+    },
+    {
+     "chance": 7,
+     "damage": 8,
+     "prob": 30
+    },
+    {
+     "chance": 8,
+     "damage": 6,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 7,
+   "noise": 9,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 7,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 1,
+     "item": 0,
+     "name": "Hand Axe",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 45,
+     "name": "Chain Cowl",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    3,
+    3,
+    3
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 20,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 4,
+   "raw_hex": "040303031e000d0fc80a340407e3e800510b0b050b2807081e08061e57897887015b440aa702c80c1400000000000449"
+  },
+  {
+   "index": 21,
+   "item_id": 85,
+   "name": "Green Lizardman",
+   "armour": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "avghit": 40,
+   "str": 0,
+   "dex": 12,
+   "int": 14,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 11,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 5,
+   "level": 4,
+   "shrewd": 7,
+   "haggle": 5,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 10,
+   "defence": 13,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 11,
+     "prob": 70
+    },
+    {
+     "chance": 4,
+     "damage": 10,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 9,
+   "noise": 9,
+   "visibility": 8,
+   "hearing": 7,
+   "sight": 6,
+   "lazy": 5,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 23,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 3,
+   "raw_hex": "0202020228000c0ee80b200305746500010a0d050b46040a1e000000598967750000050b650b65d81700000000000349"
+  },
+  {
+   "index": 22,
+   "item_id": 86,
+   "name": "Mountainman (0x56)",
+   "armour": [
+    4,
+    3,
+    3,
+    3
+   ],
+   "avghit": 33,
+   "str": 0,
+   "dex": 13,
+   "int": 15,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 10,
+   "passive": 0,
+   "remains": 5,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 7,
+   "level": 3,
+   "shrewd": 14,
+   "haggle": 8,
+   "patience": 14,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 11,
+   "defence": 15,
+   "attacks": [
+    {
+     "chance": 6,
+     "damage": 12,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 9,
+     "prob": 30
+    },
+    {
+     "chance": 9,
+     "damage": 7,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 7,
+   "noise": 9,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 7,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 1,
+     "item": 0,
+     "name": "Hand Axe",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 45,
+     "name": "Chain Cowl",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    3,
+    3,
+    3
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 25,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 4,
+   "raw_hex": "0403030321000d0fc80a340407e3e800510b0f060c2808091e09071e57897887015b370a8503c85c1900000000000449"
+  },
+  {
+   "index": 23,
+   "item_id": 87,
+   "name": "Lurker",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 20,
+   "str": 0,
+   "dex": 10,
+   "int": 2,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 12,
+   "passive": 1,
+   "remains": 0,
+   "swims": 1,
+   "flier": 0,
+   "speed": 2,
+   "run": 3,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 3,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 10,
+   "defence": 19,
+   "attacks": [
+    {
+     "chance": 4,
+     "damage": 12,
+     "prob": 25
+    },
+    {
+     "chance": 5,
+     "damage": 8,
+     "prob": 35
+    },
+    {
+     "chance": 6,
+     "damage": 6,
+     "prob": 40
+    }
+   ],
+   "range": 3,
+   "nerve": 12,
+   "noise": 7,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 6,
+   "lazy": 4,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 115,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "02ffffff14000a02080c410203000000030a13040c190508230606283c8768a400000000000000007300000000000049"
+  },
+  {
+   "index": 24,
+   "item_id": 88,
+   "name": "Red Lizardman",
+   "armour": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "avghit": 42,
+   "str": 0,
+   "dex": 12,
+   "int": 14,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 11,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 7,
+   "level": 5,
+   "shrewd": 7,
+   "haggle": 5,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 12,
+   "defence": 14,
+   "attacks": [
+    {
+     "chance": 6,
+     "damage": 12,
+     "prob": 70
+    },
+    {
+     "chance": 5,
+     "damage": 11,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 6,
+   "noise": 9,
+   "visibility": 8,
+   "hearing": 7,
+   "sight": 6,
+   "lazy": 5,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 32,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 3,
+   "raw_hex": "020202022a000c0ee80b200407756500010c0e060c46050b1e000000568967750000090b670b76d82000000000000349"
+  },
+  {
+   "index": 25,
+   "item_id": 89,
+   "name": "Gray Lizardman",
+   "armour": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "avghit": 44,
+   "str": 0,
+   "dex": 12,
+   "int": 14,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 11,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 7,
+   "level": 5,
+   "shrewd": 7,
+   "haggle": 5,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 12,
+   "defence": 14,
+   "attacks": [
+    {
+     "chance": 7,
+     "damage": 13,
+     "prob": 70
+    },
+    {
+     "chance": 6,
+     "damage": 12,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 6,
+   "noise": 9,
+   "visibility": 8,
+   "hearing": 7,
+   "sight": 6,
+   "lazy": 5,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 36,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 3,
+   "raw_hex": "020202022c000c0ee80b200407756500010c0e070d46060c1e000000568967750000050b660b76d72400000000000349"
+  },
+  {
+   "index": 26,
+   "item_id": 90,
+   "name": "Outcast",
+   "armour": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "avghit": 45,
+   "str": 0,
+   "dex": 27,
+   "int": 20,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 27,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 5,
+   "shrewd": 10,
+   "haggle": 8,
+   "patience": 9,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 12,
+   "defence": 19,
+   "attacks": [
+    {
+     "chance": 9,
+     "damage": 8,
+     "prob": 40
+    },
+    {
+     "chance": 6,
+     "damage": 10,
+     "prob": 30
+    },
+    {
+     "chance": 10,
+     "damage": 6,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 1,
+     "item": 5,
+     "name": "Longsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 32,
+     "name": "Leather Vest",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 50,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 6,
+   "raw_hex": "050404042d001b14c81b2c0408a59800510c13090828060a1e0a061e588879980b4104091709c90d3200000000000649"
+  },
+  {
+   "index": 27,
+   "item_id": 91,
+   "name": "Headless",
+   "armour": [
+    3,
+    3,
+    3,
+    8
+   ],
+   "avghit": 50,
+   "str": 0,
+   "dex": 9,
+   "int": 8,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 14,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 9,
+   "defence": 14,
+   "attacks": [
+    {
+     "chance": 5,
+     "damage": 13,
+     "prob": 70
+    },
+    {
+     "chance": 4,
+     "damage": 12,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 6,
+   "nerve": 13,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 4,
+   "sight": 2,
+   "lazy": 8,
+   "alert": 4,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    3,
+    3,
+    8
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 162,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "0303030832000908c80e18030600000001090e050d46040c1e0000006d8a24480000000000004300a200000000000149"
+  },
+  {
+   "index": 28,
+   "item_id": 92,
+   "name": "Dread Spider",
+   "armour": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "avghit": 35,
+   "str": 0,
+   "dex": 11,
+   "int": 8,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 5,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 5,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 4,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 13,
+   "defence": 17,
+   "attacks": [
+    {
+     "chance": 7,
+     "damage": 10,
+     "prob": 50
+    },
+    {
+     "chance": 6,
+     "damage": 12,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 4,
+   "nerve": 5,
+   "noise": 3,
+   "visibility": 8,
+   "hearing": 6,
+   "sight": 6,
+   "lazy": 2,
+   "alert": 5,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 167,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "0302020223000b08a805200305000008040d11070a32060c32000000458366520000000000000000a700000000000049"
+  },
+  {
+   "index": 29,
+   "item_id": 93,
+   "name": "Fighter (0x5D)",
+   "armour": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "avghit": 45,
+   "str": 0,
+   "dex": 27,
+   "int": 20,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 13,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 5,
+   "shrewd": 10,
+   "haggle": 8,
+   "patience": 9,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 13,
+   "defence": 20,
+   "attacks": [
+    {
+     "chance": 11,
+     "damage": 10,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 12,
+     "prob": 30
+    },
+    {
+     "chance": 12,
+     "damage": 8,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 1,
+     "item": 5,
+     "name": "Longsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 41,
+     "name": "Leather Boots",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 55,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 7,
+   "raw_hex": "050404042d001b14c80d2c0408a59800510d140b0a28080c1e0c081e588879980b5317090309d9543700000000000749"
+  },
+  {
+   "index": 30,
+   "item_id": 94,
+   "name": "Fighter (0x5E)",
+   "armour": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "avghit": 45,
+   "str": 0,
+   "dex": 27,
+   "int": 20,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 13,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 5,
+   "shrewd": 10,
+   "haggle": 8,
+   "patience": 9,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 13,
+   "defence": 20,
+   "attacks": [
+    {
+     "chance": 11,
+     "damage": 10,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 12,
+     "prob": 30
+    },
+    {
+     "chance": 12,
+     "damage": 8,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 1,
+     "item": 5,
+     "name": "Longsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 35,
+     "name": "Leather Leggings",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 55,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 7,
+   "raw_hex": "050404042d001b14c80d2c0408a59800510d140b0a28080c1e0c081e588879980b4717090309d9543700000000000749"
+  },
+  {
+   "index": 31,
+   "item_id": 95,
+   "name": "Fighter (0x5F)",
+   "armour": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "avghit": 45,
+   "str": 0,
+   "dex": 27,
+   "int": 20,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 13,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 5,
+   "shrewd": 10,
+   "haggle": 8,
+   "patience": 9,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 13,
+   "defence": 20,
+   "attacks": [
+    {
+     "chance": 11,
+     "damage": 10,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 12,
+     "prob": 30
+    },
+    {
+     "chance": 12,
+     "damage": 8,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 1,
+     "item": 5,
+     "name": "Longsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 39,
+     "name": "Chain Gauntlets",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 55,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 7,
+   "raw_hex": "050404042d001b14c80d2c0408a59800510d140b0a28080c1e0c081e588879980b4f17090309d9543700000000000749"
+  },
+  {
+   "index": 32,
+   "item_id": 96,
+   "name": "Troll",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 55,
+   "str": 0,
+   "dex": 10,
+   "int": 12,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 15,
+   "passive": 0,
+   "remains": 2,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 6,
+   "shrewd": 6,
+   "haggle": 13,
+   "patience": 4,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 18,
+   "defence": 15,
+   "attacks": [
+    {
+     "chance": 10,
+     "damage": 18,
+     "prob": 70
+    },
+    {
+     "chance": 12,
+     "damage": 16,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 8,
+   "nerve": 9,
+   "noise": 11,
+   "visibility": 8,
+   "hearing": 6,
+   "sight": 6,
+   "lazy": 7,
+   "alert": 6,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 45,
+   "spells": [
+    255,
+    255,
+    8
+   ],
+   "caster": 4,
+   "locks": 2,
+   "raw_hex": "0404040437000a0ce80f280408664d0001120f0a12460c101e000000898b66670000220c550ca90d2d00ffff08080249"
+  },
+  {
+   "index": 33,
+   "item_id": 97,
+   "name": "Ghost (0x61)",
+   "armour": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "avghit": 40,
+   "str": 0,
+   "dex": 25,
+   "int": 5,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 16,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 4,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 11,
+   "defence": 20,
+   "attacks": [
+    {
+     "chance": 8,
+     "damage": 10,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 3,
+   "nerve": 8,
+   "noise": 1,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 9,
+   "lazy": 8,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 202,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "01010101280019050010810406000000000b14080a64000000000000388198a80000000000000000ca00000000000149"
+  },
+  {
+   "index": 34,
+   "item_id": 98,
+   "name": "Fighter (0x62)",
+   "armour": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "avghit": 50,
+   "str": 0,
+   "dex": 27,
+   "int": 20,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 13,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 5,
+   "shrewd": 10,
+   "haggle": 8,
+   "patience": 9,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 13,
+   "defence": 20,
+   "attacks": [
+    {
+     "chance": 11,
+     "damage": 10,
+     "prob": 40
+    },
+    {
+     "chance": 8,
+     "damage": 12,
+     "prob": 30
+    },
+    {
+     "chance": 12,
+     "damage": 8,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 9,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 1,
+     "item": 5,
+     "name": "Longsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 42,
+     "name": "Chain Boots",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 55,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 7,
+   "raw_hex": "0504040432001b14c80d2c0408a59800510d140b0a28080c1e0c081e588879980b5517090309d9543700000000000749"
+  },
+  {
+   "index": 35,
+   "item_id": 99,
+   "name": "Ghoul (0x63)",
+   "armour": [
+    2,
+    2,
+    2,
+    1
+   ],
+   "avghit": 50,
+   "str": 0,
+   "dex": 13,
+   "int": 12,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 17,
+   "passive": 0,
+   "remains": 4,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 4,
+   "level": 5,
+   "shrewd": 5,
+   "haggle": 5,
+   "patience": 11,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 10,
+   "defence": 18,
+   "attacks": [
+    {
+     "chance": 12,
+     "damage": 12,
+     "prob": 50
+    },
+    {
+     "chance": 8,
+     "damage": 11,
+     "prob": 30
+    },
+    {
+     "chance": 8,
+     "damage": 13,
+     "prob": 20
+    }
+   ],
+   "range": 4,
+   "nerve": 14,
+   "noise": 7,
+   "visibility": 8,
+   "hearing": 5,
+   "sight": 4,
+   "lazy": 5,
+   "alert": 5,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 236,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 2,
+   "raw_hex": "0202020132000d0ca81110030455b500010a120c0c32080b1e080d144e8745550000440c350c5703ec00000000000249"
+  },
+  {
+   "index": 36,
+   "item_id": 100,
+   "name": "Ghost (0x64)",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 50,
+   "str": 0,
+   "dex": 25,
+   "int": 5,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 16,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 4,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 11,
+   "defence": 23,
+   "attacks": [
+    {
+     "chance": 8,
+     "damage": 12,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 3,
+   "nerve": 10,
+   "noise": 1,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 9,
+   "lazy": 8,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 250,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "02ffffff320019050010810406000000000b17080c640000000000003a8198a80000000000000000fa00000000000149"
+  },
+  {
+   "index": 37,
+   "item_id": 101,
+   "name": "Ghost (0x65)",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 5,
+   "str": 0,
+   "dex": 25,
+   "int": 5,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 16,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 4,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 11,
+   "defence": 22,
+   "attacks": [
+    {
+     "chance": 6,
+     "damage": 6,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 3,
+   "nerve": 10,
+   "noise": 1,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 9,
+   "lazy": 8,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 273,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "02ffffff050019050010810406000000000b160606640000000000003a8198a800000000000000001101000000000149"
+  },
+  {
+   "index": 38,
+   "item_id": 102,
+   "name": "Gazer",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 60,
+   "str": 0,
+   "dex": 13,
+   "int": 22,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 18,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 3,
+   "run": 4,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 13,
+   "defence": 23,
+   "attacks": [
+    {
+     "chance": 13,
+     "damage": 12,
+     "prob": 40
+    },
+    {
+     "chance": 12,
+     "damage": 10,
+     "prob": 40
+    },
+    {
+     "chance": 11,
+     "damage": 13,
+     "prob": 20
+    }
+   ],
+   "range": 6,
+   "nerve": 7,
+   "noise": 2,
+   "visibility": 8,
+   "hearing": 2,
+   "sight": 15,
+   "lazy": 10,
+   "alert": 15,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 280,
+   "spells": [
+    15,
+    15,
+    0
+   ],
+   "caster": 8,
+   "locks": 0,
+   "raw_hex": "02ffffff3c000d160812800304000000000d170d0c280c0a280b0d146782f2fa000000000000000018010f0f00110049"
+  },
+  {
+   "index": 39,
+   "item_id": 103,
+   "name": "Mage (0x67)",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 55,
+   "str": 0,
+   "dex": 15,
+   "int": 25,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 19,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 8,
+   "level": 6,
+   "shrewd": 8,
+   "haggle": 7,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 14,
+   "defence": 22,
+   "attacks": [
+    {
+     "chance": 16,
+     "damage": 15,
+     "prob": 50
+    },
+    {
+     "chance": 19,
+     "damage": 25,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 5,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 6,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 1,
+     "item": 3,
+     "name": "Dagger",
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 78,
+   "spells": [
+    15,
+    2,
+    8
+   ],
+   "caster": 8,
+   "locks": 10,
+   "raw_hex": "0404040437000f19c813200308866700010e16100f32131932000000558678a607004212180b99254e000f0208110a49"
+  },
+  {
+   "index": 40,
+   "item_id": 104,
+   "name": "Fighter (0x68)",
+   "armour": [
+    6,
+    5,
+    5,
+    4
+   ],
+   "avghit": 95,
+   "str": 0,
+   "dex": 26,
+   "int": 20,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 13,
+   "passive": 0,
+   "remains": 3,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 6,
+   "shrewd": 10,
+   "haggle": 9,
+   "patience": 10,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 19,
+   "defence": 27,
+   "attacks": [
+    {
+     "chance": 17,
+     "damage": 16,
+     "prob": 40
+    },
+    {
+     "chance": 14,
+     "damage": 17,
+     "prob": 30
+    },
+    {
+     "chance": 17,
+     "damage": 13,
+     "prob": 30
+    }
+   ],
+   "range": 5,
+   "nerve": 10,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 8,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 1,
+     "item": 6,
+     "name": "Broadsword",
+     "fires_missile": false
+    },
+    {
+     "present": 1,
+     "item": 33,
+     "name": "Mail Shirt",
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    6,
+    5,
+    5,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 325,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 14,
+   "raw_hex": "060505045f001a14c80d2c0408a6a90051131b1110280e111e110d1e5a8878a80d4303091a09cb184501000000000e49"
+  },
+  {
+   "index": 41,
+   "item_id": 105,
+   "name": "Dark Ghoul",
+   "armour": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "avghit": 80,
+   "str": 0,
+   "dex": 13,
+   "int": 12,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 17,
+   "passive": 0,
+   "remains": 4,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 5,
+   "level": 5,
+   "shrewd": 5,
+   "haggle": 5,
+   "patience": 11,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 14,
+   "defence": 22,
+   "attacks": [
+    {
+     "chance": 15,
+     "damage": 16,
+     "prob": 50
+    },
+    {
+     "chance": 12,
+     "damage": 13,
+     "prob": 30
+    },
+    {
+     "chance": 11,
+     "damage": 17,
+     "prob": 20
+    }
+   ],
+   "range": 4,
+   "nerve": 15,
+   "noise": 7,
+   "visibility": 8,
+   "hearing": 6,
+   "sight": 4,
+   "lazy": 5,
+   "alert": 5,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 350,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 3,
+   "raw_hex": "0303030350000d0ca81110030555b505010e160f10320c0d1e0b11144f8746550000660c270c54075e01000000000349"
+  },
+  {
+   "index": 42,
+   "item_id": 106,
+   "name": "Mage (0x6A)",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 60,
+   "str": 0,
+   "dex": 16,
+   "int": 25,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 19,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 8,
+   "level": 7,
+   "shrewd": 8,
+   "haggle": 7,
+   "patience": 5,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 15,
+   "defence": 22,
+   "attacks": [
+    {
+     "chance": 13,
+     "damage": 16,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 5,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 6,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 94,
+   "spells": [
+    24,
+    24,
+    38
+   ],
+   "caster": 9,
+   "locks": 9,
+   "raw_hex": "040404043c001019c813380308875700010f160d1064000000000000558678a60000040f3a0f9aa65e00181826130949"
+  },
+  {
+   "index": 43,
+   "item_id": 107,
+   "name": "Mage (0x6B)",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 55,
+   "str": 0,
+   "dex": 17,
+   "int": 25,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 19,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 8,
+   "level": 7,
+   "shrewd": 8,
+   "haggle": 7,
+   "patience": 5,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 15,
+   "defence": 23,
+   "attacks": [
+    {
+     "chance": 13,
+     "damage": 16,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 7,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 6,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 100,
+   "spells": [
+    2,
+    15,
+    19
+   ],
+   "caster": 8,
+   "locks": 12,
+   "raw_hex": "0404040437001119c813380308875700010f170d1064000000000000578678a60000950ea70f9a276400020f13100c49"
+  },
+  {
+   "index": 44,
+   "item_id": 108,
+   "name": "Mage (0x6C)",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 60,
+   "str": 0,
+   "dex": 14,
+   "int": 25,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 19,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 8,
+   "level": 7,
+   "shrewd": 8,
+   "haggle": 7,
+   "patience": 5,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 14,
+   "defence": 22,
+   "attacks": [
+    {
+     "chance": 12,
+     "damage": 17,
+     "prob": 50
+    },
+    {
+     "chance": 19,
+     "damage": 25,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 5,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 6,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 1,
+     "item": 3,
+     "name": "Dagger",
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 104,
+   "spells": [
+    24,
+    24,
+    255
+   ],
+   "caster": 10,
+   "locks": 8,
+   "raw_hex": "040404043c000e19c813380308875700010e160c1132131932000000558678a607004512170baba868001818ff150849"
+  },
+  {
+   "index": 45,
+   "item_id": 109,
+   "name": "Mage (0x6D)",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 55,
+   "str": 0,
+   "dex": 15,
+   "int": 25,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 19,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 8,
+   "level": 6,
+   "shrewd": 8,
+   "haggle": 7,
+   "patience": 6,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 14,
+   "defence": 22,
+   "attacks": [
+    {
+     "chance": 12,
+     "damage": 15,
+     "prob": 50
+    },
+    {
+     "chance": 19,
+     "damage": 25,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 5,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 6,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 1,
+     "item": 3,
+     "name": "Dagger",
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 78,
+   "spells": [
+    15,
+    2,
+    8
+   ],
+   "caster": 8,
+   "locks": 10,
+   "raw_hex": "0404040437000f19c813200308866700010e160c0f32131932000000558678a607004212180b99254e000f0208110a49"
+  },
+  {
+   "index": 46,
+   "item_id": 110,
+   "name": "Ghoul (0x6E)",
+   "armour": [
+    2,
+    2,
+    2,
+    1
+   ],
+   "avghit": 60,
+   "str": 0,
+   "dex": 13,
+   "int": 12,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 28,
+   "passive": 0,
+   "remains": 4,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 4,
+   "level": 5,
+   "shrewd": 5,
+   "haggle": 5,
+   "patience": 11,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 15,
+   "defence": 18,
+   "attacks": [
+    {
+     "chance": 14,
+     "damage": 12,
+     "prob": 50
+    },
+    {
+     "chance": 10,
+     "damage": 11,
+     "prob": 30
+    },
+    {
+     "chance": 10,
+     "damage": 15,
+     "prob": 20
+    }
+   ],
+   "range": 4,
+   "nerve": 15,
+   "noise": 7,
+   "visibility": 8,
+   "hearing": 5,
+   "sight": 4,
+   "lazy": 5,
+   "alert": 5,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    1
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 236,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 2,
+   "raw_hex": "020202013c000d0ca81c10030455b500010f120e0c320a0b1e0a0f144f8745550000440c350c5703ec00000000000249"
+  },
+  {
+   "index": 47,
+   "item_id": 111,
+   "name": "Feral Troll",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 65,
+   "str": 0,
+   "dex": 10,
+   "int": 12,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 28,
+   "passive": 0,
+   "remains": 2,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 6,
+   "shrewd": 6,
+   "haggle": 13,
+   "patience": 4,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 18,
+   "defence": 15,
+   "attacks": [
+    {
+     "chance": 10,
+     "damage": 18,
+     "prob": 70
+    },
+    {
+     "chance": 12,
+     "damage": 16,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 8,
+   "nerve": 12,
+   "noise": 11,
+   "visibility": 8,
+   "hearing": 6,
+   "sight": 6,
+   "lazy": 7,
+   "alert": 6,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 191,
+   "spells": [
+    255,
+    255,
+    8
+   ],
+   "caster": 4,
+   "locks": 2,
+   "raw_hex": "0404040441000a0ce81c280408664d0001120f0a12460c101e0000008c8b66670000220c550ca90dbf00ffff08080249"
+  },
+  {
+   "index": 48,
+   "item_id": 112,
+   "name": "Great Troll",
+   "armour": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "avghit": 100,
+   "str": 0,
+   "dex": 9,
+   "int": 12,
+   "death": 0,
+   "blood": 1,
+   "corpse": 7,
+   "race": 15,
+   "passive": 0,
+   "remains": 2,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 7,
+   "level": 7,
+   "shrewd": 6,
+   "haggle": 13,
+   "patience": 15,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 25,
+   "defence": 25,
+   "attacks": [
+    {
+     "chance": 17,
+     "damage": 22,
+     "prob": 50
+    },
+    {
+     "chance": 20,
+     "damage": 20,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 7,
+   "nerve": 10,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 7,
+   "sight": 6,
+   "lazy": 7,
+   "alert": 7,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 438,
+   "spells": [
+    255,
+    255,
+    19
+   ],
+   "caster": 8,
+   "locks": 2,
+   "raw_hex": "050404046400090ce80f28030767fd000119191116321414320000007a8a67770000340c680cb80db601ffff13100249"
+  },
+  {
+   "index": 49,
+   "item_id": 113,
+   "name": "Dire Ghost",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 70,
+   "str": 0,
+   "dex": 25,
+   "int": 5,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 16,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 4,
+   "run": 6,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 16,
+   "defence": 24,
+   "attacks": [
+    {
+     "chance": 12,
+     "damage": 15,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 12,
+   "noise": 2,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 9,
+   "lazy": 10,
+   "alert": 11,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 460,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "02ffffff4600190500108104060000000010180c0f640000000000005c8298ba0000000000000000cc01000000000149"
+  },
+  {
+   "index": 50,
+   "item_id": 114,
+   "name": "Earth Golem",
+   "armour": [
+    4,
+    4,
+    4,
+    3
+   ],
+   "avghit": 80,
+   "str": 0,
+   "dex": 6,
+   "int": 10,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 20,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 4,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 0,
+   "equip": 23,
+   "defence": 23,
+   "attacks": [
+    {
+     "chance": 15,
+     "damage": 18,
+     "prob": 70
+    },
+    {
+     "chance": 15,
+     "damage": 15,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 4,
+   "nerve": 15,
+   "noise": 10,
+   "visibility": 8,
+   "hearing": 5,
+   "sight": 6,
+   "lazy": 2,
+   "alert": 4,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    3
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 484,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "040404035000060a00140003040000001117170f12460f0f1e0000004f8a65420000000000000000e401000000000149"
+  },
+  {
+   "index": 51,
+   "item_id": 115,
+   "name": "Mage (0x73)",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 70,
+   "str": 0,
+   "dex": 16,
+   "int": 28,
+   "death": 0,
+   "blood": 1,
+   "corpse": 6,
+   "race": 19,
+   "passive": 0,
+   "remains": 6,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 8,
+   "level": 8,
+   "shrewd": 9,
+   "haggle": 7,
+   "patience": 5,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 16,
+   "defence": 21,
+   "attacks": [
+    {
+     "chance": 25,
+     "damage": 15,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 5,
+   "nerve": 6,
+   "noise": 7,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 6,
+   "alert": 10,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 125,
+   "spells": [
+    31,
+    45,
+    19
+   ],
+   "caster": 8,
+   "locks": 15,
+   "raw_hex": "040404044600101cc813380308985700011015190f64000000000000568778a60000a90f4c0fdc287d001f2d13110f49"
+  },
+  {
+   "index": 52,
+   "item_id": 116,
+   "name": "Deep Lurker",
+   "armour": [
+    2,
+    255,
+    255,
+    255
+   ],
+   "avghit": 80,
+   "str": 0,
+   "dex": 10,
+   "int": 4,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 12,
+   "passive": 1,
+   "remains": 0,
+   "swims": 1,
+   "flier": 0,
+   "speed": 3,
+   "run": 4,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 3,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 18,
+   "defence": 25,
+   "attacks": [
+    {
+     "chance": 12,
+     "damage": 20,
+     "prob": 25
+    },
+    {
+     "chance": 15,
+     "damage": 15,
+     "prob": 35
+    },
+    {
+     "chance": 17,
+     "damage": 10,
+     "prob": 40
+    }
+   ],
+   "range": 6,
+   "nerve": 9,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 7,
+   "sight": 6,
+   "lazy": 7,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 540,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "02ffffff50000a04080c41030400000a0312190c14190f0f23110a286986678700000000000000001c02000000000049"
+  },
+  {
+   "index": 53,
+   "item_id": 117,
+   "name": "Shadow Beast",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 80,
+   "str": 0,
+   "dex": 22,
+   "int": 10,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 21,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 8,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 20,
+   "defence": 25,
+   "attacks": [
+    {
+     "chance": 10,
+     "damage": 11,
+     "prob": 40
+    },
+    {
+     "chance": 10,
+     "damage": 11,
+     "prob": 30
+    },
+    {
+     "chance": 10,
+     "damage": 11,
+     "prob": 30
+    }
+   ],
+   "range": 8,
+   "nerve": 9,
+   "noise": 2,
+   "visibility": 8,
+   "hearing": 11,
+   "sight": 9,
+   "lazy": 9,
+   "alert": 9,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 567,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "040404045000160a00150104080000000014190a0b280a0b1e0a0b1e89829b9900000000000000003702000000000149"
+  },
+  {
+   "index": 54,
+   "item_id": 118,
+   "name": "Reaper",
+   "armour": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "avghit": 100,
+   "str": 0,
+   "dex": 12,
+   "int": 18,
+   "death": 0,
+   "blood": 0,
+   "corpse": 3,
+   "race": 22,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 1,
+   "run": 1,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 5,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 25,
+   "defence": 25,
+   "attacks": [
+    {
+     "chance": 20,
+     "damage": 18,
+     "prob": 50
+    },
+    {
+     "chance": 22,
+     "damage": 16,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 2,
+   "nerve": 8,
+   "noise": 8,
+   "visibility": 8,
+   "hearing": 7,
+   "sight": 3,
+   "lazy": 1,
+   "alert": 3,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 585,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "0404040464000c126016000101000000051919141232161032000000288837310000ca0cda0c65004902000000000049"
+  },
+  {
+   "index": 55,
+   "item_id": 119,
+   "name": "Stone Golem",
+   "armour": [
+    5,
+    5,
+    5,
+    4
+   ],
+   "avghit": 125,
+   "str": 0,
+   "dex": 6,
+   "int": 14,
+   "death": 0,
+   "blood": 0,
+   "corpse": 2,
+   "race": 20,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 4,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 25,
+   "defence": 27,
+   "attacks": [
+    {
+     "chance": 18,
+     "damage": 20,
+     "prob": 70
+    },
+    {
+     "chance": 15,
+     "damage": 18,
+     "prob": 30
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 4,
+   "nerve": 15,
+   "noise": 11,
+   "visibility": 8,
+   "hearing": 5,
+   "sight": 6,
+   "lazy": 2,
+   "alert": 4,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    5,
+    5,
+    5,
+    4
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 612,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "050505047d00060e401400030400000051191b1214460f121e0000004f8b654200005915671500006402000000000149"
+  },
+  {
+   "index": 56,
+   "item_id": 120,
+   "name": "Fire Elemental",
+   "armour": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "avghit": 80,
+   "str": 0,
+   "dex": 20,
+   "int": 12,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 23,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 5,
+   "run": 10,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 5,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 16,
+   "defence": 35,
+   "attacks": [
+    {
+     "chance": 20,
+     "damage": 18,
+     "prob": 60
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 15,
+     "damage": 22,
+     "prob": 40
+    }
+   ],
+   "range": 3,
+   "nerve": 8,
+   "noise": 12,
+   "visibility": 8,
+   "hearing": 4,
+   "sight": 8,
+   "lazy": 11,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 630,
+   "spells": [
+    24,
+    24,
+    255
+   ],
+   "caster": 5,
+   "locks": 0,
+   "raw_hex": "030303035000140c001700050a00000005102314123c0000000f1628388c848b000000000000000076021818ff0b0049"
+  },
+  {
+   "index": 57,
+   "item_id": 121,
+   "name": "Metal Golem",
+   "armour": [
+    7,
+    7,
+    7,
+    7
+   ],
+   "avghit": 200,
+   "str": 0,
+   "dex": 5,
+   "int": 18,
+   "death": 0,
+   "blood": 0,
+   "corpse": 2,
+   "race": 20,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 3,
+   "run": 4,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 30,
+   "defence": 32,
+   "attacks": [
+    {
+     "chance": 25,
+     "damage": 25,
+     "prob": 50
+    },
+    {
+     "chance": 22,
+     "damage": 25,
+     "prob": 50
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 4,
+   "nerve": 15,
+   "noise": 12,
+   "visibility": 8,
+   "hearing": 5,
+   "sight": 6,
+   "lazy": 2,
+   "alert": 4,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    7,
+    7,
+    7,
+    7
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 685,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 1,
+   "raw_hex": "07070707c80005124014000304000000511e201919321619320000004f8c65420000791276120000ad02000000000149"
+  },
+  {
+   "index": 58,
+   "item_id": 122,
+   "name": "Wisp",
+   "armour": [
+    15,
+    255,
+    255,
+    255
+   ],
+   "avghit": 200,
+   "str": 0,
+   "dex": 19,
+   "int": 30,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 24,
+   "passive": 1,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 4,
+   "run": 10,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 30,
+   "defence": 50,
+   "attacks": [
+    {
+     "chance": 20,
+     "damage": 15,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 8,
+   "nerve": 1,
+   "noise": 1,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 8,
+   "lazy": 9,
+   "alert": 8,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    15,
+    15,
+    15,
+    15
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 720,
+   "spells": [
+    255,
+    255,
+    50
+   ],
+   "caster": 2,
+   "locks": 30,
+   "raw_hex": "0fffffffc800131e001883040a000000001e32140f64000000000000818188890000000000000000d002ffff32041e49"
+  },
+  {
+   "index": 59,
+   "item_id": 123,
+   "name": "item 0x7B",
+   "armour": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "avghit": 120,
+   "str": 0,
+   "dex": 17,
+   "int": 30,
+   "death": 0,
+   "blood": 1,
+   "corpse": 0,
+   "race": 25,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 1,
+   "speed": 4,
+   "run": 8,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 30,
+   "defence": 32,
+   "attacks": [
+    {
+     "chance": 23,
+     "damage": 20,
+     "prob": 40
+    },
+    {
+     "chance": 20,
+     "damage": 35,
+     "prob": 30
+    },
+    {
+     "chance": 20,
+     "damage": 17,
+     "prob": 30
+    }
+   ],
+   "range": 8,
+   "nerve": 12,
+   "noise": 6,
+   "visibility": 8,
+   "hearing": 8,
+   "sight": 7,
+   "lazy": 5,
+   "alert": 12,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "offensive_spells_flag": 1,
+   "exp": 1350,
+   "spells": [
+    24,
+    31,
+    19
+   ],
+   "caster": 16,
+   "locks": 20,
+   "raw_hex": "060606067800111e0819a00408000000011e2017142814231e14111e8c8678c5000000000000ff004605181f13211449"
+  },
+  {
+   "index": 60,
+   "item_id": 124,
+   "name": "item 0x7C",
+   "armour": [
+    20,
+    20,
+    20,
+    20
+   ],
+   "avghit": 250,
+   "str": 0,
+   "dex": 21,
+   "int": 30,
+   "death": 0,
+   "blood": 1,
+   "corpse": 5,
+   "race": 26,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 4,
+   "run": 12,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 1,
+   "armour_kind": 1,
+   "weapon_kind": 1,
+   "equip": 40,
+   "defence": 50,
+   "attacks": [
+    {
+     "chance": 50,
+     "damage": 80,
+     "prob": 100
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 8,
+   "nerve": 15,
+   "noise": 12,
+   "visibility": 8,
+   "hearing": 12,
+   "sight": 12,
+   "lazy": 8,
+   "alert": 12,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    20,
+    20,
+    20,
+    20
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 0,
+   "spells": [
+    255,
+    255,
+    43
+   ],
+   "caster": 8,
+   "locks": 0,
+   "raw_hex": "14141414fa00151ea81a20040c0000005128323250640000000000008f8cccc800000000000000000000ffff2b100049"
+  },
+  {
+   "index": 61,
+   "item_id": 125,
+   "name": "item 0x7D",
+   "armour": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "avghit": 0,
+   "str": 0,
+   "dex": 0,
+   "int": 0,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 0,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 0,
+   "run": 0,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 0,
+   "defence": 0,
+   "attacks": [
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 0,
+   "nerve": 0,
+   "noise": 0,
+   "visibility": 8,
+   "hearing": 0,
+   "sight": 0,
+   "lazy": 0,
+   "alert": 0,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 0,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "000000000000000000000200000000000000000000000000000000000080000000000000000000000000000000000049"
+  },
+  {
+   "index": 62,
+   "item_id": 126,
+   "name": "item 0x7E",
+   "armour": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "avghit": 0,
+   "str": 0,
+   "dex": 0,
+   "int": 0,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 0,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 0,
+   "run": 0,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 0,
+   "defence": 0,
+   "attacks": [
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 0,
+   "nerve": 0,
+   "noise": 0,
+   "visibility": 8,
+   "hearing": 0,
+   "sight": 0,
+   "lazy": 0,
+   "alert": 0,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 0,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "000000000000000000000200000000000000000000000000000000000080000000000000000000000000000000000049"
+  },
+  {
+   "index": 63,
+   "item_id": 127,
+   "name": "Adventurer",
+   "armour": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "avghit": 0,
+   "str": 0,
+   "dex": 0,
+   "int": 0,
+   "death": 0,
+   "blood": 0,
+   "corpse": 0,
+   "race": 0,
+   "passive": 0,
+   "remains": 0,
+   "swims": 0,
+   "flier": 0,
+   "speed": 0,
+   "run": 0,
+   "level": 0,
+   "shrewd": 0,
+   "haggle": 0,
+   "patience": 0,
+   "sound": 0,
+   "armour_kind": 0,
+   "weapon_kind": 0,
+   "equip": 0,
+   "defence": 0,
+   "attacks": [
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    },
+    {
+     "chance": 0,
+     "damage": 0,
+     "prob": 0
+    }
+   ],
+   "range": 0,
+   "nerve": 0,
+   "noise": 0,
+   "visibility": 8,
+   "hearing": 0,
+   "sight": 0,
+   "lazy": 0,
+   "alert": 0,
+   "arms": [
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    },
+    {
+     "present": 0,
+     "item": 0,
+     "name": null,
+     "fires_missile": false
+    }
+   ],
+   "fires_missile_index": null,
+   "armour_by_zone": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "offensive_spells_flag": 0,
+   "exp": 0,
+   "spells": [
+    0,
+    0,
+    0
+   ],
+   "caster": 0,
+   "locks": 0,
+   "raw_hex": "000000000000000000000200000000000000000000000000000000000080000000000000000000000000000000000049"
+  }
+ ],
+ "containers": [
+  {
+   "index": 0,
+   "capacity": 125,
+   "mask": -1
+  },
+  {
+   "index": 1,
+   "capacity": 125,
+   "mask": -1
+  },
+  {
+   "index": 2,
+   "capacity": 250,
+   "mask": -1
+  },
+  {
+   "index": 3,
+   "capacity": 250,
+   "mask": -1
+  },
+  {
+   "index": 4,
+   "capacity": 125,
+   "mask": -1
+  },
+  {
+   "index": 5,
+   "capacity": 125,
+   "mask": -1
+  },
+  {
+   "index": 6,
+   "capacity": 20,
+   "mask": -1
+  },
+  {
+   "index": 7,
+   "capacity": 20,
+   "mask": -1
+  },
+  {
+   "index": 8,
+   "capacity": 30,
+   "mask": 514
+  },
+  {
+   "index": 9,
+   "capacity": 30,
+   "mask": 514
+  },
+  {
+   "index": 10,
+   "capacity": 125,
+   "mask": -1
+  },
+  {
+   "index": 11,
+   "capacity": 125,
+   "mask": -1
+  },
+  {
+   "index": 12,
+   "capacity": 200,
+   "mask": -1
+  },
+  {
+   "index": 13,
+   "capacity": 0,
+   "mask": 513
+  },
+  {
+   "index": 14,
+   "capacity": 50,
+   "mask": 515
+  },
+  {
+   "index": 15,
+   "capacity": 0,
+   "mask": 512
+  }
+ ],
+ "lights": [
+  {
+   "index": 0,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 1,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 2,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 3,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 4,
+   "burn_rate": 10,
+   "brightness": 4
+  },
+  {
+   "index": 5,
+   "burn_rate": 3,
+   "brightness": 2
+  },
+  {
+   "index": 6,
+   "burn_rate": 12,
+   "brightness": 1
+  },
+  {
+   "index": 7,
+   "burn_rate": 0,
+   "brightness": 3
+  },
+  {
+   "index": 8,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 9,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 10,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 11,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 12,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 13,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 14,
+   "burn_rate": 0,
+   "brightness": 0
+  },
+  {
+   "index": 15,
+   "burn_rate": 0,
+   "brightness": 0
+  }
+ ],
+ "food": [
+  {
+   "index": 0,
+   "nutrition": 64
+  },
+  {
+   "index": 1,
+   "nutrition": 16
+  },
+  {
+   "index": 2,
+   "nutrition": 12
+  },
+  {
+   "index": 3,
+   "nutrition": 6
+  },
+  {
+   "index": 4,
+   "nutrition": 25
+  },
+  {
+   "index": 5,
+   "nutrition": 12
+  },
+  {
+   "index": 6,
+   "nutrition": 48
+  },
+  {
+   "index": 7,
+   "nutrition": 2
+  },
+  {
+   "index": 8,
+   "nutrition": 0
+  },
+  {
+   "index": 9,
+   "nutrition": 6
+  },
+  {
+   "index": 10,
+   "nutrition": -3
+  },
+  {
+   "index": 11,
+   "nutrition": -127
+  },
+  {
+   "index": 12,
+   "nutrition": -127
+  },
+  {
+   "index": 13,
+   "nutrition": -1
+  },
+  {
+   "index": 14,
+   "nutrition": -8
+  },
+  {
+   "index": 15,
+   "nutrition": 0
+  }
+ ],
+ "trigger_modes": [
+  0,
+  2,
+  4,
+  5,
+  1,
+  7,
+  6,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "animation_classes": [
+  {
+   "index": 0,
+   "flags": 33,
+   "start_frame": 0,
+   "frames": 5
+  },
+  {
+   "index": 1,
+   "flags": 33,
+   "start_frame": 17,
+   "frames": 4
+  },
+  {
+   "index": 2,
+   "flags": 33,
+   "start_frame": 21,
+   "frames": 5
+  },
+  {
+   "index": 3,
+   "flags": 33,
+   "start_frame": 26,
+   "frames": 5
+  },
+  {
+   "index": 4,
+   "flags": 33,
+   "start_frame": 31,
+   "frames": 5
+  },
+  {
+   "index": 5,
+   "flags": 33,
+   "start_frame": 50,
+   "frames": 3
+  },
+  {
+   "index": 6,
+   "flags": 33,
+   "start_frame": 36,
+   "frames": 4
+  },
+  {
+   "index": 7,
+   "flags": 33,
+   "start_frame": 40,
+   "frames": 5
+  },
+  {
+   "index": 8,
+   "flags": 33,
+   "start_frame": 9,
+   "frames": 4
+  },
+  {
+   "index": 9,
+   "flags": 33,
+   "start_frame": 5,
+   "frames": 4
+  },
+  {
+   "index": 10,
+   "flags": 33,
+   "start_frame": 13,
+   "frames": 4
+  },
+  {
+   "index": 11,
+   "flags": 33,
+   "start_frame": 45,
+   "frames": 5
+  },
+  {
+   "index": 12,
+   "flags": 33,
+   "start_frame": 50,
+   "frames": 4
+  },
+  {
+   "index": 13,
+   "flags": 0,
+   "start_frame": 0,
+   "frames": 0
+  },
+  {
+   "index": 14,
+   "flags": 0,
+   "start_frame": 0,
+   "frames": 0
+  },
+  {
+   "index": 15,
+   "flags": 132,
+   "start_frame": 255,
+   "frames": 0
+  }
+ ]
+}

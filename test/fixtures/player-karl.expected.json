@@ -1,0 +1,128 @@
+{
+ "name": "Karl",
+ "str": 25,
+ "dex": 17,
+ "int": 18,
+ "skills": {
+  "Attack": 12,
+  "Defense": 6,
+  "Barehand": 0,
+  "Sword": 9,
+  "Axe": 0,
+  "Mace": 0,
+  "Missile": 0,
+  "Mana": 0,
+  "Lore": 0,
+  "Casting": 0,
+  "Traps": 0,
+  "Search": 0,
+  "Track": 0,
+  "Stealth": 0,
+  "Repair": 0,
+  "Charisma": 0,
+  "Pick Lock": 0,
+  "Acrobat": 5,
+  "Appraise": 0,
+  "Swimming": 0
+ },
+ "health": 35,
+ "max_health": 35,
+ "mana": 2,
+ "max_mana": 2,
+ "level": 1,
+ "exp_raw": 69,
+ "weight": 85,
+ "max_weight": 500,
+ "easy": 0,
+ "lefty": 1,
+ "pclass": 0,
+ "dungeon_level": 1,
+ "active_spell_count": 0,
+ "active_spells": [
+  0,
+  0,
+  0
+ ],
+ "problems": [],
+ "runes": [
+  "Bet",
+  "In",
+  "Jux",
+  "Lor",
+  "Ort",
+  "Sanct"
+ ],
+ "shelf": [
+  null,
+  null,
+  null
+ ],
+ "equipment": {
+  "legs": {
+   "saved_index": 8,
+   "file_offset": 368,
+   "item_id": 35,
+   "is_quant": 0,
+   "enchanted": 0,
+   "flag11": 0,
+   "quality": 7,
+   "next": 9,
+   "owner": 0,
+   "link": 0,
+   "enchantment": null
+  },
+  "shoulder 5": {
+   "saved_index": 7,
+   "file_offset": 360,
+   "item_id": 149,
+   "is_quant": 1,
+   "enchanted": 0,
+   "flag11": 0,
+   "quality": 39,
+   "next": 8,
+   "owner": 0,
+   "link": 1,
+   "enchantment": null
+  },
+  "hand 7 (weapon hand)": {
+   "saved_index": 6,
+   "file_offset": 352,
+   "item_id": 3,
+   "is_quant": 0,
+   "enchanted": 0,
+   "flag11": 0,
+   "quality": 15,
+   "next": 7,
+   "owner": 0,
+   "link": 0,
+   "enchantment": null
+  },
+  "hand 8 (shield hand)": {
+   "saved_index": 13,
+   "file_offset": 408,
+   "item_id": 60,
+   "is_quant": 0,
+   "enchanted": 0,
+   "flag11": 0,
+   "quality": 27,
+   "next": 0,
+   "owner": 0,
+   "link": 0,
+   "enchantment": null
+  }
+ },
+ "pack_slots_ignored": 3,
+ "derived": {
+  "max_weight": 500,
+  "max_hp": 35,
+  "max_mana": 2,
+  "armour_by_zone": {
+   "torso": 1,
+   "gloves": 1,
+   "legs_boots": 1,
+   "head": 0
+  },
+  "defence": 10,
+  "defence_weapon_skill": "Sword"
+ }
+}
