@@ -2,7 +2,7 @@
 
 The `uw2` branch of the Underworld combat simulator: the same static, client-side site for **Ultima Underworld II: Labyrinth of Worlds**, in a darker blue theme. (The `main` branch is the UW1 version, *Stygian Abyss Odds*.) Two tabs:
 
-- **Skills**: the exact odds (n/31) of every `skill_check` outside combat — casting by circle (with the Britannia cap), lore, traps (whose targets grow with the world), locks (with the pick-breaking fumble), repair, swimming, falling, thin ice, skill traps, regeneration, the mushroom quirk, character creation — with grade bars, the 31 scores, a P(success)-vs-value curve, a value × target heatmap and pinned scenarios to compare.
+- **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle (with the Britannia cap), lore, traps (whose targets grow with the world), locks (with the pick-breaking fumble), repair, swimming, falling, thin ice, skill traps, regeneration, the mushroom quirk, character creation — with grade bars, the 31 scores, a P(success)-vs-value curve, a value × target heatmap and pinned scenarios to compare.
 - **Combat**: pick any of the 746 monsters in the 42 levels of LEV.ARK, by world, fight it N times in melee or at range, and see outcomes with 95% Wilson intervals, fight length, HP left, damage dealt by source, damage received per body part with armour absorption, the monster's attacks by source, wear, casting and special-weapon statistics, experience, and the exact one-blow damage distribution. **All enemies** runs every combat-capable monster and plots how many the character can beat.
 
 A shared character panel holds attributes, skills, the dungeon level (its world sets the casting and XP rules), equipment slots 0–10 (item, quality, enchantment — including UW2's special weapons), runes, buffs (Luck, Resist Blows, Valor, Speed, Poison Weapon, Flameproof, Thick Skin, Missile Protection, Freeze Time, Iron Flesh) and easy mode, and loads a save's `PLAYER.DAT` in the browser (nothing is uploaded).
@@ -24,7 +24,7 @@ npm test           # Vitest: C cross-check, PLAYER.DAT reader, simulator vs exac
 npm run build && npm run smoke   # Playwright smoke test (screenshots in test/screenshots)
 ```
 
-The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the damage dice of `do_damage`, UW2's `check_res`, the arithmetic of `player_get_exp` and `player_killed_a`, the Poison Weapon term of `frp_check`, `should_i_flee` and `rollem` verbatim from the game source, replaces `rand()` with enumerated values, and requires the TypeScript ports to agree exactly (it needs `cc`, `gcc` or `clang`; skipped otherwise).
+The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the damage dice of `do_damage`, UW2's `check_res`, the arithmetic of `player_get_exp` and `player_killed_a`, the Poison Weapon term of `frp_check`, `should_i_flee` and `rollem` verbatim from the game source, replaces `rand()` with enumerated values, and requires the TypeScript ports to agree exactly; `test/rng-vectors.test.ts` replays vectors measured on UW2.EXE (same generator state in, same result and state out) (it needs `cc`, `gcc` or `clang`; skipped otherwise).
 
 ## Rebuild the data
 

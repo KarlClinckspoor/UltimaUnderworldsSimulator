@@ -57,7 +57,7 @@ Skills tab: no Monte Carlo, no worker; every number is an exact count. Combat ta
 
 Check: d = 0 gives 2, 13, 13, 3, as the source comment states. This is the only place the rule lives; the test in section 6 verifies it against the real C.
 
-**Roll model.** Ideal uniform: r is one of 31 equally likely values, every probability is n/31. The real `rand() % 31` on a 15-bit `rand()` is off by at most 1/32768 per outcome (residue 0 has 1058 of 32768, the others 1057); this is deliberately ignored. Counts stay integers; display as fraction and percent.
+**Roll model** (superseded: see "Random numbers" above; the ideal model remains an option). Ideal uniform: r is one of 31 equally likely values, every probability is n/31. The real `rand() % 31` on a 15-bit `rand()` is off by at most 1/32768 per outcome (residue 0 has 1058 of 32768, the others 1057); this is deliberately ignored. Counts stay integers; display as fraction and percent.
 
 **Compound outcomes** are exact too, by integer convolution (BigInt, denominators 31^k): sums of independent checks (character creation), per-tick drowning, repair outcomes with their extra random draws, and the random bonuses listed below.
 
