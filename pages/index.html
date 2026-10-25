@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ultima Underworld Simulators</title>
+    <meta name="description" content="Skill check odds and combat simulators for Ultima Underworld and Ultima Underworld II, with the rules ported from the games' reconstructed source." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root { --bg: #0d0f14; --text: #e6e4dc; --muted: #9a9ca6; --border: #262a35; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(900px 400px at 50% -10%, #1b1f2b, transparent 70%), var(--bg);
+        color: var(--text); font: 15px/1.5 'IBM Plex Sans', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 48px 16px; }
+      h1 { font: 600 34px 'Cormorant SC', Georgia, serif; margin: 0 0 6px; text-align: center; }
+      .lede { color: var(--muted); max-width: 640px; text-align: center; margin: 0 0 32px; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; width: 100%; max-width: 820px; }
+      a.card { display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: 12px; padding: 22px 22px 20px;
+        transition: transform .12s, border-color .12s; }
+      a.card:hover { transform: translateY(-2px); }
+      .uw1 { background: linear-gradient(160deg, #1d1a12, #121317); }
+      .uw1:hover { border-color: #d9a441; }
+      .uw2 { background: linear-gradient(160deg, #0d1a33, #070b14); }
+      .uw2:hover { border-color: #6db5ff; }
+      .card .glyph { font-size: 28px; }
+      .uw1 .glyph, .uw1 h2 { color: #d9a441; }
+      .uw2 .glyph, .uw2 h2 { color: #6db5ff; }
+      .card h2 { font: 600 24px 'Cormorant SC', Georgia, serif; margin: 6px 0 2px; }
+      .card .game { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+      .card p { margin: 0; font-size: 14px; }
+      footer { margin-top: 40px; color: var(--muted); font-size: 12.5px; text-align: center; max-width: 640px; }
+      footer a { color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <h1>Ultima Underworld Simulators</h1>
+    <p class="lede">Exact skill check odds and Monte Carlo combat for both games, with the rules ported from the reconstructed source and the game's own random number generator. Everything runs in your browser; a save's PLAYER.DAT can be loaded and never leaves it.</p>
+    <div class="cards">
+      <a class="card uw1" href="./uw1/">
+        <div class="glyph" aria-hidden="true">☥</div>
+        <h2>Stygian Abyss Odds</h2>
+        <p class="game">Ultima Underworld: The Stygian Abyss</p>
+        <p>Nine levels, 657 monsters, UW1's casting, experience and enchantment rules.</p>
+      </a>
+      <a class="card uw2" href="./uw2/">
+        <div class="glyph" aria-hidden="true">◈</div>
+        <h2>Labyrinth of Worlds Odds</h2>
+        <p class="game">Ultima Underworld II: Labyrinth of Worlds</p>
+        <p>Eight worlds, 746 monsters, UW2's casting, experience, special weapons and timing.</p>
+      </a>
+    </div>
+    <footer>
+      Rules from <a href="https://github.com/abedegno/underworld-exhumed">abedegno/underworld-exhumed</a> ·
+      source at <a href="https://github.com/KarlClinckspoor/UltimaUnderworldsSimulator">KarlClinckspoor/UltimaUnderworldsSimulator</a>.
+      A fan project, not affiliated with Electronic Arts, Origin Systems or Looking Glass Technologies.
+    </footer>
+  </body>
+</html>

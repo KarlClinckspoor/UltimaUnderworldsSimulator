@@ -1,5 +1,7 @@
 # Stygian Abyss Odds — UW1 skill check and combat simulator
 
+**Live:** https://karlclinckspoor.github.io/UltimaUnderworldsSimulator/uw1/ (UW1) · https://karlclinckspoor.github.io/UltimaUnderworldsSimulator/uw2/ (UW2, branch `uw2`)
+
 A static, client-side website for Ultima Underworld 1 with two tabs:
 
 - **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle, lore, traps, locks, repair, swimming, falling, regeneration, the mushroom quirk, character creation — with grade bars, the 31 scores, a P(success)-vs-value curve, a value × target heatmap and pinned scenarios to compare.
@@ -16,6 +18,10 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # static site in dist/ (open with any static server, e.g. npm run preview)
 ```
+
+## Publishing
+
+`.github/workflows/pages.yml` builds this branch into `/uw1/` and the `uw2` branch into `/uw2/` of one GitHub Pages site, with `pages/index.html` as the landing page; a push to either branch runs the tests and redeploys both.
 
 ## Test it
 
