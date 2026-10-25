@@ -15,10 +15,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
   # a push to uw2: rebuild the site from main (workflow_dispatch is allowed to start a run with GITHUB_TOKEN)
   from-uw2:
@@ -64,6 +60,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # one deployment at a time; a newer run waits instead of cancelling (so a uw2-triggered rebuild is never lost)
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       contents: read
       pages: write
