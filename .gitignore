@@ -3,3 +3,4 @@ dist/
 test/c/build/
 test/screenshots/
 __pycache__/
+site/

@@ -1,0 +1,91 @@
+# Builds both simulators into one GitHub Pages site:
+#   /        a landing page (pages/index.html)
+#   /uw1/    Ultima Underworld (branch main)
+#   /uw2/    Ultima Underworld II (branch uw2)
+# The same file is on both branches, so a push to either rebuilds the whole site. Deploys always run
+# from main (the github-pages environment only accepts the default branch): a push to uw2 just starts
+# this workflow on main, which then builds both branches.
+name: Pages
+
+on:
+  push:
+    branches: [main, uw2]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # a push to uw2: rebuild the site from main (workflow_dispatch is allowed to start a run with GITHUB_TOKEN)
+  from-uw2:
+    if: github.ref_name != 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - run: gh workflow run pages.yml --repo "${{ github.repository }}" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  build:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - game: uw1
+            ref: main
+          - game: uw2
+            ref: uw2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test (Vitest, with the C cross-check)
+        run: npm test
+      - name: Build
+        run: |
+          npx tsc --noEmit
+          npx vite build --base "/${{ github.event.repository.name }}/${{ matrix.game }}/" --outDir "site/${{ matrix.game }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ matrix.game }}
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: pages
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: site-*
+          merge-multiple: true
+          path: site
+      - name: Landing page
+        run: cp pages/index.html site/index.html && touch site/.nojekyll && ls -R site | head -20
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,5 +1,7 @@
 # Labyrinth of Worlds Odds — UW2 skill check and combat simulator
 
+**Live:** https://karlclinckspoor.github.io/UltimaUnderworldsSimulator/uw2/ (UW2) · https://karlclinckspoor.github.io/UltimaUnderworldsSimulator/uw1/ (UW1, branch `main`)
+
 The `uw2` branch of the Underworld combat simulator: the same static, client-side site for **Ultima Underworld II: Labyrinth of Worlds**, in a darker blue theme. (The `main` branch is the UW1 version, *Stygian Abyss Odds*.) Two tabs:
 
 - **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle (with the Britannia cap), lore, traps (whose targets grow with the world), locks (with the pick-breaking fumble), repair, swimming, falling, thin ice, skill traps, regeneration, the mushroom quirk, character creation — with grade bars, the 31 scores, a P(success)-vs-value curve, a value × target heatmap and pinned scenarios to compare.
@@ -16,6 +18,10 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # static site in dist/ (open with any static server, e.g. npm run preview)
 ```
+
+## Publishing
+
+`.github/workflows/pages.yml` builds this branch into `/uw2/` and the `main` branch into `/uw1/` of one GitHub Pages site, with `pages/index.html` as the landing page; a push to either branch runs the tests and redeploys both.
 
 ## Test it
 
