@@ -84,7 +84,6 @@ export function renderCombat(root: HTMLElement) {
     lab('Fights (N)', numInput(u.n, 10, 1_000_000, (v) => set(() => (u.n = v)))),
     lab('Time limit (s)', numInput(u.timeLimit, 5, 600, (v) => set(() => (u.timeLimit = v)))),
     lab('Seed', numInput(u.seed, 0, 2 ** 31 - 1, (v) => set(() => (u.seed = v)))),
-    lab('Random numbers', select(u.rand, [['game', "the game's Borland rand()"], ['ideal', 'ideal uniform (comparison)']], (v) => set(() => (u.rand = v)))),
   );
   const progress = h('div', { class: 'progress' }, h('i'));
   const progText = h('span', { class: 'prog-text' });
@@ -312,13 +311,11 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
 }
 
 /** How many of the game's random draws the run used, against the generator's period. */
-function randCard(s: Stats, S: FightSettings) {
-  const el = card('Random numbers', S.rand === 'game'
-    ? "Borland rand() as the game has it: seed × 0x015A4E35 + 1, bits 16-30; every call site uses the draw the game's way"
-    : 'ideal uniform draws (a comparison; the game is not like this)');
+function randCard(s: Stats, _S: FightSettings) {
+  const el = card('Random numbers', "Borland rand() as the game has it: seed × 0x015A4E35 + 1, bits 16-30; every call site uses the draw the game's way");
   const per = s.draws / Math.max(1, s.n);
-  el.append(h('p', {}, `${s.draws.toLocaleString()} draws, ${fmt(per, 0)} per fight${S.rand === 'game' ? ` · ${pct(s.draws / LCG_PERIOD, 3)} of the generator's period of 2^32` : ''}.`));
-  if (S.rand === 'game') el.append(h('p', { class: 'hint' }, 'The run is split into equal blocks of the one 2^32-long sequence, one per worker, so no draw is used twice. The bias of the game\'s draws is per draw and does not grow with N; a larger N only makes it easier to see (rand() % 31 gives residue 0 one draw in 1058/32768 instead of 1/31, +0.09%; rand() % 100, the attack slot, favours 0-67 by 0.3%).'));
+  el.append(h('p', {}, `${s.draws.toLocaleString()} draws, ${fmt(per, 0)} per fight · ${pct(s.draws / LCG_PERIOD, 3)} of the generator's period of 2^32.`));
+  el.append(h('p', { class: 'hint' }, 'The run is split into equal blocks of the one 2^32-long sequence, one per worker, so no draw is used twice. The bias of the game\'s draws is per draw and does not grow with N; a larger N only makes it easier to see (rand() % 31 gives residue 0 one draw in 1058/32768 instead of 1/31, +0.09%; rand() % 100, the attack slot, favours 0-67 by 0.3%).'));
   if (s.blockOverruns) el.append(h('p', { class: 'warn' }, `${s.blockOverruns} job(s) used more draws than their block of the cycle, so parts of the sequence were read twice. Lower N or the number of enemies.`));
   return el;
 }
