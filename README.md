@@ -4,7 +4,7 @@
 
 A static, client-side website for Ultima Underworld 1 with two tabs:
 
-- **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle, lore, traps, locks, repair, swimming, falling, regeneration, the mushroom quirk, character creation — with grade bars, the 31 scores, a P(success)-vs-value curve, a value × target heatmap and pinned scenarios to compare.
+- **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle, lore, traps, locks, repair, swimming, falling, regeneration, the mushroom quirk, character creation — with a Details card per check (what it does, the rule as LaTeX and Python, how often timed checks run), grade bars, P(grade)-vs-value curves, threshold values per goal, a value × target heatmap, pinned scenarios, and for the timed checks (HP and mana regeneration, drowning) the exact distribution of the time to full / to 0 HP with 50 / 65 / 95% ranges over time. Value is shown in blue and target in red throughout.
 - **Combat**: pick any of the 657 monsters in LEV.ARK (levels 1–9), fight it N times in melee or at range, and see outcomes with 95% Wilson intervals, fight length, HP left, damage dealt by source, damage received per body part with armour absorption, the monster's attacks by source, wear, casting statistics, and the exact one-blow damage distribution. **All enemies** runs every combat-capable monster and plots how many the character can beat.
 
 A shared character panel holds attributes, skills, equipment slots 0–10 (item, quality, enchantment), runes, buffs and easy mode, and loads a save's `PLAYER.DAT` in the browser (nothing is uploaded).
@@ -46,7 +46,7 @@ The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the dama
 ## Model in brief (see PLAN.md Part B)
 
 - Nobody moves. Melee: face to face (optional hit angle for your blows). Ranged: the monster is held at a distance (default 3 tiles; slingers only fire under 4 tiles, `tdistsqr < 0x10`).
-- Random numbers come from the game's own generator, Borland `rand()` (`seed × 0x015A4E35 + 1`, bits 16–30), used the way each call site uses it, so `rand() % 31`'s 1058-vs-1057 imbalance and its kin are in the simulation and in the exact odds (n/32768). It is checked call for call against vectors measured on UW.EXE (`test/vectors`). An ideal-uniform model is kept as an option for comparison.
+- Random numbers come from the game's own generator, Borland `rand()` (`seed × 0x015A4E35 + 1`, bits 16–30), used the way each call site uses it, so `rand() % 31`'s 1058-vs-1057 imbalance and its kin are in the simulation and in the exact odds (n/32768). It is checked call for call against vectors measured on UW.EXE (`test/vectors`). An ideal-uniform model survives only in the core, as a reference for the tests.
 - Time runs in 1/16 s ticks. A monster acts every 4 ticks (8 under Speed, never under Freeze Time): one time in four it starts an attack that lands 5 steps later with a charge from `atk_charge` by its wind-up; casters and slingers roll their ranged chances.
 - Your swing follows the weapon animation (`adjust_weapon`, one frame per 32 clock units) and charges to full before release (`player_attack`), so a dagger swing takes about 1.5 s. Launcher shots and spells add 1 s of aiming.
 - Each blow: hit location (`pickloc`), to-hit `skill_check`, critical ×1 or ×2, dice `(d/6)d6 + 1d(d%6)`, × charge/128, + hit angle, − armour (×5/3 for a powerful monster), easy mode halves damage to you, then `check_res`.

@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 export const C = {
   win: '#2a9d78', death: '#d1603d', flee: '#e0a030', timeout: '#8a8f98',
   accent: '#d9a441', blue: '#4f8fd0', purple: '#a275c9', teal: '#3fb3b0', pink: '#d27aa8',
+  val: '#4fa3ff', tgt: '#ff5d5d',
   series: ['#4f8fd0', '#e0a030', '#2a9d78', '#d1603d', '#a275c9', '#3fb3b0', '#d27aa8', '#8a8f98'],
 };
 export const OUTCOME_COLORS = [C.win, C.death, C.flee, C.timeout];
@@ -33,15 +34,16 @@ export function chart(el: HTMLElement, height: number, draw: (svg: Svg, w: numbe
 const M = { t: 12, r: 14, b: 36, l: 46 };
 
 function axes(svg: Svg, x: d3.AxisScale<any>, y: d3.AxisScale<any>, w: number, h: number, xl?: string, yl?: string,
-  yfmt?: (v: any) => string, xticks?: number) {
+  yfmt?: (v: any) => string, xticks?: number, xClass = '', yClass = '', xfmt?: (v: any) => string) {
   const ax = d3.axisBottom(x);
   if (xticks !== undefined) ax.ticks(xticks);
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - M.b})`).call(ax as any);
+  if (xfmt) ax.tickFormat(xfmt as any);
+  svg.append('g').attr('class', `axis ${xClass}`).attr('transform', `translate(0,${h - M.b})`).call(ax as any);
   const ay = d3.axisLeft(y).ticks(5);
   if (yfmt) ay.tickFormat(yfmt as any);
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(ay as any);
-  if (xl) svg.append('text').attr('class', 'axis-label').attr('x', (M.l + w - M.r) / 2).attr('y', h - 4).attr('text-anchor', 'middle').text(xl);
-  if (yl) svg.append('text').attr('class', 'axis-label').attr('transform', `translate(11,${(M.t + h - M.b) / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(yl);
+  svg.append('g').attr('class', `axis ${yClass}`).attr('transform', `translate(${M.l},0)`).call(ay as any);
+  if (xl) svg.append('text').attr('class', `axis-label ${xClass}`).attr('x', (M.l + w - M.r) / 2).attr('y', h - 4).attr('text-anchor', 'middle').text(xl);
+  if (yl) svg.append('text').attr('class', `axis-label ${yClass}`).attr('transform', `translate(11,${(M.t + h - M.b) / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(yl);
 }
 
 export interface Series { name: string; color: string; values: number[] }
@@ -93,8 +95,8 @@ export function groupedBars(el: HTMLElement, cats: string[], series: Series[], o
   });
 }
 
-export interface LineSeries { name: string; color: string; points: [number, number][]; dashed?: boolean }
-export function lineChart(el: HTMLElement, series: LineSeries[], o: { height?: number; xLabel?: string; yLabel?: string; yDomain?: [number, number]; xDomain?: [number, number]; marker?: number | null; yfmt?: (v: number) => string; step?: boolean; area?: boolean } = {}) {
+export interface LineSeries { name: string; color: string; points: [number, number][]; dashed?: boolean | string; width?: number }
+export function lineChart(el: HTMLElement, series: LineSeries[], o: { height?: number; xLabel?: string; yLabel?: string; yDomain?: [number, number]; xDomain?: [number, number]; marker?: number | null; yfmt?: (v: number) => string; step?: boolean; area?: boolean; xClass?: string; yClass?: string } = {}) {
   chart(el, o.height ?? 220, (svg, w, h) => {
     const all = series.flatMap((s) => s.points);
     const x = d3.scaleLinear().domain(o.xDomain ?? (d3.extent(all, (p) => p[0]) as [number, number])).range([M.l, w - M.r]);
@@ -108,13 +110,13 @@ export function lineChart(el: HTMLElement, series: LineSeries[], o: { height?: n
         if (o.step) area.curve(d3.curveStepAfter);
         svg.append('path').attr('d', area(s.points)).attr('fill', s.color).attr('opacity', 0.18);
       }
-      svg.append('path').attr('d', line(s.points)).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', 2)
-        .attr('stroke-dasharray', s.dashed ? '5 4' : null).append('title').text(s.name);
+      svg.append('path').attr('d', line(s.points)).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', s.width ?? 2)
+        .attr('stroke-dasharray', typeof s.dashed === 'string' ? s.dashed : s.dashed ? '6 4' : null).append('title').text(s.name);
     }
     if (o.marker !== undefined && o.marker !== null) {
-      svg.append('line').attr('class', 'marker').attr('x1', x(o.marker)).attr('x2', x(o.marker)).attr('y1', M.t).attr('y2', h - M.b);
+      svg.append('line').attr('class', `marker ${o.xClass ?? ''}`).attr('x1', x(o.marker)).attr('x2', x(o.marker)).attr('y1', M.t).attr('y2', h - M.b);
     }
-    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt);
+    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, undefined, o.xClass, o.yClass);
     // hover readout
     const tip = svg.append('text').attr('class', 'readout').attr('x', w - M.r).attr('y', M.t + 10).attr('text-anchor', 'end');
     svg.append('rect').attr('x', M.l).attr('y', M.t).attr('width', w - M.l - M.r).attr('height', h - M.t - M.b).attr('fill', 'transparent')
@@ -132,7 +134,7 @@ export function lineChart(el: HTMLElement, series: LineSeries[], o: { height?: n
 }
 
 /** Stacked histogram: bins are [x0, x1) of equal width. */
-export function histogram(el: HTMLElement, x0: number, width: number, series: Series[], o: { height?: number; xLabel?: string; yLabel?: string; yfmt?: (v: number) => string } = {}) {
+export function histogram(el: HTMLElement, x0: number, width: number, series: Series[], o: { height?: number; xLabel?: string; yLabel?: string; yfmt?: (v: number) => string; xfmt?: (v: number) => string; marks?: { x: number; label: string }[] } = {}) {
   chart(el, o.height ?? 200, (svg, w, h) => {
     const nb = Math.max(...series.map((s) => s.values.length), 1);
     const x = d3.scaleLinear().domain([x0, x0 + nb * width]).range([M.l, w - M.r]);
@@ -146,15 +148,19 @@ export function histogram(el: HTMLElement, x0: number, width: number, series: Se
         if (!v) continue;
         const bx = x(x0 + i * width), bw = Math.max(1, x(x0 + (i + 1) * width) - bx - (nb < 80 ? 1 : 0));
         svg.append('rect').attr('x', bx).attr('width', bw).attr('y', y(acc + v)).attr('height', y(acc) - y(acc + v)).attr('fill', s.color)
-          .append('title').text(`${s.name}, ${(x0 + i * width).toFixed(1)}–${(x0 + (i + 1) * width).toFixed(1)}: ${o.yfmt ? o.yfmt(v) : v}`);
+          .append('title').text(`${s.name}, ${o.xfmt ? o.xfmt(x0 + i * width) : (x0 + i * width).toFixed(1)}–${o.xfmt ? o.xfmt(x0 + (i + 1) * width) : (x0 + (i + 1) * width).toFixed(1)}: ${o.yfmt ? o.yfmt(v) : v}`);
         acc += v;
       }
     }
-    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt);
+    for (const m of o.marks ?? []) {
+      svg.append('line').attr('class', 'marker').attr('x1', x(m.x)).attr('x2', x(m.x)).attr('y1', M.t).attr('y2', h - M.b);
+      svg.append('text').attr('class', 'mark-label').attr('x', x(m.x) + 3).attr('y', M.t + 9).text(m.label);
+    }
+    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, undefined, '', '', o.xfmt);
   });
 }
 
-export function heatmap(el: HTMLElement, xs: number[], ys: number[], val: (x: number, y: number) => number, o: { height?: number; xLabel?: string; yLabel?: string; mark?: [number, number] | null; onClick?: (x: number, y: number) => void; fmt?: (v: number) => string } = {}) {
+export function heatmap(el: HTMLElement, xs: number[], ys: number[], val: (x: number, y: number) => number, o: { height?: number; xLabel?: string; yLabel?: string; mark?: [number, number] | null; onClick?: (x: number, y: number) => void; fmt?: (v: number) => string; xClass?: string; yClass?: string } = {}) {
   chart(el, o.height ?? 300, (svg, w, h) => {
     const x = d3.scaleBand<number>().domain(xs).range([M.l, w - M.r]);
     const y = d3.scaleBand<number>().domain(ys).range([h - M.b, M.t]);
@@ -169,10 +175,45 @@ export function heatmap(el: HTMLElement, xs: number[], ys: number[], val: (x: nu
       svg.append('rect').attr('class', 'heat-mark').attr('x', x(o.mark[0])!).attr('y', y(o.mark[1])!).attr('width', x.bandwidth()).attr('height', y.bandwidth());
     const ax = d3.axisBottom(x).tickValues(xs.filter((v) => v % 5 === 0));
     const ay = d3.axisLeft(y).tickValues(ys.filter((v) => v % 5 === 0));
-    svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - M.b})`).call(ax as any);
-    svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(ay as any);
-    if (o.xLabel) svg.append('text').attr('class', 'axis-label').attr('x', (M.l + w - M.r) / 2).attr('y', h - 4).attr('text-anchor', 'middle').text(o.xLabel);
-    if (o.yLabel) svg.append('text').attr('class', 'axis-label').attr('transform', `translate(11,${(M.t + h - M.b) / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(o.yLabel);
+    svg.append('g').attr('class', `axis ${o.xClass ?? ''}`).attr('transform', `translate(0,${h - M.b})`).call(ax as any);
+    svg.append('g').attr('class', `axis ${o.yClass ?? ''}`).attr('transform', `translate(${M.l},0)`).call(ay as any);
+    if (o.xLabel) svg.append('text').attr('class', `axis-label ${o.xClass ?? ''}`).attr('x', (M.l + w - M.r) / 2).attr('y', h - 4).attr('text-anchor', 'middle').text(o.xLabel);
+    if (o.yLabel) svg.append('text').attr('class', `axis-label ${o.yClass ?? ''}`).attr('transform', `translate(11,${(M.t + h - M.b) / 2}) rotate(-90)`).attr('text-anchor', 'middle').text(o.yLabel);
+  });
+}
+
+export interface FanBand { lo: number[]; hi: number[]; label: string; opacity: number }
+/** A fan chart: nested bands (widest first) around a median line, plus a mean line and an
+    optional reference line (e.g. the maximum). Steps: values hold until the next x. */
+export function fanChart(el: HTMLElement, xs: number[], bands: FanBand[], median: number[], mean: number[], o: { height?: number; xLabel?: string; yLabel?: string; color?: string; yMax?: number; ref?: { y: number; label: string }; xfmt?: (v: number) => string; tipFmt?: (v: number) => string; yfmt?: (v: number) => string } = {}) {
+  const color = o.color ?? C.accent;
+  chart(el, o.height ?? 240, (svg, w, h) => {
+    const x = d3.scaleLinear().domain([xs[0], xs[xs.length - 1] || 1]).range([M.l, w - M.r]);
+    const top = Math.max(o.yMax ?? 0, d3.max(bands.flatMap((b) => b.hi)) ?? 1, 1);
+    const y = d3.scaleLinear().domain([0, top]).nice().range([h - M.b, M.t]);
+    svg.append('g').attr('class', 'grid').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(w - M.l - M.r)).tickFormat(() => '') as any);
+    const idx = xs.map((_, i) => i);
+    for (const b of bands) {
+      const area = d3.area<number>().x((i) => x(xs[i])).y0((i) => y(b.lo[i])).y1((i) => y(b.hi[i])).curve(d3.curveStepAfter);
+      svg.append('path').attr('d', area(idx)).attr('fill', color).attr('opacity', b.opacity).append('title').text(b.label);
+    }
+    const line = (vals: number[], curve: d3.CurveFactory) => d3.line<number>().x((i) => x(xs[i])).y((i) => y(vals[i])).curve(curve)(idx);
+    svg.append('path').attr('d', line(median, d3.curveStepAfter)).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2).append('title').text('median');
+    svg.append('path').attr('d', line(mean, d3.curveLinear)).attr('fill', 'none').attr('stroke', 'var(--text)').attr('stroke-width', 1.4).attr('stroke-dasharray', '5 4').append('title').text('mean');
+    if (o.ref) {
+      svg.append('line').attr('class', 'marker').attr('x1', M.l).attr('x2', w - M.r).attr('y1', y(o.ref.y)).attr('y2', y(o.ref.y));
+      svg.append('text').attr('class', 'mark-label').attr('x', w - M.r - 2).attr('y', y(o.ref.y) - 4).attr('text-anchor', 'end').text(o.ref.label);
+    }
+    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, undefined, '', '', o.xfmt);
+    const tip = svg.append('text').attr('class', 'readout').attr('x', w - M.r).attr('y', M.t + 10).attr('text-anchor', 'end');
+    svg.append('rect').attr('x', M.l).attr('y', M.t).attr('width', w - M.l - M.r).attr('height', h - M.t - M.b).attr('fill', 'transparent')
+      .on('mousemove', (ev: MouseEvent) => {
+        const xv = x.invert(d3.pointer(ev)[0]);
+        let i = 0;
+        while (i + 1 < xs.length && xs[i + 1] <= xv) i++;
+        const fx = o.tipFmt ?? o.xfmt ?? ((v: number) => v.toFixed(0));
+        tip.text(`${fx(xs[i])} · median ${median[i]} · mean ${mean[i].toFixed(1)} · ${bands.map((b) => `${b.label} ${b.lo[i]}–${b.hi[i]}`).join(' · ')}`);
+      }).on('mouseleave', () => tip.text(''));
   });
 }
 

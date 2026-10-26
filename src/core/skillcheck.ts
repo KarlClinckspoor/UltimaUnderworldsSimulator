@@ -3,14 +3,14 @@
 //   score > 28 -> 2, > 15 -> 1, > 2 -> 0, else -1
 // Exact counts under the chosen random model (core/randdist.ts): out of 32768 with the game's
 // Borland rand(), where residue 0 of rand() % 31 comes up 1058 times and every other one 1057;
-// out of 31 under the ideal model.
+// out of 31 under the ideal model (kept for the tests; the site always uses the game's).
 
 import type { Rng, RandModel } from './rng';
 import { modCounts, randModel } from './randdist';
 
 export type Grade = -1 | 0 | 1 | 2;
 export const GRADES: Grade[] = [-1, 0, 1, 2];
-export const GRADE_NAMES: Record<Grade, string> = { [-1]: 'failure', 0: 'near miss', 1: 'success', 2: 'critical' };
+export const GRADE_NAMES: Record<Grade, string> = { [-1]: 'critical failure', 0: 'failure', 1: 'success', 2: 'critical success' };
 
 /** One roll, as the game does it. */
 export function skillCheck(value: number, target: number, rng: Rng): Grade {

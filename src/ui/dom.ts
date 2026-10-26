@@ -47,7 +47,7 @@ export function toggle(label: string, checked: boolean, onChange: (v: boolean) =
   return h('label', { class: 'toggle', title }, h('input', { type: 'checkbox', checked, onchange: (e: Event) => onChange((e.target as HTMLInputElement).checked) }), h('span', {}, label));
 }
 
-export const card = (title: string, sub?: string, ...kids: (Node | null)[]) =>
+export const card = (title: string, sub?: string | Node, ...kids: (Node | null)[]) =>
   h('section', { class: 'card' }, h('header', {}, h('h3', {}, title), sub ? h('p', { class: 'sub' }, sub) : null), ...kids);
 
 export const pct = (p: number, d = 1) => `${(100 * p).toFixed(d)}%`;
