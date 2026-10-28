@@ -104,6 +104,7 @@ table.mini tr.on td { color: var(--text); font-weight: 600; }
 .axis-label { fill: var(--muted); font-size: 11px; }
 .marker { stroke: var(--accent); stroke-dasharray: 4 3; stroke-width: 1.5; }
 .readout { fill: var(--text) !important; font-family: var(--mono) !important; font-size: 11px; }
+.readout-box rect { fill: var(--surface); fill-opacity: .82; stroke: var(--border); stroke-opacity: .8; }
 .bar-label { font-size: 10.5px !important; fill: var(--text) !important; }
 .heat-mark { fill: none; stroke: var(--accent); stroke-width: 2.5; }
 .sharebar { display: flex; height: 26px; border-radius: 6px; overflow: hidden; margin: 8px 0; }
@@ -253,5 +254,10 @@ tr.row-improbable td:first-child, tr.row-impossible td:first-child { color: var(
 .cg-big b { font-size: 22px; font-variant-numeric: tabular-nums; }
 .cg-classes tr.on td { color: var(--text); font-weight: 600; }
 .cg-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 14px; margin-top: 6px; }
-.chart .iso { stroke: var(--text); stroke-opacity: .35; stroke-dasharray: 2 3; }
-.chart .iso-label { font-size: 9.5px !important; fill: var(--muted); }
+.chart .iso-halo { stroke: #fff; stroke-opacity: .55; stroke-width: 3.5; }
+.chart .iso { stroke: #000; stroke-opacity: .85; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.chart .iso-label { font-size: 10.5px !important; font-weight: 600; fill: #000 !important; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; }
+
+.legend .toggle-item { cursor: pointer; user-select: none; border-radius: 4px; padding: 1px 4px; }
+.legend .toggle-item:hover { background: var(--surface2); }
+.legend .toggle-item.off { opacity: .4; text-decoration: line-through; }

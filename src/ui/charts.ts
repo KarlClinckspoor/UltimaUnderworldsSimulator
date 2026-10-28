@@ -48,6 +48,30 @@ function axes(svg: Svg, x: d3.AxisScale<any>, y: d3.AxisScale<any>, w: number, h
 
 export interface Series { name: string; color: string; values: number[] }
 
+/** A hover readout: a translucent box of lines (each with an optional colour swatch), drawn in
+    the plot's top corner away from the cursor. Returns show(mouseX, lines) / show(0, null). */
+function readoutBox(svg: Svg, w: number, h: number) {
+  const g = svg.append('g').attr('class', 'readout-box').style('pointer-events', 'none').style('display', 'none');
+  const bg = g.append('rect').attr('rx', 5).attr('ry', 5);
+  const txt = g.append('text').attr('class', 'readout');
+  const LH = 14, PAD = 6;
+  void h;
+  return (mx: number, lines: { text: string; color: string }[] | null) => {
+    if (!lines) { g.style('display', 'none'); return; }
+    g.style('display', null);
+    txt.selectAll('tspan').remove();
+    lines.forEach((l, i) => {
+      const t = txt.append('tspan').attr('x', PAD).attr('y', PAD + 10 + i * LH);
+      if (l.color) t.append('tspan').attr('fill', l.color).text('■ ');
+      t.append('tspan').text(l.text);
+    });
+    const bw = Math.ceil((txt.node()?.getBBox().width ?? 100) + 2 * PAD), bh = lines.length * LH + PAD + 4;
+    bg.attr('width', bw).attr('height', bh);
+    const left = mx > (M.l + w - M.r) / 2;
+    g.attr('transform', `translate(${left ? M.l + 6 : w - M.r - bw - 6},${M.t + 4})`);
+  };
+}
+
 /** Stacked bars over categorical x. */
 export function stackedBars(el: HTMLElement, cats: string[], series: Series[], o: { height?: number; yLabel?: string; xLabel?: string; yfmt?: (v: number) => string; tip?: (cat: string, s: Series, v: number) => string; rotate?: boolean } = {}) {
   const height = o.height ?? 220;
@@ -117,19 +141,22 @@ export function lineChart(el: HTMLElement, series: LineSeries[], o: { height?: n
       svg.append('line').attr('class', `marker ${o.xClass ?? ''}`).attr('x1', x(o.marker)).attr('x2', x(o.marker)).attr('y1', M.t).attr('y2', h - M.b);
     }
     axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, undefined, o.xClass, o.yClass);
-    // hover readout
-    const tip = svg.append('text').attr('class', 'readout').attr('x', w - M.r).attr('y', M.t + 10).attr('text-anchor', 'end');
+    // hover readout: one line per series in a translucent box, on the side away from the cursor
+    const tip = readoutBox(svg, w, h);
     svg.append('rect').attr('x', M.l).attr('y', M.t).attr('width', w - M.l - M.r).attr('height', h - M.t - M.b).attr('fill', 'transparent')
       .on('mousemove', (ev: MouseEvent) => {
         const [mx] = d3.pointer(ev);
         const xv = x.invert(mx);
-        const parts = series.map((s) => {
+        let xShown = xv;
+        const lines = series.map((s, k) => {
           let best = s.points[0];
           for (const p of s.points) if (Math.abs(p[0] - xv) < Math.abs(best[0] - xv)) best = p;
-          return best ? `${s.name}: ${o.yfmt ? o.yfmt(best[1]) : best[1].toFixed(2)}` : '';
-        });
-        tip.text(`x ${xv.toFixed(1)} · ${parts.join(' · ')}`);
-      }).on('mouseleave', () => tip.text(''));
+          if (k === 0 && best) xShown = best[0];
+          return best ? { text: `${s.name}: ${o.yfmt ? o.yfmt(best[1]) : best[1].toFixed(2)}`, color: s.color } : null;
+        }).filter(Boolean) as { text: string; color: string }[];
+        const xs = Number.isInteger(xShown) ? String(xShown) : xShown.toFixed(1);
+        tip(mx, [{ text: `${o.xLabel ?? 'x'} ${xs}`, color: '' }, ...lines]);
+      }).on('mouseleave', () => tip(0, null));
   });
 }
 
@@ -213,15 +240,17 @@ export function fanChart(el: HTMLElement, xs: number[], bands: FanBand[], median
       svg.append('text').attr('class', 'mark-label').attr('x', w - M.r - 2).attr('y', y(o.ref.y) - 4).attr('text-anchor', 'end').text(o.ref.label);
     }
     axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, undefined, '', '', o.xfmt);
-    const tip = svg.append('text').attr('class', 'readout').attr('x', w - M.r).attr('y', M.t + 10).attr('text-anchor', 'end');
+    const tip = readoutBox(svg, w, h);
     svg.append('rect').attr('x', M.l).attr('y', M.t).attr('width', w - M.l - M.r).attr('height', h - M.t - M.b).attr('fill', 'transparent')
       .on('mousemove', (ev: MouseEvent) => {
-        const xv = x.invert(d3.pointer(ev)[0]);
+        const mx = d3.pointer(ev)[0];
+        const xv = x.invert(mx);
         let i = 0;
         while (i + 1 < xs.length && xs[i + 1] <= xv) i++;
         const fx = o.tipFmt ?? o.xfmt ?? ((v: number) => v.toFixed(0));
-        tip.text(`${fx(xs[i])} · median ${median[i]} · mean ${mean[i].toFixed(1)} · ${bands.map((b) => `${b.label} ${b.lo[i]}–${b.hi[i]}`).join(' · ')}`);
-      }).on('mouseleave', () => tip.text(''));
+        tip(mx, [{ text: fx(xs[i]), color: '' }, { text: `median ${median[i]}`, color }, { text: `mean ${mean[i].toFixed(1)}`, color: '' },
+          ...bands.map((b) => ({ text: `${b.label}: ${b.lo[i]}–${b.hi[i]}`, color: '' }))]);
+      }).on('mouseleave', () => tip(0, null));
   });
 }
 

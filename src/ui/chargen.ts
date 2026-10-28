@@ -145,31 +145,33 @@ function togetherCard(cls: ChargenClass, attrs: AttrOutcome[], rerender: () => v
   const total = cls.attrs[0] + cls.attrs[1] + cls.attrs[2] + cls.points;
   const r = attrCorrelation(attrs);
   const el = withHelp(card('Attributes together', `STR + DEX + INT is always ${total} for a ${cls.name} (${cls.attrs.join(' + ')} + ${cls.points} bonus points)`),
-    'The bonus points are shared out among the three attributes, so the three always add up to the same total and are not independent: every point one gets is a point the other two do not. Left: every STR/DEX outcome, coloured by its chance, with INT fixed by the other two (the diagonals). Right: pick an attribute; for each value it can take, the lines show what the other two average (solid) and their 10th to 90th percentile (dashed). The chances in the "desired stats" form already account for this.');
+    'The bonus points are shared out among the three attributes, so the three always add up to the same total and are not independent: every point one gets is a point the other two do not. Left: every STR/INT outcome, coloured by its chance, with DEX fixed by the other two (the diagonals). Right: pick an attribute; for each value it can take, the lines show what the other two average (solid) and their 10th to 90th percentile (dashed). The chances in the "desired stats" form already account for this.');
   el.classList.add('span-all');
   const pair = (i: number, j: number) => `${ATTR_NAMES[i]}–${ATTR_NAMES[j]} ${r[i][j].toFixed(2)}`;
   el.append(h('p', {}, 'Correlations: ', h('b', {}, [pair(0, 1), pair(0, 2), pair(1, 2)].join(' · ')),
     '. A correlation of −0.5 between each pair is what an even share of a fixed total gives; the 30 cap and the uneven rand() % 3 move it a little.'));
-  // joint STR x DEX
+  // joint STR x INT (DEX follows: total - STR - INT)
   const joint = new Map<string, number>();
   let pmax = 0;
-  for (const o of attrs) { const k = `${o.a[0]},${o.a[1]}`; const v = (joint.get(k) ?? 0) + o.p; joint.set(k, v); pmax = Math.max(pmax, v); }
+  for (const o of attrs) { const k = `${o.a[0]},${o.a[2]}`; const v = (joint.get(k) ?? 0) + o.p; joint.set(k, v); pmax = Math.max(pmax, v); }
   const rng = (i: number) => { let lo = 99, hi = 0; for (const o of attrs) { lo = Math.min(lo, o.a[i]); hi = Math.max(hi, o.a[i]); } return Array.from({ length: hi - lo + 1 }, (_, k) => lo + k); };
-  const xs = rng(0), ys = rng(1);
+  const xs = rng(0), ys = rng(2);
   const left = h('div');
   heatmap(left, xs, ys, (x, y) => joint.get(`${x},${y}`) ?? 0, {
-    xLabel: 'STR', yLabel: 'DEX', max: pmax, skipZero: true, tickEvery: 2, height: 280,
-    tip: (x, y, v) => `STR ${x}, DEX ${y}, INT ${total - x - y}: ${pctS(v)}`,
+    xLabel: 'STR', yLabel: 'INT', max: pmax, skipZero: true, tickEvery: 2, height: 280,
+    tip: (x, y, v) => `STR ${x}, INT ${y}, DEX ${total - x - y}: ${pctS(v)}`,
     after: (svg, x, y) => {
-      const ints = attrs.map((o) => o.a[2]);
-      const i0 = Math.min(...ints), i1 = Math.max(...ints);
-      for (let int = i0 + ((i1 - i0) % 2); int <= i1; int += 2) {
-        const pts = xs.filter((xv) => joint.has(`${xv},${total - int - xv}`));
+      const dexs = attrs.map((o) => o.a[1]);
+      const d0 = Math.min(...dexs), d1 = Math.max(...dexs);
+      for (let dex = d0 + ((d1 - d0) % 2); dex <= d1; dex += 2) {
+        const pts = xs.filter((xv) => joint.has(`${xv},${total - dex - xv}`));
         if (pts.length < 2) continue;
         const cx = (v: number) => x(v)! + x.bandwidth() / 2, cy = (v: number) => y(v)! + y.bandwidth() / 2;
         const a = pts[0], b = pts[pts.length - 1];
-        svg.append('line').attr('class', 'iso').attr('x1', cx(a)).attr('y1', cy(total - int - a)).attr('x2', cx(b)).attr('y2', cy(total - int - b));
-        svg.append('text').attr('class', 'iso-label').attr('x', cx(b) + x.bandwidth() / 2 + 2).attr('y', cy(total - int - b) + 3).text(`INT ${int}`);
+        // a pale halo under a dark dashed line, so it reads on dark and bright cells alike
+        for (const cls of ['iso-halo', 'iso'])
+          svg.append('line').attr('class', cls).attr('x1', cx(a)).attr('y1', cy(total - dex - a)).attr('x2', cx(b)).attr('y2', cy(total - dex - b));
+        svg.append('text').attr('class', 'iso-label').attr('x', cx(b) + x.bandwidth() / 2 + 2).attr('y', cy(total - dex - b) + 3).text(`DEX ${dex}`);
       }
     },
   });
@@ -186,7 +188,7 @@ function togetherCard(cls: ChargenClass, attrs: AttrOutcome[], rerender: () => v
   const pick = h('div', { class: 'row class-picker' }, h('span', { class: 'muted' }, 'If I roll this much'), ...ATTR_NAMES.map((n, i) =>
     h('button', { class: `wld ${i === condAttr ? 'on' : ''}`, onclick: () => { condAttr = i; rerender(); } }, n)));
   el.append(h('div', { class: 'cg-two' },
-    h('div', {}, h('div', { class: 'mini-title' }, 'Every STR / DEX outcome (INT on the diagonals)'), left),
+    h('div', {}, h('div', { class: 'mini-title' }, 'Every STR / INT outcome (DEX on the diagonals)'), left),
     h('div', {}, pick, right, h('ul', { class: 'legend' }, ...cond[0].others.map((o, k) => h('li', {}, h('span', { class: 'sw-line', style: `border-color:${cols[k]}` }), `${ATTR_NAMES[o.j]}: mean, dashed 10th–90th percentile`))))));
   return el;
 }

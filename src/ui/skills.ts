@@ -16,6 +16,8 @@ export const GRADE_COLORS = [C.death, C.flee, C.blue, C.win];
 export const GRADE_LABELS = ['−1 critical failure', '0 failure', '1 success', '2 critical success'];
 
 let paramVals: Record<string, number> = {};
+/** P(grade) lines the reader has hidden by clicking the legend (kept while the page is open). */
+const hiddenCurves = new Set<string>();
 const val = (x: string | number) => h('span', { class: 'val' }, String(x));
 const tgt = (x: string | number) => h('span', { class: 'tgt' }, String(x));
 
@@ -156,9 +158,22 @@ function curveCard(value: number, target: number) {
     { name: 'success or better', color: C.teal, dashed: '7 4', width: 2.4, points: xs.map((x, i) => [x, gp[i][2] + gp[i][3]] as [number, number]) },
     { name: 'failure or worse', color: C.pink, dashed: '2 4', width: 2.4, points: xs.map((x, i) => [x, gp[i][0] + gp[i][1]] as [number, number]) },
   ];
-  lineChart(cv, series, { yDomain: [0, 1], marker: value, xLabel: 'value', yfmt: (v) => pct(v, 0), xClass: 'val', height: 240 });
-  el.append(cv, h('ul', { class: 'legend' }, ...series.map((s) => h('li', {},
-    h('span', { class: `sw-line ${'dashed' in s ? 'dash' : ''}`, style: `border-color:${s.color}` }), s.name))));
+  const draw = () => lineChart(cv, series.filter((s) => !hiddenCurves.has(s.name)),
+    { yDomain: [0, 1], xDomain: [lo, hi], marker: value, xLabel: 'value', yfmt: (v) => pct(v, 0), xClass: 'val', height: 240 });
+  draw();
+  const items = series.map((s) => {
+    const li = h('li', { class: `toggle-item ${hiddenCurves.has(s.name) ? 'off' : ''}`, role: 'button', tabindex: 0, title: 'Click to show or hide this line' },
+      h('span', { class: `sw-line ${'dashed' in s ? 'dash' : ''}`, style: `border-color:${s.color}` }), s.name);
+    const flip = () => {
+      if (hiddenCurves.has(s.name)) hiddenCurves.delete(s.name); else hiddenCurves.add(s.name);
+      li.classList.toggle('off', hiddenCurves.has(s.name));
+      draw();
+    };
+    li.addEventListener('click', flip);
+    li.addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+    return li;
+  });
+  el.append(cv, h('ul', { class: 'legend' }, ...items), h('p', { class: 'hint' }, 'Click a name to show or hide its line.'));
   return el;
 }
 
