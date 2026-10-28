@@ -224,3 +224,31 @@ pre.py .cm { color: var(--muted); }
   font: 400 12.5px/1.45 var(--font); color: var(--text); text-transform: none; letter-spacing: normal; }
 .help:hover .help-pop, .help:focus-within .help-pop { display: block; }
 @media (max-width: 700px) { .help-pop { left: 0; transform: none; } }
+
+/* character creation tab */
+.chargen .cg-title { font-family: var(--display); font-size: 22px; margin: 0; }
+.class-picker { gap: 6px; margin-top: 8px; }
+.class-picker .wld { font-size: 13px; padding: 5px 12px; }
+.class-picker .wld.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.cg-entries { margin: 6px 0; padding-left: 22px; font-size: 13px; }
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 14px; margin-top: 6px; }
+.mini-hist { border: 1px solid var(--grid); border-radius: 8px; padding: 6px 8px 2px; min-width: 0; }
+.mini-title { font-weight: 600; font-size: 13px; }
+.mini-title small { font-weight: 400; color: var(--muted); }
+.mini-note { font-size: 11.5px; color: var(--muted); }
+.cg-h { margin: 10px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.cg-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px 10px; }
+.cg-field { display: grid; grid-template-columns: 1fr 52px; grid-template-rows: auto auto; align-items: center; column-gap: 6px; font-size: 12.5px; }
+.cg-field > span { grid-column: 1; }
+.cg-field input { grid-column: 2; grid-row: 1 / span 2; width: 52px; }
+.cg-field .cg-note { grid-column: 1; font-size: 11px; color: var(--muted); min-height: 1em; }
+.cg-field.na > span { color: var(--muted); text-decoration: line-through; }
+input.cg-in.improbable { border-color: var(--bad) !important; background: color-mix(in srgb, var(--bad) 22%, var(--surface)); color: var(--text); }
+input.cg-in.unlikely { border-color: var(--warn) !important; background: color-mix(in srgb, var(--warn) 14%, var(--surface)); }
+.improbable, .impossible, .cg-note.improbable, .cg-note.impossible { color: var(--bad) !important; font-weight: 600; }
+.unlikely, .cg-note.unlikely { color: var(--warn) !important; }
+tr.row-improbable td:first-child, tr.row-impossible td:first-child { color: var(--bad); font-weight: 600; }
+.cg-result { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+.cg-big { font-size: 15px; }
+.cg-big b { font-size: 22px; font-variant-numeric: tabular-nums; }
+.cg-classes tr.on td { color: var(--text); font-weight: 600; }

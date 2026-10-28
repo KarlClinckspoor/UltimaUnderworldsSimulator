@@ -10,7 +10,8 @@ export interface CombatUi extends FightSettings {
   allN: number; threshold: number; inclTrap: boolean; inclPeaceful: boolean; fleeCounts: boolean;
 }
 export interface SkillsUi { check: string; value: number | null; target: number | null; pinned: { label: string; value: number; target: number }[] }
-export interface AppState { tab: 'skills' | 'combat'; panelOpen: boolean; character: Character; combat: CombatUi; skills: SkillsUi }
+export type Tab = 'skills' | 'combat' | 'chargen';
+export interface AppState { tab: Tab; panelOpen: boolean; character: Character; combat: CombatUi; skills: SkillsUi }
 
 const CHAR_KEY = 'uw2sim.character.v1';
 
@@ -52,7 +53,7 @@ function writeHash() {
 export function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   const tab = p.get('tab');
-  if (tab === 'skills' || tab === 'combat') state.tab = tab;
+  if (tab === 'skills' || tab === 'combat' || tab === 'chargen') state.tab = tab;
   for (const k of HASH_COMBAT) {
     const v = p.get(k);
     if (v === null) continue;
