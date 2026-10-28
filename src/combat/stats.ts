@@ -36,6 +36,8 @@ export interface Stats {
   xpHalved: number;                   // kills halved because the character outranks the dungeon level
   draws: number;                      // game rand() draws taken (the generator's period is 2^32)
   blockOverruns: number;              // worker jobs that used more draws than their block of the cycle
+  buffEnded: number[];                // fights in which the active buff in slot i wore off
+  buffEndSum: number[];               // seconds at which it did, summed
   ttkSum: number;                     // seconds, wins
   dps: number;                        // summed damage per second over all fights
 }
@@ -50,7 +52,7 @@ export function emptyStats(hpBins = 1, monBins = 1, durBins = 241): Stats {
     weaponWearEvents: 0, weaponQualityLost: 0, weaponBroken: 0, armourWearEvents: 0, armourQualityLost: 0, armourBroken: 0,
     zoneHits: z(4), zoneDamage: z(4), zoneAbsorbed: [z(3), z(3), z(3), z(3)], zoneProtMisses: z(4), zoneMisses: z(4),
     easyHalved: 0, resistedPlayer: 0, srcAttempts: z(6), srcHits: z(6), srcCrits: z(6), srcDamage: z(6),
-    defensiveCasts: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0, draws: 0, blockOverruns: 0, ttkSum: 0, dps: 0,
+    defensiveCasts: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0, draws: 0, blockOverruns: 0, buffEnded: z(3), buffEndSum: z(3), ttkSum: 0, dps: 0,
   };
 }
 

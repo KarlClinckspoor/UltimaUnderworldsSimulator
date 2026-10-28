@@ -163,21 +163,26 @@ export function histogram(el: HTMLElement, x0: number, width: number, series: (S
   });
 }
 
-export function heatmap(el: HTMLElement, xs: number[], ys: number[], val: (x: number, y: number) => number, o: { height?: number; xLabel?: string; yLabel?: string; mark?: [number, number] | null; onClick?: (x: number, y: number) => void; fmt?: (v: number) => string; xClass?: string; yClass?: string } = {}) {
+export function heatmap(el: HTMLElement, xs: number[], ys: number[], val: (x: number, y: number) => number, o: { height?: number; xLabel?: string; yLabel?: string; mark?: [number, number] | null; onClick?: (x: number, y: number) => void; fmt?: (v: number) => string; xClass?: string; yClass?: string;
+  max?: number; tip?: (x: number, y: number, v: number) => string; tickEvery?: number; skipZero?: boolean;
+  after?: (svg: Svg, x: d3.ScaleBand<number>, y: d3.ScaleBand<number>) => void } = {}) {
   chart(el, o.height ?? 300, (svg, w, h) => {
     const x = d3.scaleBand<number>().domain(xs).range([M.l, w - M.r]);
     const y = d3.scaleBand<number>().domain(ys).range([h - M.b, M.t]);
-    const col = d3.scaleSequential(d3.interpolateCividis).domain([0, 1]);
+    const col = d3.scaleSequential(d3.interpolateCividis).domain([0, o.max ?? 1]);
     for (const xv of xs) for (const yv of ys) {
       const v = val(xv, yv);
+      if (o.skipZero && !v) continue;
       svg.append('rect').attr('x', x(xv)!).attr('y', y(yv)!).attr('width', x.bandwidth() + 0.5).attr('height', y.bandwidth() + 0.5).attr('fill', col(v))
         .style('cursor', o.onClick ? 'pointer' : 'default').on('click', () => o.onClick?.(xv, yv))
-        .append('title').text(`value ${xv}, target ${yv}: ${o.fmt ? o.fmt(v) : v.toFixed(3)}`);
+        .append('title').text(o.tip ? o.tip(xv, yv, v) : `value ${xv}, target ${yv}: ${o.fmt ? o.fmt(v) : v.toFixed(3)}`);
     }
+    o.after?.(svg, x, y);
     if (o.mark && xs.includes(o.mark[0]) && ys.includes(o.mark[1]))
       svg.append('rect').attr('class', 'heat-mark').attr('x', x(o.mark[0])!).attr('y', y(o.mark[1])!).attr('width', x.bandwidth()).attr('height', y.bandwidth());
-    const ax = d3.axisBottom(x).tickValues(xs.filter((v) => v % 5 === 0));
-    const ay = d3.axisLeft(y).tickValues(ys.filter((v) => v % 5 === 0));
+    const te = o.tickEvery ?? 5;
+    const ax = d3.axisBottom(x).tickValues(xs.filter((v) => v % te === 0));
+    const ay = d3.axisLeft(y).tickValues(ys.filter((v) => v % te === 0));
     svg.append('g').attr('class', `axis ${o.xClass ?? ''}`).attr('transform', `translate(0,${h - M.b})`).call(ax as any);
     svg.append('g').attr('class', `axis ${o.yClass ?? ''}`).attr('transform', `translate(${M.l},0)`).call(ay as any);
     if (o.xLabel) svg.append('text').attr('class', `axis-label ${o.xClass ?? ''}`).attr('x', (M.l + w - M.r) / 2).attr('y', h - 4).attr('text-anchor', 'middle').text(o.xLabel);

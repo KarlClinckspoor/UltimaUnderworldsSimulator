@@ -3,11 +3,13 @@
 // critter_attack, OBJPHYS.C missile_newhit, RUNES.C player_cast, AI.C crit_offense.
 
 import { creatures, heightOf, items, missiles, resistOf, SK, spells, weapons, type Attack, type CreatureRec } from '../data/gameData';
-import { derive, spellStatus, weaponSlot, type ArmourParts, type Character } from '../core/character';
+import { derive, spellStatus, stabilityOf, weaponSlot, type ArmourParts, type Character } from '../core/character';
 import { SWING_KIND } from './blow';
 import type { RandModel } from '../core/rng';
 
 export const PLAYER_HEIGHT = 23; // ComObjData[ITEM_ADVENTURER].height
+/** Ticks (1/16 s) between duration checks: INTERACT.C runs duration_check every 21 s of game time. */
+export const DUR_CHECK_TICKS = 21 * 16;
 
 export interface MeleeProfile {
   name: string; isFist: boolean;
@@ -26,6 +28,8 @@ export interface PlayerProfile {
   hp: number; hpMax: number; mana: number; manaMax: number; level: number; easy: boolean;
   armour: number[]; armourParts: ArmourParts[]; cmbModTH: number[]; resist: number; defence: number;
   hasted: boolean; timeStop: boolean;
+  /** the active buffs, with their duration dice (set_curmagic); they wear off during the fight */
+  buffs: { index: number; dice: number; sides: number; plus: number }[];
   melee: MeleeProfile; fist: MeleeProfile;
   launcher: { name: string; ammoName: string; damage: number; type: number } | null;
   missileSkill: number; casting: number; manaSkill: number;
@@ -123,6 +127,7 @@ export function playerProfile(c: Character, attackSpellIndex: number | null): Pl
     hp: d.startHp, hpMax: d.maxHp, mana: d.startMana, manaMax: d.maxMana, level: c.level, easy: c.easy,
     armour: d.armour, armourParts: d.armourParts, cmbModTH: d.cmbModTH, resist: d.resist, defence: d.defence,
     hasted: d.hasted, timeStop: d.timeStop, melee, fist, launcher,
+    buffs: d.activeBuffs.map((index) => { const st = stabilityOf(index); return { index, dice: st.dice, sides: st.sides, plus: st.plus }; }),
     missileSkill: c.skills[SK.Missile], casting: c.skills[SK.Casting], manaSkill: c.skills[SK.Mana], attackSpell,
     character: c, attackSpellIndex, expRaw: c.expRaw,
   };

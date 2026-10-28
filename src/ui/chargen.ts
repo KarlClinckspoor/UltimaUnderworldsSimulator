@@ -3,12 +3,12 @@
 import { CHARGEN_CLASSES, CHARGEN_GAME, type ChargenClass } from '../data/chargenData';
 import { SKILLS } from '../data/gameData';
 import {
-  ATTR_NAMES, attrDist, attrHist, bestRoute, designFields, emptyDesign, hpHist, manaHist, menus, only, pDesign, routes,
+  ATTR_NAMES, attrConditional, attrCorrelation, attrDist, attrHist, bestRoute, designFields, emptyDesign, hpHist, manaHist, menus, only, pDesign, routes,
   skillHist, timesRange, without, type AttrOutcome, type Design, type Route,
 } from '../core/chargen';
 import { setRandModel } from '../core/randdist';
 import { card, clear, h, pct } from './dom';
-import { C, histogram } from './charts';
+import { C, heatmap, histogram, lineChart } from './charts';
 import { withHelp } from './help';
 import { formula } from './formula';
 
@@ -26,7 +26,7 @@ const routeCache = new Map<number, Route[]>();
 const attrsOf = (i: number) => { let a = attrCache.get(i); if (!a) { a = attrDist(CHARGEN_CLASSES[i]); attrCache.set(i, a); } return a; };
 const routesOf = (i: number) => { let r = routeCache.get(i); if (!r) { r = routes(CHARGEN_CLASSES[i]); routeCache.set(i, r); } return r; };
 
-const TIMES_COLORS = [C.timeout, C.accent, C.blue, C.purple];
+const TIMES_COLORS = [C.timeout, C.accent, C.purple, C.pink];
 const TIMES_LABEL = ['not taken', 'taken once', 'taken twice', 'taken three times'];
 const IMPROBABLE = 0.05, UNLIKELY = 0.25;
 
@@ -75,6 +75,7 @@ export function renderChargen(root: HTMLElement) {
   const cards = h('div', { class: 'cards' },
     howCard(cls),
     attributesCard(cls, attrs),
+    togetherCard(cls, attrs, rerender),
     skillsCard(cls, attrs),
     designCard(cls, root, rerender));
 
@@ -136,6 +137,57 @@ function attributesCard(cls: ChargenClass, attrs: AttrOutcome[]) {
   el.append(grid);
   const lg = legend(min[7], max[7]);
   if (lg) el.append(lg);
+  return el;
+}
+
+let condAttr = 0;
+function togetherCard(cls: ChargenClass, attrs: AttrOutcome[], rerender: () => void) {
+  const total = cls.attrs[0] + cls.attrs[1] + cls.attrs[2] + cls.points;
+  const r = attrCorrelation(attrs);
+  const el = withHelp(card('Attributes together', `STR + DEX + INT is always ${total} for a ${cls.name} (${cls.attrs.join(' + ')} + ${cls.points} bonus points)`),
+    'The bonus points are shared out among the three attributes, so the three always add up to the same total and are not independent: every point one gets is a point the other two do not. Left: every STR/DEX outcome, coloured by its chance, with INT fixed by the other two (the diagonals). Right: pick an attribute; for each value it can take, the lines show what the other two average (solid) and their 10th to 90th percentile (dashed). The chances in the "desired stats" form already account for this.');
+  el.classList.add('span-all');
+  const pair = (i: number, j: number) => `${ATTR_NAMES[i]}–${ATTR_NAMES[j]} ${r[i][j].toFixed(2)}`;
+  el.append(h('p', {}, 'Correlations: ', h('b', {}, [pair(0, 1), pair(0, 2), pair(1, 2)].join(' · ')),
+    '. A correlation of −0.5 between each pair is what an even share of a fixed total gives; the 30 cap and the uneven rand() % 3 move it a little.'));
+  // joint STR x DEX
+  const joint = new Map<string, number>();
+  let pmax = 0;
+  for (const o of attrs) { const k = `${o.a[0]},${o.a[1]}`; const v = (joint.get(k) ?? 0) + o.p; joint.set(k, v); pmax = Math.max(pmax, v); }
+  const rng = (i: number) => { let lo = 99, hi = 0; for (const o of attrs) { lo = Math.min(lo, o.a[i]); hi = Math.max(hi, o.a[i]); } return Array.from({ length: hi - lo + 1 }, (_, k) => lo + k); };
+  const xs = rng(0), ys = rng(1);
+  const left = h('div');
+  heatmap(left, xs, ys, (x, y) => joint.get(`${x},${y}`) ?? 0, {
+    xLabel: 'STR', yLabel: 'DEX', max: pmax, skipZero: true, tickEvery: 2, height: 280,
+    tip: (x, y, v) => `STR ${x}, DEX ${y}, INT ${total - x - y}: ${pctS(v)}`,
+    after: (svg, x, y) => {
+      const ints = attrs.map((o) => o.a[2]);
+      const i0 = Math.min(...ints), i1 = Math.max(...ints);
+      for (let int = i0 + ((i1 - i0) % 2); int <= i1; int += 2) {
+        const pts = xs.filter((xv) => joint.has(`${xv},${total - int - xv}`));
+        if (pts.length < 2) continue;
+        const cx = (v: number) => x(v)! + x.bandwidth() / 2, cy = (v: number) => y(v)! + y.bandwidth() / 2;
+        const a = pts[0], b = pts[pts.length - 1];
+        svg.append('line').attr('class', 'iso').attr('x1', cx(a)).attr('y1', cy(total - int - a)).attr('x2', cx(b)).attr('y2', cy(total - int - b));
+        svg.append('text').attr('class', 'iso-label').attr('x', cx(b) + x.bandwidth() / 2 + 2).attr('y', cy(total - int - b) + 3).text(`INT ${int}`);
+      }
+    },
+  });
+  // conditional means
+  const right = h('div');
+  const cond = attrConditional(attrs, condAttr);
+  const cols = [C.accent, C.purple, C.win];
+  const series = cond[0].others.flatMap((o, k) => [
+    { name: `${ATTR_NAMES[o.j]} mean`, color: cols[k], points: cond.map((c) => [c.v, c.others[k].mean] as [number, number]) },
+    { name: `${ATTR_NAMES[o.j]} 10th`, color: cols[k], dashed: '3 3', width: 1.2, points: cond.map((c) => [c.v, c.others[k].lo] as [number, number]) },
+    { name: `${ATTR_NAMES[o.j]} 90th`, color: cols[k], dashed: '3 3', width: 1.2, points: cond.map((c) => [c.v, c.others[k].hi] as [number, number]) },
+  ]);
+  lineChart(right, series, { xLabel: `${ATTR_NAMES[condAttr]} rolled`, yLabel: 'the other two', height: 250, yfmt: (v) => v.toFixed(0) });
+  const pick = h('div', { class: 'row class-picker' }, h('span', { class: 'muted' }, 'If I roll this much'), ...ATTR_NAMES.map((n, i) =>
+    h('button', { class: `wld ${i === condAttr ? 'on' : ''}`, onclick: () => { condAttr = i; rerender(); } }, n)));
+  el.append(h('div', { class: 'cg-two' },
+    h('div', {}, h('div', { class: 'mini-title' }, 'Every STR / DEX outcome (INT on the diagonals)'), left),
+    h('div', {}, pick, right, h('ul', { class: 'legend' }, ...cond[0].others.map((o, k) => h('li', {}, h('span', { class: 'sw-line', style: `border-color:${cols[k]}` }), `${ATTR_NAMES[o.j]}: mean, dashed 10th–90th percentile`))))));
   return el;
 }
 
