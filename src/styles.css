@@ -243,5 +243,5 @@ input.cg-in.unlikely { border-color: var(--warn) !important; background: color-m
 tr.row-improbable td:first-child, tr.row-impossible td:first-child { color: var(--bad); font-weight: 600; }
 .cg-result { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
 .cg-big { font-size: 15px; }
-.cg-big b { font-size: 22px; font-family: var(--mono); }
+.cg-big b { font-size: 22px; font-variant-numeric: tabular-nums; }
 .cg-classes tr.on td { color: var(--text); font-weight: 600; }
