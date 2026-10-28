@@ -12,7 +12,7 @@ import {
   ATK_CHARGE, checkRes, creatureArmourAt, critMultiplier, DMG_PHYSICAL, meleeProbe, pickloc, rollDamage, shouldIFlee,
 } from './blow';
 import {
-  AREA_SPELLS, chooseSwing, isUndead, PLAYER_HEIGHT, poisonBonus, swingKindOf, type AreaKind, type FightSettings,
+  AREA_SPELLS, chooseSwing, DUR_CHECK_TICKS, isUndead, PLAYER_HEIGHT, poisonBonus, swingKindOf, type AreaKind, type FightSettings,
   type MeleeProfile, type MonsterProfile, type PlayerProfile,
 } from './setup';
 import { DUR_BIN, emptyStats, type Stats } from './stats';
@@ -143,7 +143,8 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   const rawSpells = creatures[M.creature].spells;
   let P = P0;
   let ch: Character | null = null; // a copy of the character, made when an item first wears
-  const own = () => (ch ??= structuredClone(P0.character));
+  // only the buffs that took (at most three, castable) are on the copy, so none slides in when one ends
+  const own = () => (ch ??= { ...structuredClone(P0.character), buffs: P0.buffs.map((b) => b.index) });
   /** An item broke: FixPlayerEquips recomputes armour, defence, protection and the weapon (INVDATA.C). */
   const refit = () => {
     const np = playerProfile(own(), P0.attackSpellIndex, P0.fightLevel);
@@ -162,10 +163,18 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   const mhp0 = mhp;
   let dmgTaken = 0, lastHit = false, active = M.attitude === 0, bound = false;
   let seq = 0, frame = 0, k = 0, castSlot = 0, heldUntil = -1, tNow = 0;
-  const interval = P.timeStop ? Infinity : P.hasted ? 8 : 4;
+  let interval = P.timeStop ? Infinity : P.hasted ? 8 : 4;
   let tM = P.timeStop ? Infinity : rng.int(4);
+  // Duration checks come every 20 s at a phase the fight does not know (a model draw). The
+  // buffs were cast just before the fight: set_curmagic rolled each one's count of checks,
+  // and the check that finds it at 1 ends it. The mana roll is every third check.
+  const I = DUR_CHECK_TICKS;
+  const phase = Math.floor(rng.next() * I) + 1;
   const regenOk = manaRegenAllowed(P0.fightLevel);
-  let tRegen = regenOk ? 960 : Infinity; // mana: skill_check(Mana, 10) every third 20 s duration check
+  let tRegen = regenOk ? phase + I * Math.floor(rng.next() * 3) : Infinity; // mana: skill_check(Mana, 10)
+  const buffEnds = P0.buffs.map((b, slot) => ({ slot, index: b.index, t: phase + I * (rng.rollem(b.dice, b.sides) + b.plus - 1) }))
+    .sort((a, b) => a.t - b.t);
+  let tBuff = buffEnds.length ? buffEnds[0].t : Infinity;
 
   let outcome = -1; // 0 win 1 death 2 flee 3 timeout
   let dealt = 0;
@@ -536,13 +545,26 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
 
   let t = 0;
   while (outcome < 0) {
-    t = Math.min(tP, tM, tRegen);
+    t = Math.min(tP, tM, tRegen, tBuff);
     if (t > T) { t = T; outcome = 3; break; }
     tNow = t;
+    if (t === tBuff) {
+      // dispel_spell, then FixPlayerEquips: armour, protection, Valor, Speed and Freeze Time recomputed
+      const b = buffEnds.shift()!;
+      const c = own();
+      c.buffs = c.buffs.filter((x) => x !== b.index);
+      st.buffEnded[b.slot]++; st.buffEndSum[b.slot] += t / 16;
+      const wasStopped = P.timeStop;
+      refit();
+      interval = P.timeStop ? Infinity : P.hasted ? 8 : 4;
+      if (wasStopped && !P.timeStop) tM = t + 1 + Math.floor(rng.next() * interval);
+      tBuff = buffEnds.length ? buffEnds[0].t : Infinity;
+      continue;
+    }
     if (t === tRegen) {
       const g = skillCheck(P.manaSkill, 10, rng);
       if (g > 0) mana = Math.min(P.manaMax, mana + g);
-      tRegen += 960;
+      tRegen += 3 * I;
       if (plan === 'none') schedule(t);
       continue;
     }

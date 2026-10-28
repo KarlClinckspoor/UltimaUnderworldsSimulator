@@ -1,7 +1,7 @@
 // Combat tab (plan Part B): one enemy N times, or every enemy in the game.
-import { ATTACK_SPELLS, derive, weaponSlot, LEVEL_TABLE, spellLabel, spellStatus, ZONE_NAMES } from '../core/character';
+import { ATTACK_SPELLS, derive, weaponSlot, LEVEL_TABLE, spellLabel, spellStatus, stabilityOf, ZONE_NAMES } from '../core/character';
 import { ATTITUDES, creatures, levels, WORLD_NAMES, worldOf, worlds, type EnemyRow } from '../data/gameData';
-import { combatCapable, monsterProfile, playerProfile, type FightSettings, type MonsterProfile, type PlayerProfile } from '../combat/setup';
+import { combatCapable, DUR_CHECK_TICKS, monsterProfile, playerProfile, type FightSettings, type MonsterProfile, type PlayerProfile } from '../combat/setup';
 import { runJobs, splitJob, type RunHandle } from '../combat/pool';
 import type { Job } from '../combat/worker';
 import { DEALT_PARTS, DUR_BIN, OUTCOMES, SOURCES, wilson, type Stats } from '../combat/stats';
@@ -305,9 +305,23 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
     sc.append(h('p', {}, `Fired ${fmt(s.specialTriggers / n, 2)} times per fight${s.specialHealed ? `, healing ${fmt(s.specialHealed / n, 1)} HP` : ''}${s.specialHeldTicks ? `, holding the monster ${fmt(s.specialHeldTicks / n / 16, 1)} s` : ''}.`));
     cards.append(sc);
   }
+  if (P.buffs.length) cards.append(buffCard(s, P));
   cards.append(exactCard(P, M, S));
   cards.append(randCard(s, S));
   out.append(cards);
+}
+
+/** When the pre-cast buffs wore off (set_curmagic's duration, counted down by duration_check). */
+function buffCard(s: Stats, P: PlayerProfile) {
+  const el = card('Buffs wearing off', `each lasts its rolled number of duration checks (one every ${DUR_CHECK_TICKS / 16} s, the first 0–${DUR_CHECK_TICKS / 16} s after casting); armour, protection, Valor, Speed and Freeze Time are recomputed when one ends`);
+  const t = h('table', { class: 'mini wide' }, h('tr', {}, ...['Buff', 'Duration', 'Wore off in', 'On average at'].map((x) => h('th', {}, x))));
+  P.buffs.forEach((b, i) => {
+    const n = s.buffEnded[i] ?? 0;
+    t.append(h('tr', {}, h('td', {}, spellLabel(b.index)), h('td', {}, `${stabilityOf(b.index).text} checks`),
+      h('td', {}, `${pct(n / Math.max(1, s.n))} of fights`), h('td', {}, n ? `${fmt((s.buffEndSum[i] ?? 0) / n, 1)} s` : '–')));
+  });
+  el.append(t, h('p', { class: 'hint' }, 'A buff that has not worn off when the fight ends (a kill, a death or the time limit) is not counted.'));
+  return el;
 }
 
 /** How many of the game's random draws the run used, against the generator's period. */

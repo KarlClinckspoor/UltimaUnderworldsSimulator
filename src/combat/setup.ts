@@ -4,10 +4,12 @@
 // area1_spells / release_missile, AI.C crit_offense.
 
 import { creatures, heightOf, items, missiles, resistOf, SK, spells, weapons, worldOf, type Attack, type CreatureRec } from '../data/gameData';
-import { derive, spellStatus, weaponSlot, type ArmourParts, type Character } from '../core/character';
+import { derive, spellStatus, stabilityOf, weaponSlot, type ArmourParts, type Character } from '../core/character';
 import { isSharp, SWING_KIND } from './blow';
 import type { RandModel } from '../core/rng';
 
+/** Ticks (1/16 s) between duration checks: INTERACT.C runs duration_check every 20 s of game time. */
+export const DUR_CHECK_TICKS = 20 * 16;
 export const PLAYER_HEIGHT = 23; // ComObjData[ITEM_ADVENTURER].height
 
 export interface MeleeProfile {
@@ -43,6 +45,8 @@ export interface PlayerProfile {
   hp: number; hpMax: number; mana: number; manaMax: number; level: number; easy: boolean;
   armour: number[]; armourParts: ArmourParts[]; cmbModTH: number[]; resist: number; defence: number;
   hasted: boolean; timeStop: boolean; lefty: number;
+  /** the active buffs, with their duration dice (set_curmagic); they wear off during the fight */
+  buffs: { index: number; dice: number; sides: number; plus: number }[];
   melee: MeleeProfile; fist: MeleeProfile;
   launcher: { name: string; ammoName: string; damage: number; type: number } | null;
   missileSkill: number; casting: number; manaSkill: number;
@@ -161,6 +165,7 @@ export function playerProfile(c: Character, attackSpellIndex: number | null, fig
     hp: d.startHp, hpMax: d.maxHp, mana: d.startMana, manaMax: d.maxMana, level: c.level, easy: c.easy,
     armour: d.armour, armourParts: d.armourParts, cmbModTH: d.cmbModTH, resist: d.resist, defence: d.defence,
     hasted: d.hasted, timeStop: d.timeStop, lefty: c.lefty, melee, fist, launcher,
+    buffs: d.activeBuffs.map((index) => { const st = stabilityOf(index); return { index, dice: st.dice, sides: st.sides, plus: st.plus }; }),
     missileSkill: c.skills[SK.Missile], casting: c.skills[SK.Casting], manaSkill: c.skills[SK.Mana], attackSpell, attackSpellBlocked,
     character: c, attackSpellIndex, expRaw: c.expRaw, fightLevel,
   };

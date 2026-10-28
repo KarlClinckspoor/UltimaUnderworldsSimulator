@@ -1,6 +1,7 @@
 // The character panel shared by both tabs.
+import { DUR_CHECK_TICKS } from '../combat/setup';
 import {
-  BUFF_SPELLS, characterFromSave, defaultCharacter, derive, derivedMaxHp, derivedMaxMana, itemLabel, levelFromExp,
+  BUFF_SPELLS, stabilityOf, characterFromSave, defaultCharacter, derive, derivedMaxHp, derivedMaxMana, itemLabel, levelFromExp,
   maxWeight, shieldSlot, SLOT_NAMES, spellLabel, spellStatus, weaponSlot, ZONE_NAMES, type Character, type Enchant,
 } from '../core/character';
 import { readPlayerDat } from '../core/playerdat';
@@ -174,11 +175,20 @@ export function renderPanel(root: HTMLElement) {
       h('input', { type: 'checkbox', checked: on, disabled: !s.castable && !on, onchange: (e: Event) => set(() => {
         c.buffs = (e.target as HTMLInputElement).checked ? [...c.buffs, idx] : c.buffs.filter((x) => x !== idx);
       }) }),
-      h('span', {}, `${spellLabel(idx)} `, h('small', {}, `c${sp.circle} · ${3 * sp.circle!} mana${s.castable ? '' : ' · ' + s.reasons.join(', ')}`))));
+      h('span', {}, `${spellLabel(idx)} `, h('small', {}, `c${sp.circle} · ${3 * sp.circle!} mana · lasts ${buffLasts(idx)}${s.castable ? '' : ' · ' + s.reasons.join(', ')}`))));
   }
   root.append(h('div', { class: 'panel-sec' }, h('h4', {}, 'Runes'), rb, h('h4', {}, 'Buffs (pre-cast at 100%)'), buffs,
     toggle(`Pay buff mana from the starting mana (${d.buffMana})`, c.payBuffMana, (v) => set(() => (c.payBuffMana = v))),
-    h('p', { class: 'hint' }, 'A spell is offered when its runes are in the bag, (level + 1) / 2 ≥ circle, 3 × circle ≤ max mana and, on levels 1-8, its circle is at most 3; at most three are active.')));
+    h('p', { class: 'hint' }, 'A spell is offered when its runes are in the bag, (level + 1) / 2 ≥ circle, 3 × circle ≤ max mana and, on levels 1-8, its circle is at most 3; at most three are active. Each wears off during the fight after its rolled number of duration checks (one every ' + DUR_CHECK_TICKS / 16 + ' s).')));
 }
 
 const lab = (t: string, input: HTMLElement) => h('label', { class: 'lab' }, h('span', {}, t), input);
+
+/** A buff's duration as set_curmagic rolls it, in duration checks and game seconds. */
+function buffLasts(idx: number) {
+  const st = stabilityOf(idx);
+  const sec = DUR_CHECK_TICKS / 16;
+  const lo = st.dice + st.plus, hi = st.dice * st.sides + st.plus;
+  // the first check comes 0..one interval after casting
+  return `${st.text} checks, ${Math.round((lo - 1) * sec)}–${Math.round(hi * sec)} s`;
+}

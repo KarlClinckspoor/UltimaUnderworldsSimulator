@@ -228,3 +228,30 @@ export function without(d: Design, f: { kind: string; i: number }): Design {
   else e.skills[f.i] = null;
   return e;
 }
+
+/** Pearson correlations between the three attributes over the class's outcomes. */
+export function attrCorrelation(attrs: AttrOutcome[]): number[][] {
+  const m = [0, 1, 2].map((i) => attrs.reduce((s, o) => s + o.p * o.a[i], 0));
+  const cov = (i: number, j: number) => attrs.reduce((s, o) => s + o.p * (o.a[i] - m[i]) * (o.a[j] - m[j]), 0);
+  return [0, 1, 2].map((i) => [0, 1, 2].map((j) => { const d = Math.sqrt(cov(i, i) * cov(j, j)); return d ? cov(i, j) / d : i === j ? 1 : 0; }));
+}
+
+/** Given attribute i at each value: its probability and the other two attributes' mean and 10th-90th percentiles. */
+export function attrConditional(attrs: AttrOutcome[], i: number) {
+  const byV = new Map<number, AttrOutcome[]>();
+  for (const o of attrs) { const l = byV.get(o.a[i]); if (l) l.push(o); else byV.set(o.a[i], [o]); }
+  const q = (list: AttrOutcome[], j: number, lv: number) => {
+    const tot = list.reduce((s, o) => s + o.p, 0);
+    const sorted = [...list].sort((a, b) => a.a[j] - b.a[j]);
+    let acc = 0;
+    for (const o of sorted) { acc += o.p / tot; if (acc >= lv - 1e-12) return o.a[j]; }
+    return sorted[sorted.length - 1].a[j];
+  };
+  return [...byV.entries()].sort((a, b) => a[0] - b[0]).map(([v, list]) => {
+    const p = list.reduce((s, o) => s + o.p, 0);
+    const others = [0, 1, 2].filter((j) => j !== i).map((j) => ({
+      j, mean: list.reduce((s, o) => s + o.p * o.a[j], 0) / p, lo: q(list, j, 0.1), hi: q(list, j, 0.9),
+    }));
+    return { v, p, others };
+  });
+}

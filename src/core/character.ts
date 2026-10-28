@@ -185,6 +185,16 @@ export function activeEffectOf(s: SpellRec): { major: number; minor: number } | 
 
 /** Buffs the character can carry into a fight (active spells, set_curmagic): Luck, Resist Blows, Valor, Speed,
     Poison Weapon, Flameproof, Thick Skin, Missile Protection, Freeze Time, Iron Flesh. */
+/** set_curmagic (PLAYTIME.C): an active spell's duration in duration checks, from the stability
+    bits of its sub byte (flags 0xC0): 1 lasts one check, 0 2d3, 0x40 2d8 + 6, 0x80 3d20 + 24. */
+export const STABILITY_DICE: Record<number, { dice: number; sides: number; plus: number; text: string }> = {
+  1: { dice: 0, sides: 0, plus: 1, text: '1' },
+  0: { dice: 2, sides: 3, plus: 0, text: '2d3' },
+  0x40: { dice: 2, sides: 8, plus: 6, text: '2d8 + 6' },
+  0x80: { dice: 3, sides: 20, plus: 24, text: '3d20 + 24' },
+};
+export const stabilityOf = (idx: number) => STABILITY_DICE[(spells[idx]?.flags ?? 0) & 0xc0] ?? STABILITY_DICE[0];
+
 export const BUFF_SPELLS = [1, 3, 9, 22, 26, 28, 29, 31, 58, 59];
 /** Spells that hurt a monster: missiles, area spells and the targeted (class 7) ones. */
 export const ATTACK_SPELLS = [2, 10, 16, 19, 21, 24, 33, 36, 41, 51, 56, 62];

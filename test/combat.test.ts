@@ -106,6 +106,25 @@ describe('player profile (DoPlayerWeapon)', () => {
   });
 });
 
+describe('buffs wear off', () => {
+  it('Freeze Time ends after 2d3 duration checks, and the monster then attacks', () => {
+    const c = karl();
+    c.level = 16; c.manaMax = 60; c.runes = [...Array(24).keys()]; c.buffs = [58]; c.dungeonLevel = 9;
+    for (const s of Object.keys(c.equipment)) delete c.equipment[+s];
+    const P = playerProfile(c, null);
+    expect(P.timeStop).toBe(true);
+    expect(P.buffs).toEqual([{ index: 58, dice: 2, sides: 3, plus: 0 }]);
+    const M = monsterProfile(cIndex(GOBLIN), 255, false, 0);
+    const S = { ...defaultSettings(), timeLimit: 600 };
+    const st = simulate(newStats(P, M, S), P, M, S, { kind: 'set', value: 255 }, 400, makeRng(3));
+    expect(st.buffEnded[0]).toBe(400);
+    const mean = st.buffEndSum[0] / 400;
+    // ends at the n-th check, n in 2..6, the first check 0..20 s in: mean 10 + 20 * 3 = 70 s
+    expect(mean).toBeGreaterThan(62); expect(mean).toBeLessThan(78);
+    expect(st.srcAttempts.reduce((a, b) => a + b)).toBeGreaterThan(0);
+  });
+});
+
 describe('fights', () => {
   it('a 1-HP monster that is always hit dies at the first strike', () => {
     const c = karl();
