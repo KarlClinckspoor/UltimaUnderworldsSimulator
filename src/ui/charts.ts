@@ -134,11 +134,12 @@ export function lineChart(el: HTMLElement, series: LineSeries[], o: { height?: n
 }
 
 /** Stacked histogram: bins are [x0, x1) of equal width. */
-export function histogram(el: HTMLElement, x0: number, width: number, series: Series[], o: { height?: number; xLabel?: string; yLabel?: string; yfmt?: (v: number) => string; xfmt?: (v: number) => string; marks?: { x: number; label: string }[] } = {}) {
+export function histogram(el: HTMLElement, x0: number, width: number, series: (Series & { opacity?: number })[], o: { height?: number; xLabel?: string; yLabel?: string; yfmt?: (v: number) => string; xfmt?: (v: number) => string; marks?: { x: number; label: string }[]; overlay?: boolean; centred?: boolean } = {}) {
   chart(el, o.height ?? 200, (svg, w, h) => {
     const nb = Math.max(...series.map((s) => s.values.length), 1);
-    const x = d3.scaleLinear().domain([x0, x0 + nb * width]).range([M.l, w - M.r]);
-    const tot = Array.from({ length: nb }, (_, i) => series.reduce((s, se) => s + (se.values[i] ?? 0), 0));
+    const sh = o.centred ? -width / 2 : 0;
+    const x = d3.scaleLinear().domain([x0 + sh, x0 + nb * width + sh]).range([M.l, w - M.r]);
+    const tot = Array.from({ length: nb }, (_, i) => o.overlay ? Math.max(...series.map((se) => se.values[i] ?? 0)) : series.reduce((s, se) => s + (se.values[i] ?? 0), 0));
     const y = d3.scaleLinear().domain([0, d3.max(tot) || 1]).nice().range([h - M.b, M.t]);
     svg.append('g').attr('class', 'grid').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(w - M.l - M.r)).tickFormat(() => '') as any);
     for (let i = 0; i < nb; i++) {
@@ -146,9 +147,11 @@ export function histogram(el: HTMLElement, x0: number, width: number, series: Se
       for (const s of series) {
         const v = s.values[i] ?? 0;
         if (!v) continue;
-        const bx = x(x0 + i * width), bw = Math.max(1, x(x0 + (i + 1) * width) - bx - (nb < 80 ? 1 : 0));
+        if (o.overlay) acc = 0;
+        const bx = x(x0 + i * width + sh), bw = Math.max(1, x(x0 + (i + 1) * width + sh) - bx - (nb < 80 ? 1 : 0));
         svg.append('rect').attr('x', bx).attr('width', bw).attr('y', y(acc + v)).attr('height', y(acc) - y(acc + v)).attr('fill', s.color)
-          .append('title').text(`${s.name}, ${o.xfmt ? o.xfmt(x0 + i * width) : (x0 + i * width).toFixed(1)}–${o.xfmt ? o.xfmt(x0 + (i + 1) * width) : (x0 + (i + 1) * width).toFixed(1)}: ${o.yfmt ? o.yfmt(v) : v}`);
+          .attr('opacity', s.opacity ?? null)
+          .append('title').text(o.centred ? `${s.name}, ${o.xfmt ? o.xfmt(x0 + i * width) : x0 + i * width}: ${o.yfmt ? o.yfmt(v) : v}` : `${s.name}, ${o.xfmt ? o.xfmt(x0 + i * width) : (x0 + i * width).toFixed(1)}–${o.xfmt ? o.xfmt(x0 + (i + 1) * width) : (x0 + (i + 1) * width).toFixed(1)}: ${o.yfmt ? o.yfmt(v) : v}`);
         acc += v;
       }
     }
@@ -156,7 +159,7 @@ export function histogram(el: HTMLElement, x0: number, width: number, series: Se
       svg.append('line').attr('class', 'marker').attr('x1', x(m.x)).attr('x2', x(m.x)).attr('y1', M.t).attr('y2', h - M.b);
       svg.append('text').attr('class', 'mark-label').attr('x', x(m.x) + 3).attr('y', M.t + 9).text(m.label);
     }
-    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, undefined, '', '', o.xfmt);
+    axes(svg, x, y, w, h, o.xLabel, o.yLabel, o.yfmt, o.centred ? Math.min(nb, Math.max(2, Math.floor((w - M.l - M.r) / 28))) : undefined, '', '', o.xfmt);
   });
 }
 

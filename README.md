@@ -4,6 +4,7 @@
 
 A static, client-side website for Ultima Underworld 1 with two tabs:
 
+- **Creation**: character creation by class, exactly: histograms of each attribute, max HP and max mana, and of every skill the class can get (overlaid for a skill added once or twice), plus a "desired stats" form giving the chance that one roll meets every minimum with the best menu picks, marking the improbable fields in red and comparing all eight classes.
 - **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle, lore, traps, locks, repair, swimming, falling, regeneration, the mushroom quirk, character creation — with a Details card per check (what it does, the rule as LaTeX and Python, how often timed checks run), grade bars, P(grade)-vs-value curves, threshold values per goal, a value × target heatmap, pinned scenarios, and for the timed checks (HP and mana regeneration, drowning) the exact distribution of the time to full / to 0 HP with 50 / 65 / 95% ranges over time. Value is shown in blue and target in red throughout.
 - **Combat**: pick any of the 657 monsters in LEV.ARK (levels 1–9), fight it N times in melee or at range, and see outcomes with 95% Wilson intervals, fight length, HP left, damage dealt by source, damage received per body part with armour absorption, the monster's attacks by source, wear, casting statistics, and the exact one-blow damage distribution. **All enemies** runs every combat-capable monster and plots how many the character can beat.
 
