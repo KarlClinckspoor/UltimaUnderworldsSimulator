@@ -29,6 +29,8 @@ const rendered = { skills: '', combat: '', chargen: '' };
 function render(why: string) {
   setRandModel(state.combat.rand);
   document.body.classList.toggle('panel-closed', !state.panelOpen);
+  collapse.classList.toggle('on', state.panelOpen);
+  collapse.setAttribute('aria-pressed', String(state.panelOpen));
   for (const b of document.querySelectorAll<HTMLButtonElement>('.tab')) b.classList.toggle('on', b.dataset.tab === state.tab);
   views.skills.hidden = state.tab !== 'skills';
   views.combat.hidden = state.tab !== 'combat';

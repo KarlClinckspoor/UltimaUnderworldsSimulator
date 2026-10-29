@@ -3,7 +3,7 @@
 // critter_attack / frp_check, OBJPHYS.C missile_newhit, RUNES.C player_cast, SPELLS.C area_spells /
 // area1_spells / release_missile, AI.C crit_offense.
 
-import { creatures, heightOf, items, missiles, resistOf, SK, spells, weapons, worldOf, type Attack, type CreatureRec } from '../data/gameData';
+import { creatureName, creatures, heightOf, items, missiles, resistOf, SK, spells, weapons, worldOf, type Attack, type CreatureRec } from '../data/gameData';
 import { derive, spellStatus, stabilityOf, weaponSlot, type ArmourParts, type Character } from '../core/character';
 import { isSharp, SWING_KIND } from './blow';
 import type { RandModel } from '../core/rng';
@@ -191,7 +191,7 @@ export function monsterProfile(creatureIndex: number, hp: number, powerful: bool
   const cr: CreatureRec = creatures[creatureIndex];
   const fm = cr.firesMissile;
   return {
-    creature: creatureIndex, itemId: cr.id, name: cr.name, hp, avghit: cr.avghit, powerful, attitude,
+    creature: creatureIndex, itemId: cr.id, name: creatureName(cr), hp, avghit: cr.avghit, powerful, attitude,
     height: heightOf(cr.id), resist: resistOf(cr.id), armour: cr.armour, defence: cr.defence, nerve: cr.nerve,
     equip: cr.equip, str: cr.str, dex: cr.dex, passive: !!cr.passive, attacks: cr.attacks, exp: cr.exp, blood: cr.blood, race: cr.race,
     missile: fm !== null ? { damage: missiles[fm].damage, type: missiles[fm].damageType ?? 0x40, name: missiles[fm].name } : null,

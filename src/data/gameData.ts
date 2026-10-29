@@ -17,7 +17,9 @@ export interface CreatureRec {
 export interface SpellRec { index: number; name: string | null; circle: number | null; cls: number; className: string | null;
   minor: number; flags: number; runes: number[]; words: string; missile: number | null; heal: string | null }
 export interface EnemyRow { c: number; hp: number; pw: number; att: number; n: number; placed: number; trap: number;
-  spawnP?: number[]; objs: number[]; authored: number }
+  spawnP?: number[]; objs: number[]; authored: number;
+  /** the NPC's name (STRINGS.PAK block 7, whoami + 0x10), when it has one */
+  who?: string }
 export interface LevelRec { level: number; world: number; worldName: string; levelInWorld: number; rows: EnemyRow[] }
 export interface WeaponFrames { lefty: number; kind: number; frmtot: number[]; wframe: number[][] }
 export interface ItemRec { name: string; height: number; radius: number; resist: number; qualclass: number }
@@ -60,5 +62,17 @@ export const heightOf = (itemId: number) => items[itemId]?.height ?? 0;
 export const resistOf = (itemId: number) => items[itemId]?.resist ?? 0;
 export const itemName = (itemId: number) => items[itemId]?.name ?? `item 0x${itemId.toString(16)}`;
 
-/** Creature display name without the item-id suffix used to disambiguate duplicates. */
-export const creatureLabel = (c: CreatureRec) => c.name;
+/** Goblin colours. CRIT\\AS.AN gives both goblin kinds (cudgel 0x49, shortsword 0x4A) their art
+    file's palette 0, and in both files it carries the green skin ramp (in UW1 the gray
+    goblins' palettes lack it), so both are green. */
+const GOBLIN_COLOUR: Record<number, string> = { 0x49: 'Green', 0x4a: 'Green' };
+/** Creature display name: no item-id suffix (it stays in tooltips), goblins by colour. */
+export function creatureName(c: CreatureRec): string {
+  const base = c.name.replace(/\s*\(0x[0-9a-f]+\)$/i, '');
+  const col = GOBLIN_COLOUR[c.id];
+  return col ? `${col} ${base.toLowerCase()}` : base;
+}
+export const creatureLabel = creatureName;
+/** An NPC name as block 7 has it: 'a_bizarre fish' loses its article marker, 'the Slasher of Veils' keeps its own. */
+export const npcName = (s: string) => s.replace(/^(a|an)_/, '').replace(/_/g, ' ');
+export const creatureHex = (c: CreatureRec) => `creature 0x${c.id.toString(16).toUpperCase()}`;
