@@ -11,6 +11,7 @@ const objects = j('objects.json');
 const comobj = j('comobj.json');
 const spells = j('spells.json');
 const levels = j('level-monsters.json');
+const npcNames = j('npc-names.json').names; // whoami -> name (STRINGS.PAK block 7)
 
 const items = comobj.items.map((i) => [i.name, i.height, i.radius, i.resist, i.qualclass]);
 
@@ -48,11 +49,13 @@ const sp = spells.spells.map((s) => ({
 const lv = levels.levels.map((L) => {
   const rows = new Map();
   for (const m of L.monsters) {
-    const key = `${m.creature_index}|${m.hp}|${m.powerful}|${m.attitude}`;
+    const who = npcNames[m.whoami] ?? null; // named NPCs get rows of their own
+    const key = `${m.creature_index}|${m.hp}|${m.powerful}|${m.attitude}|${who ?? ''}`;
     let r = rows.get(key);
     if (!r) {
       r = { c: m.creature_index, hp: m.hp, pw: m.powerful, att: m.attitude, n: 0, placed: 0, trap: 0,
         spawnP: [], objs: [], authored: m.hp_authored ? 1 : 0 };
+      if (who) r.who = who;
       rows.set(key, r);
     }
     r.n++;

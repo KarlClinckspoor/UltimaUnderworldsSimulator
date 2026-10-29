@@ -1,6 +1,6 @@
 // Combat tab (plan Part B): one enemy N times, or every enemy in the game.
 import { ATTACK_SPELLS, derive, LEVEL_TABLE, spellLabel, spellStatus, stabilityOf, ZONE_NAMES } from '../core/character';
-import { ATTITUDES, creatures, levels, type EnemyRow } from '../data/gameData';
+import { ATTITUDES, creatures, levels, creatureName, creatureHex, npcName, type EnemyRow } from '../data/gameData';
 import { combatCapable, DUR_CHECK_TICKS, monsterProfile, playerProfile, type FightSettings, type MonsterProfile, type PlayerProfile } from '../combat/setup';
 import { runJobs, splitJob, type RunHandle } from '../combat/pool';
 import type { Job } from '../combat/worker';
@@ -21,8 +21,8 @@ let lastAll: { results: AllResult[]; key: string } | null = null;
 interface EnemyRef { level: number; rowIndex: number; row: EnemyRow }
 interface AllResult extends EnemyRef { stats: Stats; M: MonsterProfile }
 
-const rowName = (r: EnemyRow) => `${creatures[r.c].name}${r.pw ? ' ★' : ''}`;
-const rowDesc = (r: EnemyRow) => `${rowName(r)} · HP ${r.hp} · ${ATTITUDES[r.att]}${r.n > 1 ? ` · ×${r.n}` : ''}${r.trap ? ` · ${r.trap} from traps` : ''}`;
+const rowName = (r: EnemyRow) => `${creatureName(creatures[r.c])}${r.who ? ` (${npcName(r.who)})` : ''}${r.pw ? ' ★' : ''}`;
+const rowDesc = (r: EnemyRow) => `${rowName(r)} · ${creatureHex(creatures[r.c])} · HP ${r.hp} · ${ATTITUDES[r.att]}${r.n > 1 ? ` · ×${r.n}` : ''}${r.trap ? ` · ${r.trap} from traps` : ''}`;
 
 function hpMode(): HpMode {
   const u = state.combat;
@@ -168,7 +168,7 @@ function enemySummary(r: EnemyRow) {
     M.caster ? `caster ${M.caster}${M.offensive ? '' : ' (no attack spells)'}: ${M.spells.map((s) => s.name).filter((n) => n !== '-').join(', ')}` : '',
     M.resist ? `resist 0x${M.resist.toString(16)}` : '', r.pw ? 'powerful: +7..12 to hit, +4..15 damage, armour ×5/3' : ''].filter(Boolean).join(' · ');
   return h('div', {},
-    h('h2', {}, rowName(r), h('small', {}, ` level ${state.combat.level} · ${ATTITUDES[r.att]} · stored HP ${r.hp} (average ${cr.avghit})`)),
+    h('h2', {}, rowName(r), h('small', {}, ` level ${state.combat.level} · ${ATTITUDES[r.att]} · stored HP ${r.hp} (average ${cr.avghit}) · ${creatureHex(cr)}`)),
     h('p', { class: 'derived' }, `Defence ${cr.defence} · armour ${cr.armour.map((a) => (a === 255 ? '—' : a)).join('/')} · height ${M.height} · nerve ${cr.nerve} · XP ${cr.exp * 4}+2d${cr.exp}`),
     h('p', { class: 'derived' }, atk), extra ? h('p', { class: 'derived' }, extra) : null);
 }
