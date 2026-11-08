@@ -106,6 +106,7 @@ export function rate(run: ArenaRun, scoring: Scoring): { r: RatingResult; sum: E
 
 /** The named NPCs that use a creature type (from the placed monsters). */
 const namesByType = new Map<number, string[]>();
+// (the character's entrant has creature -1 and no names)
 for (const L of levels) for (const r of L.rows) if (r.who) {
   const a = namesByType.get(r.c) ?? [];
   const nm = npcName(r.who);
@@ -113,5 +114,13 @@ for (const L of levels) for (const r of L.rows) if (r.who) {
   namesByType.set(r.c, a);
 }
 export const namedOf = (creature: number) => namesByType.get(creature) ?? [];
-export const entrantLabel = (e: Entrant) => `${creatures[e.creature].name}${e.powerful ? ' ★' : ''}`;
+export const entrantLabel = (e: Entrant) => (e.player !== undefined ? `You (${e.player})` : `${creatures[e.creature].name}${e.powerful ? ' ★' : ''}`);
+
+/** The run with the character added as the last entrant, from its pairs keyed by the monster's entrant key. */
+export function withPlayer(run: ArenaRun, name: string, pairs: Map<string, PairRec>): { run: ArenaRun; you: number } {
+  const you = run.entrants.length;
+  const extra: PairRec[] = [];
+  run.entrants.forEach((e, j) => { const p = pairs.get(entrantKey(e)); if (p) extra.push({ ...p, i: you, j }); });
+  return { run: { ...run, entrants: [...run.entrants, { creature: -1, powerful: false, player: name }], pairs: [...run.pairs, ...extra] }, you };
+}
 export { entrantKey };

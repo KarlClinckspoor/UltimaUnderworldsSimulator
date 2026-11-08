@@ -434,7 +434,12 @@ Measured: melee 61 entrants, 1,830 pairs × 2,000 fights in 46 s in Node; ranged
 
 Found while building: a monster whose rolled HP starts below 3/4 of its average runs `should_i_flee` every time it is attacked, even on a miss (`do_attack` calls `damage_item` with 0, which records the attacker), so a harmless attacker such as the Brain creature (to-hit 0, damage 0) still puts the Fighter to flight in 19% of fights. The upsets card explains it. Fire immunity against Fireball casters (Imp against Destroyer, Liche 0x69, Fire elemental) is the other main source of upsets in the ranged ladder.
 
-Not done from C8: the character on the ladder, per-placement entrants, a combined rating with movement.
+Not done from C8: per-placement entrants, a combined rating with movement.
+
+**Added 2026-11-08 (later):**
+- *The character on the ladder* (`src/arena/player.ts`): a toggle adds the character as one more entrant. It fights every monster entrant with Part B's `fight()` (N per pair, the run's HP rule, time limit, distance and random numbers; jobs in the worker pool), each result is turned into a pair (the player never flees; a monster's flight is its loss), and the ratings are fitted again over the monsters' unchanged pairs plus these. Melee: the weapon in hand, no spells (no attack spell, and the panel's buffs only when "with the panel's buffs" is ticked). Ranged: the single most damaging move, the launcher or one castable attack spell, chosen by the mean damage per use against an unarmoured, bleeding, living target that does not fight back (`playerSetup`); a chosen spell falls back to the launcher when the mana runs out, as in Part B. No ranged move: not rated at range.
+- *One entrant against all others*: clicking a name in the ladder or a row label in the heatmap opens a card with its record against every opponent, best to worst, each with its score, the score the two ratings predict, kills, deaths, flights both ways, timeouts, fight length and HP dealt and taken; the heatmap outlines its row and column.
+- *Launcher enchantments checked*: `player_fire` (MISSILE.C:80 UW2, :89 UW1) copies the ammunition's link onto the projectile and never reads the launcher; `missile_newhit` (OBJPHYS.C:93 UW2, :105 UW1) takes `Missile[ammo].damage`, scaled only by the Missile skill and its skill check; `missile_thwack` sets power 0x80 and hitangle 0. So a launcher's enchantment does not change its shots, as the simulator already had it; the panel now says so, and a test fixes it.
 
 
 # Both tabs

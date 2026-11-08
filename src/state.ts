@@ -17,6 +17,9 @@ export interface ArenaUi {
   rand: 'game' | 'ideal'; seed: number;
   flee: 'loss' | 'draw'; timeout: 'draw' | 'ignore';
   sel: string;                       // the head-to-head pair, "i-j" in the shown run, or ''
+  player: boolean;                   // add the character as an entrant
+  playerBuffs: boolean;              // with the panel's buffs (spells are left out otherwise)
+  focus: string;                     // the entrant summarised against all others (entrant key), or ''
 }
 export interface SkillsUi { check: string; value: number | null; target: number | null; pinned: { label: string; value: number; target: number }[] }
 export type Tab = 'skills' | 'combat' | 'chargen';
@@ -41,7 +44,7 @@ export const state: AppState = {
 };
 export function defaultArena(): ArenaUi {
   return { view: 'player', mode: 'melee', nMelee: 200, nRanged: 1000, hpMode: 'roll', powerful: false, timeLimit: 120, distance: 3,
-    rand: 'game', seed: 1, flee: 'loss', timeout: 'draw', sel: '' };
+    rand: 'game', seed: 1, flee: 'loss', timeout: 'draw', sel: '', player: false, playerBuffs: false, focus: '' };
 }
 
 type Listener = (why: string) => void;

@@ -128,8 +128,9 @@ export function simulateDuels(st: DuelStats, A: MonsterProfile, B: MonsterProfil
 
 // ---- entrants
 
-export interface Entrant { creature: number; powerful: boolean }
-export const entrantKey = (e: Entrant) => `${e.creature}${e.powerful ? 'p' : ''}`;
+/** A creature type (powerful or not), or the character (`player` holds its name; creature is -1). */
+export interface Entrant { creature: number; powerful: boolean; player?: string }
+export const entrantKey = (e: Entrant) => (e.player !== undefined ? 'you' : `${e.creature}${e.powerful ? 'p' : ''}`);
 /** The fighter for an entrant: its creature type at average HP (the HP actually used is rolled per fight). */
 export const entrantProfile = (e: Entrant, creatures: { avghit: number }[]) =>
   monsterProfile(e.creature, creatures[e.creature].avghit, e.powerful, 0, 9);
