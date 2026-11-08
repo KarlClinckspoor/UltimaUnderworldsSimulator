@@ -411,7 +411,12 @@ Ported from the UW2 branch. `src/combat/actor.ts` holds UW1's monster AI step (b
 
 Measured: melee 60 entrants, 1,770 pairs × 2,000 fights in 57 s in Node; ranged 12 entrants, 66 pairs in about 1 s.
 
-Not done from C8: the character on the ladder, per-placement entrants, a combined rating with movement.
+Not done from C8: per-placement entrants, a combined rating with movement.
+
+**Added 2026-11-08 (later), as on the UW2 branch:**
+- *The character on the ladder* (`src/arena/player.ts`): a toggle adds the character as one more entrant. It fights every monster entrant with Part B's `fight()` (N per pair, the run's HP rule, time limit, distance and random numbers; jobs in the worker pool), each result is turned into a pair (the player never flees; a monster's flight is its loss), and the ratings are fitted again over the monsters' unchanged pairs plus these. Melee: the weapon in hand, no spells (no attack spell, and the panel's buffs only when "with the panel's buffs" is ticked). Ranged: the single most damaging move, the launcher or one castable attack spell (Magic Arrow, Lightning, Fireball, Flame Wind, Sheet Lightning), chosen by the mean damage per use against an unarmoured target that does not fight back (`playerSetup`); a chosen spell falls back to the launcher when the mana runs out, as in Part B. No ranged move: not rated at range.
+- *One entrant against all others*: clicking a name in the ladder or a row label in the heatmap opens a card with its record against every opponent, best to worst, each with its score, the score the two ratings predict, kills, deaths, flights both ways, timeouts, fight length and HP dealt and taken; the heatmap outlines its row and column.
+- *Launcher enchantments checked*: `player_fire` (uw1/src/combat/MISSILE.C:89) copies the ammunition's link onto the projectile and never reads the launcher; `missile_newhit` (uw1/src/motion/OBJPHYS.C:105) takes `Missile[ammo].damage`, scaled only by the Missile skill and its skill check (ammo field -64); `missile_thwack` (COMBAT.C:761) sets power 0x80 and hitangle 0. So a launcher's enchantment does not change its shots, as the simulator already had it (DoPlayerWeapon decodes the hand's enchantment for a fist blow, but with a launcher in hand the character shoots, so that never applies); the panel now says so, and a test fixes it.
 
 
 # Both tabs

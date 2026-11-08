@@ -147,6 +147,8 @@ export function renderPanel(root: HTMLElement) {
       row.append(enchSelect(c, s, e.ench, (en) => set(() => (e.ench = en))));
       if (e.ench?.major === 12 && (e.ench.effect & 8) && s > 4 && s !== weaponSlot(c))
         row.append(h('p', { class: 'warn eq-note' }, '⚠ Toughness on a shield or ring goes twice to the torso and not at all to the arms (player_affected_by adds it to the first of its two locations each time); the simulator does the same.'));
+      if (e.ench && s === weaponSlot(c) && e.itemId >= 0x18 && e.itemId <= 0x1f)
+        row.append(h('p', { class: 'warn eq-note' }, '⚠ A launcher\'s enchantment does not change its shots: player_fire never reads the launcher, and missile_newhit takes the damage from the ammunition (Missile[]) scaled only by the Missile skill. The simulator does the same.'));
     }
     eq.append(row);
   }

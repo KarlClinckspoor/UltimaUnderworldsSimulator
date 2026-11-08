@@ -1,6 +1,14 @@
 // The arena (plan Part C, tests C9): duels between monsters, the critter defender, the rating fit, and
 // the shipped reference run.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { readPlayerDat } from '../src/core/playerdat';
+import { characterFromSave, weaponSlot, type Character } from '../src/core/character';
+import { defaultSettings, playerProfile } from '../src/combat/setup';
+import { newStats, simulate } from '../src/combat/fight';
+import { playerSetup, pairFromPlayerStats, arenaHpMode } from '../src/arena/player';
+import { withPlayer } from '../src/arena/arena';
 import { makeRng } from '../src/core/rng';
 import { pPass } from '../src/core/skillcheck';
 import { MonsterActor } from '../src/combat/actor';
@@ -8,7 +16,7 @@ import {
   critterDefender, defaultDuelSettings, emptyDuelStats, entrantProfile, hasRangedAttack, simulateDuels, type DuelStats,
 } from '../src/combat/duel';
 import { monsterProfile, type MonsterProfile } from '../src/combat/setup';
-import { creatures } from '../src/data/gameData';
+import { creatures, SK } from '../src/data/gameData';
 import { ARENA_ENGINE, arenaEntrants, packRun, pairFromStats, unpackRun, type PackedRun } from '../src/arena/arena';
 import { expected, fitRatings, upsets, type PairCounts } from '../src/arena/rating';
 import arenaJson from '../src/data/arena.json';
@@ -180,5 +188,69 @@ describe('reference run (src/data/arena.json)', () => {
         expect(pairFromStats(p.i, p.j, st)).toEqual(p);
       }
     }
+  });
+});
+
+const karl = () => characterFromSave(readPlayerDat(new Uint8Array(readFileSync(join(__dirname, 'fixtures', 'player-karl.dat')))));
+const withWeapon = (c: Character, itemId: number, ench: { major: number; effect: number } | null): Character =>
+  ({ ...c, equipment: { ...c.equipment, [weaponSlot(c)]: { itemId, quality: 40, ench } } });
+
+describe("a launcher's enchantment (player_fire, missile_newhit)", () => {
+  it('does not change its shots: the damage comes from the ammunition and the Missile skill only', () => {
+    const M = prof('Skeleton');
+    for (const id of [0x18, 0x19, 0x1a]) for (const mode of ['ranged', 'melee'] as const) {
+      const S = { ...defaultSettings(), mode, timeLimit: 30 };
+      const plain = playerProfile(withWeapon(karl(), id, null), null);
+      expect(plain.launcher).not.toBeNull();
+      const results = [null, { major: 12, effect: 3 }, { major: 12, effect: 7 }, { major: 12, effect: 9 }].map((ench) => {
+        const P = playerProfile(withWeapon(karl(), id, ench), null);
+        expect(P.launcher).toEqual(plain.launcher);
+        return simulate(newStats(P, M, S), P, M, S, { kind: 'set', value: 20 }, 200, makeRng(3)).dealt;
+      });
+      for (const r of results) expect(r).toEqual(results[0]);
+    }
+  });
+});
+
+describe('the character as an arena entrant', () => {
+  const D = defaultDuelSettings('ranged');
+  it('melee: no spells (no attack spell, no buffs unless asked)', () => {
+    const c = { ...karl(), buffs: [1] };
+    const s = playerSetup(c, 'melee', defaultDuelSettings('melee'), 'game', false);
+    expect(s.P!.attackSpell).toBeNull();
+    expect(s.P!.character.buffs).toEqual([]);
+    expect(s.S.mode).toBe('melee');
+    expect(playerSetup(c, 'melee', defaultDuelSettings('melee'), 'game', true).P!.character.buffs).toEqual([1]);
+  });
+  it('ranged: the most damaging move, launcher or spell; none: not rated', () => {
+    const bow = playerSetup(withWeapon(karl(), 0x1a, null), 'ranged', D, 'game', false);
+    expect(bow.P!.launcher).not.toBeNull();
+    expect(bow.options[0].perUse).toBeGreaterThan(0);
+    for (const o of bow.options) expect(o.perUse).toBeLessThanOrEqual(bow.options[0].perUse);
+    // a strong caster with a crossbow: every castable attack spell is weighed against the bolt
+    const mage = withWeapon({ ...karl(), level: 16, mana: 60, manaMax: 60, skills: karl().skills.map((v, i) => (i === SK.Casting || i === SK.Mana ? 30 : v)),
+      runes: [...Array(24).keys()], dungeonLevel: 20 }, 0x1a, null);
+    const ms = playerSetup(mage, 'ranged', D, 'game', false);
+    expect(ms.options.length).toBeGreaterThan(1);
+    expect(ms.P!.attackSpellIndex).toBe(ms.options[0].spell);
+    const none = playerSetup({ ...karl(), equipment: {} }, 'ranged', D, 'game', false);
+    expect(none.P).toBeNull();
+  });
+  it("its games join the round robin as pairs (the player never flees)", () => {
+    const s = playerSetup(karl(), 'melee', defaultDuelSettings('melee'), 'game', false);
+    const M = prof('Giant Rat (0x43)');
+    const st = simulate(newStats(s.P!, M, s.S), s.P!, M, s.S, arenaHpMode(defaultDuelSettings('melee'), M), 300, makeRng(4));
+    const p = pairFromPlayerStats(-1, 0, st, s.P!, M, defaultDuelSettings('melee'));
+    expect(p.o.reduce((a, b) => a + b, 0)).toBe(300);
+    expect(p.o[2]).toBe(0);
+    expect(p.o[0]).toBe(st.outcomes[0]);
+    expect(p.hist.reduce((a, b) => a + b, 0)).toBe(300);
+    const run = unpackRun((arenaJson as unknown as Record<'melee', PackedRun>).melee);
+    const w = withPlayer(run, 'Karl', new Map([[`${run.entrants[0].creature}`, p]]));
+    expect(w.you).toBe(run.entrants.length);
+    expect(w.run.entrants[w.you].player).toBe('Karl');
+    expect(w.run.pairs.length).toBe(run.pairs.length + 1);
+    expect(w.run.pairs.at(-1)!.i).toBe(w.you);
+    expect(w.run.pairs.at(-1)!.j).toBe(0);
   });
 });
