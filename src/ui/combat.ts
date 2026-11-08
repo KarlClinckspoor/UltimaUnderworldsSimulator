@@ -13,6 +13,7 @@ import { setRandModel } from '../core/randdist';
 import { LCG_PERIOD } from '../core/rng';
 import { card, clear, fmt, h, numInput, pct, select, toggle } from './dom';
 import { C, groupedBars, histogram, lineChart, OUTCOME_COLORS, shareBar, stackedBars, stripChart } from './charts';
+import { renderArena } from './arena';
 
 const OUT_LABEL = ['Victory', 'Death', 'Monster flees', 'Timeout'];
 let running: RunHandle | null = null;
@@ -42,6 +43,11 @@ export function renderCombat(root: HTMLElement) {
   const c = state.character;
   const rerender = () => renderCombat(root);
   const set = (f: () => void) => { f(); changed('combat'); rerender(); };
+  const a = state.arena;
+  root.append(h('div', { class: 'world-tabs combat-views' },
+    h('button', { class: `wld ${a.view === 'player' ? 'on' : ''}`, onclick: () => { a.view = 'player'; changed('arena'); rerender(); } }, 'Character against monsters'),
+    h('button', { class: `wld ${a.view === 'arena' ? 'on' : ''}`, title: 'every monster against every other: Melee and Ranged ratings', onclick: () => { a.view = 'arena'; changed('arena'); rerender(); } }, 'Arena: monster ratings')));
+  if (a.view === 'arena') { renderArena(root, rerender); return; }
   setRandModel(u.rand);
   const L = levels.find((x) => x.level === u.level) ?? levels[0];
   if (u.row >= L.rows.length) u.row = 0;

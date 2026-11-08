@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:c": "node test/c/run-c-checks.mjs",
-    "smoke": "node test/smoke.mjs"
+    "smoke": "node test/smoke.mjs",
+    "arena": "vite-node tools/arena.ts"
   },
   "devDependencies": {
     "@types/d3": "7.4.3",

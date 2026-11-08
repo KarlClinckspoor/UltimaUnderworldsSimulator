@@ -9,9 +9,18 @@ export interface CombatUi extends FightSettings {
   attackSpell: number | null;
   allN: number; threshold: number; inclTrap: boolean; inclPeaceful: boolean; fleeCounts: boolean;
 }
+export interface ArenaUi {
+  view: 'player' | 'arena';          // the Combat tab's sub-view
+  mode: 'melee' | 'ranged';
+  nMelee: number; nRanged: number;   // fights per pair
+  hpMode: 'roll' | 'avg'; powerful: boolean; timeLimit: number; distance: number;
+  rand: 'game' | 'ideal'; seed: number;
+  flee: 'loss' | 'draw'; timeout: 'draw' | 'ignore';
+  sel: string;                       // the head-to-head pair, "i-j" in the shown run, or ''
+}
 export interface SkillsUi { check: string; value: number | null; target: number | null; pinned: { label: string; value: number; target: number }[] }
 export type Tab = 'skills' | 'combat' | 'chargen';
-export interface AppState { tab: Tab; panelOpen: boolean; character: Character; combat: CombatUi; skills: SkillsUi }
+export interface AppState { tab: Tab; panelOpen: boolean; character: Character; combat: CombatUi; skills: SkillsUi; arena: ArenaUi }
 
 const CHAR_KEY = 'uw2sim.character.v1';
 
@@ -28,7 +37,12 @@ export const state: AppState = {
   combat: { ...defaultSettings(), level: 1, row: 0, n: 1000, hpMode: 'stored', hpSet: 20, seed: 1, attackSpell: null,
     allN: 300, threshold: 0.9, inclTrap: true, inclPeaceful: true, fleeCounts: false },
   skills: { check: 'casting', value: null, target: null, pinned: [] },
+  arena: defaultArena(),
 };
+export function defaultArena(): ArenaUi {
+  return { view: 'player', mode: 'melee', nMelee: 200, nRanged: 1000, hpMode: 'roll', powerful: false, timeLimit: 120, distance: 3,
+    rand: 'game', seed: 1, flee: 'loss', timeout: 'draw', sel: '' };
+}
 
 type Listener = (why: string) => void;
 const listeners: Listener[] = [];
@@ -48,6 +62,8 @@ function writeHash() {
   p.set('tab', state.tab);
   for (const k of HASH_COMBAT) { const v = state.combat[k]; if (v !== null && v !== undefined) p.set(k, String(v)); }
   p.set('check', state.skills.check);
+  const d = defaultArena() as unknown as Record<string, unknown>;
+  for (const [k, v] of Object.entries(state.arena)) if (v !== d[k]) p.set('a.' + k, String(v));
   try { history.replaceState(null, '', '#' + p.toString()); } catch { /* ignore */ }
 }
 export function readHash() {
@@ -62,4 +78,10 @@ export function readHash() {
   }
   const c = p.get('check');
   if (c) state.skills.check = c;
+  const d = defaultArena() as unknown as Record<string, unknown>;
+  for (const k of Object.keys(d)) {
+    const v = p.get('a.' + k);
+    if (v === null) continue;
+    (state.arena as any)[k] = typeof d[k] === 'number' ? Number(v) : typeof d[k] === 'boolean' ? v === 'true' : v;
+  }
 }

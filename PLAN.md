@@ -341,6 +341,102 @@ Filters first: include trap-spawned monsters (yes), include non-hostile creature
 Movement, distance closing and kiting; line of sight and projectile flight (ranged hit probability is a parameter); player healing, potions, HP regeneration, buff casting during the fight (buffs are pre-cast), attack spells in melee fights; monster summoning and slot-3 spells other than the heal no-op; multiple enemies at once; ally critters; the dying animation; armour value recomputation as armour wears; the other xt spells; hunger, fatigue, drunkenness and poison effects on the player; the 16-bit overflow in the powerful-XP product (shown as the nominal value).
 
 
+# Part C. Arena: monster-vs-monster ratings (planned 2026-11-07)
+
+A sub-view of the Combat tab. Every monster fights every other monster one on one, many times, and the results become two ladders on the Elo scale: a **Melee rating** and a **Ranged rating**. The character plays no part (until C8). Same engine, same data, same random numbers as Part B; nothing new is invented about the rules.
+
+## C1. Does the game support critter-vs-critter fights? (traced in uw2/src)
+
+Yes, through the same code the player fights with, so the arena needs no new rules, only the defender side generalised:
+
+- `critter_attack` (COMBAT.C:891) → `do_attack` → `resolve_attack` / `frp_check` / `do_damage` runs for any `hitobj`. Against a critter defender: to-hit is `skill_check(attacks[slot].chance + equip / 2 (+ 7..12 if powerful) + hitangle, defender's Creature.defence)`; **no** `cmbModTH` (that term is only `if (hitobj == 1)`); the critical is ×1 or ×2 as for the player.
+- Damage: `attacks[slot].damage + STR / 5 (+ 4..15 if powerful)`, the dice of B5, then the **defender creature's armour** for the zone (0xFF → zone 0), ×5/3 when the defender is powerful (`hitobj != 1 && OBJ_POWERFUL(def)`, so this applies to monster attackers too); no easy-mode halving; `damage_item` → `check_res` with the defender's resist byte.
+- Poison is not applied: `critter_attack` only poisons `hitobj == 1`. Wear does not apply (monsters carry no worn items in the model).
+- `do_attack` returns 0 when both sides are on the same ally side; `critter_mv` (AI.C:1166) only runs the hit reaction (attack back / `should_i_flee`) between critters when one of them is an ally. **The arena assumes one fighter is the player's ally** (as a charmed creature would be) and the other hostile, so both fight and both can flee exactly as a monster does against the player (B4: flee test, bound-to-fight at range, `bA_1` skips the reaction).
+- Ranged: `crit_missile_attack` (AI.C:522, < 4 tiles, chance (DEX + 1) / 192) and `crit_magik_attack` (AI.C:499, < 8 tiles, chance caster / 128, slot 1 eleven times in sixteen) aim at `mytarget`, which can be a critter; the missile hits through `missile_thwack` and the area spells through `damage_square` as in B4. In melee reach a caster only melees (`crit_offense` takes the reach branch first).
+
+## C2. Entrants
+
+- **One entrant per creature type** (the 61 combat-capable types of `creatures`, `combatCapable`), not per placed monster: a type's stats are fixed, only HP varies by placement, and 559 level rows would give 156,000 pairs. HP is **rolled each fight** with the game's new-critter formula `avghit × (16 + rand % 24) / 32` (B4 "roll" mode); "average HP" (exactly `avghit`) is an option.
+- Not powerful by default. Option: **add powerful variants** as separate entrants ("Troll ★"), which doubles the field.
+- Named NPCs share their creature type's stats and are not separate entrants; the ladder row lists the names that use the type.
+- **Melee ladder:** all 61 types.
+- **Ranged ladder:** only the types with a damaging ranged attack, 14 in this data: Acid slug (acid), Imp (Magic Arrow), Yeti (snowball), Human 0x5B (Sheet Lightning / Flame Wind), Fire elemental (Fireball), Despoiler (acid), Dire reaper (Lightning), Destroyer (Fireball), Liche 0x69 (Fireball / Flame Wind), Fighter (crossbow bolt), Gazer (Lightning), Humans 0x75-0x77 (Lightning). Brain creature (special spells only) and every melee-only type cannot score at range and are listed below the ladder as **unrated, no ranged attack**.
+- An entrant that never damages anyone (every match a timeout) is shown as unrated with the reason, in either ladder.
+
+## C3. The duel
+
+- `duel(A, B, S, rng)` in `src/combat/duel.ts`: two monster actors, nobody moves (B2), 1/16 s ticks, each actor's AI step every 4 ticks from a random phase (`rng.int(4)`, as `fight` does for the monster), time limit 120 s.
+- **Melee:** face to face in reach, hitangle 0 both ways.
+- **Ranged:** held at distance D (default **3 tiles**: slingers and bolt-firers need < 4, Flame Wind 2..7, spells < 8). The area-spell square geometry is `areaSquareIndex` from both ends; a missile spell's explosion is the defender's own square only. Monster missiles always hit, as they do against the player in Part B (no hit-chance setting in the arena).
+- **Same-tick order:** when both actors step on the same tick one of them goes first, which can decide a mutual kill. Half the fights of a pair run with A first and half with B first, so neither side gets the edge.
+- **Outcomes per fight:** A wins (B dead), B wins, A fled, B fled, timeout. Records: duration, HP left, hits and criticals each way, damage by source, as `Stats` does for Part B.
+
+**Engine refactor first (C7 step 1):** the monster's AI step is a closure inside `fight()` (`monsterStep`, `monsterMelee`, `monsterMissile`, `monsterArea`, fight.ts:418-560). Pull it out into a `MonsterActor` (its state plus `step(target)`) that takes a `Defender` interface: `{ height, defence, resist, powerful, armourAt(zone), protectAt(zone), easy, isPlayer }`. The player becomes one `Defender` (armour from the profile, `cmbModTH`, easy mode, poison, wear), a monster another (creature armour ×5/3 if powerful, `protectAt = 0`, no easy, no poison, no wear). `fight()` keeps its exact draw order, so **every Part B result stays bit-identical** (snapshot test before and after).
+
+## C4. Scoring and the rating
+
+- Score per fight for A: win 1, loss 0, **timeout ½**; **fleeing counts as a loss for the one who fled** (it left the field). Options: flee as draw; timeouts left out.
+- **Round robin:** every unordered pair, N fights each (default 200 melee, 1,000 ranged; mirror matches skipped). Melee: 1,830 pairs × 200 = 366,000 fights (twice the size of the current All enemies run); ranged: 91 pairs × 1,000 = 91,000.
+- **Rating = Bradley–Terry fitted on the Elo scale**, not sequential Elo updates. Classic Elo processes games one by one and the result depends on their order and on K; with a full round robin the maximum-likelihood fit of `P(i beats j) = 1 / (1 + 10^((R_j − R_i) / 400))` is the order-free answer Elo converges to. Fit with the MM algorithm (Hunter 2004) on the score totals (½ for a draw); mean rating anchored at 1500.
+- **Uncertainty:** 95% interval per rating from the Fisher information of the fit (bootstrap over fights as a check in the tests).
+- **What one number misses:** the game has rock-paper-scissors cases (Fireball does nothing to the fire-resistant Imp, Hordling, Fire elemental, Despoiler, Destroyer and Liche 0x69, and double damage to cold-resistant ones; UW2's `check_res`). So the view always shows the real matchup matrix next to the ladder, and an **upsets** list: the pairs where the observed win rate is furthest from the rating's prediction.
+
+## C5. Output
+
+1. Switch at the top of the Combat tab: **Against the character | Arena**. In the arena, a second switch **Melee | Ranged** picks the ladder.
+2. **Ladder table:** rank, creature (with the named NPCs of that type), rating ± interval, win / draw / loss %, flee %, mean fight length, avghit, defence, best attack (chance, damage), armour by zone, resistances. Sortable.
+3. **Matchup heatmap:** entrants in rating order on both axes, cell = P(row beats column), diverging colour around 50%, hover readout with the counts. Click a cell for the **head-to-head card**: outcomes with Wilson intervals, fight-length histogram, damage per blow each way (the exact one-blow distribution from `exact.ts` for both directions), reusing Part B's cards.
+4. **Rating against the game's own numbers:** scatter of rating vs `exp` (kill XP) and vs avghit, which shows whether the game's XP values track strength.
+5. Controls: fights per pair, HP mode (rolled / average), powerful variants, flee and timeout scoring, time limit, distance and hit chance (ranged), random numbers model, seed, Run / Cancel with progress. Arena settings go in the URL hash like the rest.
+
+## C6. Precomputed reference ratings
+
+The default ladders should appear instantly: `tools/arena.mjs` runs both round robins at a large N (2,000 per pair, default settings, fixed seed) in Node and writes `src/data/arena.json` (ratings, intervals, the full matrix of counts). The page shows that, marked "reference run, N = 2,000, seed 1"; changing any setting and pressing Run replaces it with a live run in the worker pool. Regenerated when the engine or data change (a test fails if `arena.json` was built by an older engine version).
+
+## C7. Build order
+
+1. Extract `MonsterActor` / `Defender` from `fight.ts`; snapshot test that Part B stats are unchanged for fixed seeds (melee and ranged, several monsters, both random models).
+2. `duel()` and its tests (C9).
+3. Worker job kind `duel` (pair key, N, stream), and `src/arena/rating.ts` (MM fit, intervals, predicted P, upsets).
+4. Arena view: switches, controls, ladder, heatmap, head-to-head card.
+5. `tools/arena.mjs` and `src/data/arena.json`.
+6. README section and SOURCE-COMPARISON rows for the critter-defender path.
+
+## C8. Later (not in the first build)
+
+- **The character on the ladder:** run the current character against every entrant (Part B's engine, the All enemies job) and fit its rating with the monsters' ratings held fixed: "your character rates 1640 in melee, between the Troll and the Ghoul".
+- Per-placement entrants (stored HP of each placed monster) for one level at a time.
+- A combined rating where a melee fighter closes the distance under fire (needs movement, which B2 leaves out).
+
+## C9. Tests
+
+- **Symmetry:** A vs A scores 50% within its interval; swapping A and B mirrors every outcome count within noise; the same seed gives the same matrix.
+- **Critter-defender blow:** simulated one-blow damage of a monster on a monster against the exact convolution (chi-square), including a powerful defender's ×5/3 armour and no easy-mode halving; no poison is ever applied.
+- **Part B unchanged** after the refactor (C7 step 1).
+- **Rating fit:** recovers known ratings from synthetic round-robin data; does not depend on pair order; a never-scoring entrant is reported unrated, not fitted to −∞.
+- **Hand cases:** a 1-HP entrant against a sure hitter loses within the first blow cycle; two entrants that cannot hurt each other time out every fight.
+
+## C10. Decisions to confirm
+
+1. Entrants per creature type with rolled HP (recommended) rather than per placed monster.
+2. Flee = loss for the one who fled, timeout = draw.
+3. Ranged ladder limited to the 14 types with a damaging ranged attack; melee-only types unrated there.
+4. Ship precomputed reference ratings (C6), with live re-runs for other settings.
+5. Powerful variants: off by default, available as an option.
+
+
+## C11. Build status (2026-11-08)
+
+Built as planned with the C10 defaults. `src/combat/actor.ts` holds the monster's AI step and blows against a `Defender`; `fight()` uses it with the player as defender and `test/fight-snapshot.test.ts` shows nine seeded scenarios hash identically before and after. `src/combat/duel.ts` (duel, critter defender, entrants), `src/arena/` (records, rating fit), `src/ui/arena.ts` (the Arena sub-view of the Combat tab), `tools/arena.ts` (`npm run arena`, writes `src/data/arena.json`, loaded lazily), `test/arena.test.ts`.
+
+Measured: melee 61 entrants, 1,830 pairs × 2,000 fights in 46 s in Node; ranged 14 entrants, 91 pairs in 4 s. In the browser a live ranged run (N 1,000) takes about 1.3 s.
+
+Found while building: a monster whose rolled HP starts below 3/4 of its average runs `should_i_flee` every time it is attacked, even on a miss (`do_attack` calls `damage_item` with 0, which records the attacker), so a harmless attacker such as the Brain creature (to-hit 0, damage 0) still puts the Fighter to flight in 19% of fights. The upsets card explains it. Fire immunity against Fireball casters (Imp against Destroyer, Liche 0x69, Fire elemental) is the other main source of upsets in the ranged ladder.
+
+Not done from C8: the character on the ladder, per-placement entrants, a combined rating with movement.
+
+
 # Both tabs
 
 ## Milestones

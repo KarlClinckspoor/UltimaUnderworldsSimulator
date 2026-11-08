@@ -7,6 +7,7 @@ The `uw2` branch of the Underworld combat simulator: the same static, client-sid
 - **Creation**: character creation by class, exactly: histograms of each attribute, max HP and max mana, and of every skill the class can get (overlaid for a skill added once or twice), plus a "desired stats" form giving the chance that one roll meets every minimum with the best menu picks, marking the improbable fields in red and comparing all eight classes.
 - **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle (with the Britannia cap), lore, traps (whose targets grow with the world), locks (with the pick-breaking fumble), repair, swimming, falling, thin ice, skill traps, regeneration, the mushroom quirk, character creation — with a Details card per check (what it does, the rule as LaTeX and Python, how often timed checks run), grade bars, P(grade)-vs-value curves, threshold values per goal, a value × target heatmap, pinned scenarios, and for the timed checks (HP and mana regeneration, drowning) the exact distribution of the time to full / to 0 HP with 50 / 65 / 95% ranges over time. Value is shown in blue and target in red throughout.
 - **Combat**: pick any of the 746 monsters in the 42 levels of LEV.ARK, by world, fight it N times in melee or at range, and see outcomes with 95% Wilson intervals, fight length, HP left, damage dealt by source, damage received per body part with armour absorption, the monster's attacks by source, wear, casting and special-weapon statistics, experience, and the exact one-blow damage distribution. **All enemies** runs every combat-capable monster and plots how many the character can beat.
+- **Combat → Arena**: every monster against every other, one on one, many times, rated on the Elo scale: a **Melee rating** (61 creature types, face to face) and a **Ranged rating** (the 14 types with a ranged attack that can hurt a critter, held 3 tiles apart). Shows the ladder with intervals, a who-beats-whom heatmap, a head-to-head card for any pair, the upsets the single rating cannot explain, and the rating against the game's kill XP. A reference run (2,000 fights per pair) ships with the site; other settings run live in the worker pool.
 
 A shared character panel holds attributes, skills, the dungeon level (its world sets the casting and XP rules), equipment slots 0–10 (item, quality, enchantment — including UW2's special weapons), runes, buffs (Luck, Resist Blows, Valor, Speed, Poison Weapon, Flameproof, Thick Skin, Missile Protection, Freeze Time, Iron Flesh) and easy mode, and loads a save's `PLAYER.DAT` in the browser (nothing is uploaded).
 
@@ -29,7 +30,10 @@ npm run build      # static site in dist/ (open with any static server, e.g. npm
 ```bash
 npm test           # Vitest: C cross-check, PLAYER.DAT reader, simulator vs exact distributions
 npm run build && npm run smoke   # Playwright smoke test (screenshots in test/screenshots)
+npm run arena      # recompute the arena's reference ratings (src/data/arena.json, about a minute)
 ```
+
+`test/fight-snapshot.test.ts` hashes the full results of seeded player-vs-monster fights, so a change that moves any number of the Combat tab shows up; `test/arena.test.ts` checks the duels, the rating fit and that `src/data/arena.json` was made by the current engine and is reproduced pair for pair by a live run.
 
 The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the damage dice of `do_damage`, UW2's `check_res`, the arithmetic of `player_get_exp` and `player_killed_a`, the Poison Weapon term of `frp_check`, `should_i_flee` and `rollem` verbatim from the game source, replaces `rand()` with enumerated values, and requires the TypeScript ports to agree exactly; `test/rng-vectors.test.ts` replays vectors measured on UW2.EXE (same generator state in, same result and state out) (it needs `cc`, `gcc` or `clang`; skipped otherwise).
 
@@ -47,7 +51,8 @@ node tools/compact-data.mjs      # -> src/data/game.json
 | Path | What |
 |---|---|
 | `src/core/` | `skill_check` model, seeded RNG, UW2 PLAYER.DAT reader (chained cipher), character and derived values (`FixPlayerEquips`) |
-| `src/combat/` | blow pipeline (`blow.ts`), profiles and spell table (`setup.ts`), fight loop (`fight.ts`), exact distributions (`exact.ts`), worker pool |
+| `src/combat/` | blow pipeline (`blow.ts`), profiles and spell table (`setup.ts`), the monster's AI step shared by both kinds of fight (`actor.ts`), fight loop (`fight.ts`), monster-vs-monster duel (`duel.ts`), exact distributions (`exact.ts`), worker pool |
+| `src/arena/` | the arena's round robin records and the Bradley–Terry rating fit |
 | `src/ui/` | character panel, Skills tab, Combat tab, d3 charts |
 | `src/data/game.json` | compact game data, built by `node tools/compact-data.mjs` from `uw2-data/json` |
 | `uw2-data/` | the extractor (with the LZSS decoder), the reference PLAYER.DAT reader and the full JSON extracts |
@@ -63,5 +68,6 @@ node tools/compact-data.mjs      # -> src/data/game.json
 - Casting: `skill_check(Casting, 3 × circle)`; nothing above circle 3 in Britannia; missile (Fireball and Lightning also explode where they stop), area (Sheet Lightning, Flame Wind, Frost, Shockwave; Repel Undead makes the undead flee) and targeted (Bleeding, Smite Foe, Smite Undead) attack spells with their real geometry. Armour spells (Resist Blows, Thick Skin, Iron Flesh) add no armour, as in the game: `parse_spells` reads the armour bonus from the wrong bits. Monsters cast their acid and snowball missiles and heal themselves with Heal.
 - Experience comes only from a kill: (exp × 4 + 2d(exp)) halved, halved again (+1) when your level is above twice the world plus two, nothing past 524272 raw. The Combat tab totals it; the all-enemies view gives the expected XP for fighting everything once.
 - A monster you hit re-evaluates `should_i_flee` at its next step; fleeing ends the fight. You never flee; your death ends it too; otherwise the time limit is a timeout.
+- Arena: a monster's blow on another monster takes COMBAT.C's `hitobj != 1` path: to-hit against the defender's own defence with no protection term, its armour at the zone (×5/3 if powerful), no easy mode, no poison, no wear. Critters only fight each other when one is the player's ally, so the arena takes one side as an ally; both run the hit reaction and can flee. Score: a kill 1, fleeing a loss for the one who fled, a timeout a draw (both switchable); ratings are a maximum-likelihood Bradley–Terry fit on the Elo scale (order-free, unlike sequential Elo), with one virtual draw per pair so a perfect record stays finite.
 - Not modelled: movement, line of sight and projectile flight (a hit-chance setting stands in), the player's healing and potions, failed buff casts, summons, Paralyze/Charm/Fear, multiple enemies. Poison from monster bites is modelled (it ticks every third 20 s duration check).
 - How each rule compares with the game's source, the modelling choices and the corrections made: [docs/SOURCE-COMPARISON.md](docs/SOURCE-COMPARISON.md).

@@ -31,6 +31,15 @@ try {
   await page.waitForSelector('text=How many can this character beat?', { timeout: 180000 });
   await page.waitForTimeout(500);
   await page.screenshot({ path: join(shots, '3-all-enemies.png'), fullPage: true });
+  await page.click('text=Arena: monster ratings');
+  await page.waitForSelector('text=Melee ladder', { timeout: 30000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: join(shots, '3b-arena-melee.png'), fullPage: true });
+  await page.click('text=Ranged rating');
+  await page.click('text=Run round robin');
+  await page.waitForSelector('text=Your run:', { timeout: 120000 });
+  await page.screenshot({ path: join(shots, '3c-arena-ranged.png'), fullPage: true });
+  await page.click('text=Character against monsters');
   await page.click('.collapse');
   await page.click('.tab[data-tab=skills]');
   await page.waitForSelector('#view-skills:not([hidden]) h3');
