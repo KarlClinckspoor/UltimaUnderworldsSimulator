@@ -7,6 +7,7 @@ A static, client-side website for Ultima Underworld 1 with two tabs:
 - **Creation**: character creation by class, exactly: histograms of each attribute, max HP and max mana, and of every skill the class can get (overlaid for a skill added once or twice), plus a "desired stats" form giving the chance that one roll meets every minimum with the best menu picks, marking the improbable fields in red and comparing all eight classes.
 - **Skills**: the exact odds (n/32768, from the game's own `rand()`) of every `skill_check` outside combat — casting by circle, lore, traps, locks, repair, swimming, falling, regeneration, the mushroom quirk, character creation — with a Details card per check (what it does, the rule as LaTeX and Python, how often timed checks run), grade bars, P(grade)-vs-value curves, threshold values per goal, a value × target heatmap, pinned scenarios, and for the timed checks (HP and mana regeneration, drowning) the exact distribution of the time to full / to 0 HP with 50 / 65 / 95% ranges over time. Value is shown in blue and target in red throughout.
 - **Combat**: pick any of the 657 monsters in LEV.ARK (levels 1–9), fight it N times in melee or at range, and see outcomes with 95% Wilson intervals, fight length, HP left, damage dealt by source, damage received per body part with armour absorption, the monster's attacks by source, wear, casting statistics, and the exact one-blow damage distribution. **All enemies** runs every combat-capable monster and plots how many the character can beat.
+- **Combat → Arena**: every monster against every other, one on one, many times, rated on the Elo scale: a **Melee rating** (60 creature types, face to face) and a **Ranged rating** (the 12 types with a ranged attack that can hurt a critter, held 3 tiles apart). Shows the ladder with intervals, a who-beats-whom heatmap, a head-to-head card for any pair, the upsets the single rating cannot explain, and the rating against the game's kill XP. A reference run (2,000 fights per pair) ships with the site; other settings run live in the worker pool.
 
 A shared character panel holds attributes, skills, equipment slots 0–10 (item, quality, enchantment), runes, buffs and easy mode, and loads a save's `PLAYER.DAT` in the browser (nothing is uploaded).
 
@@ -29,6 +30,7 @@ npm run build      # static site in dist/ (open with any static server, e.g. npm
 ```bash
 npm test           # Vitest: C cross-check, PLAYER.DAT reader, simulator vs exact distributions
 npm run build && npm run smoke   # Playwright smoke test (screenshots in test/screenshots)
+npm run arena      # recompute the arena's reference ratings (src/data/arena.json, about a minute)
 ```
 
 The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the damage dice of `do_damage`, `check_res`, `should_i_flee` and `rollem` verbatim from the game source, replaces `rand()` with enumerated values, and requires the TypeScript ports to agree exactly (it needs `cc`, `gcc` or `clang`; skipped otherwise). The `skill_check` test enumerates all 32768 values of the 15-bit `rand()` and requires the site's counts to equal them exactly. `test/rng-vectors.test.ts` replays vectors measured on UW.EXE: same generator state in, same result and state out.
@@ -38,7 +40,8 @@ The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the dama
 | Path | What |
 |---|---|
 | `src/core/` | `skill_check` model, seeded RNG, PLAYER.DAT reader, character and derived values (`FixPlayerEquips`) |
-| `src/combat/` | blow pipeline (`blow.ts`), profiles (`setup.ts`), fight loop (`fight.ts`), exact distributions (`exact.ts`), worker pool |
+| `src/combat/` | blow pipeline (`blow.ts`), profiles (`setup.ts`), the monster's AI step shared by both kinds of fight (`actor.ts`), fight loop (`fight.ts`), monster-vs-monster duel (`duel.ts`), exact distributions (`exact.ts`), worker pool |
+| `src/arena/` | the arena's round robin records and the Bradley–Terry rating fit |
 | `src/ui/` | character panel, Skills tab, Combat tab, d3 charts |
 | `src/data/game.json` | compact game data, built by `node tools/compact-data.mjs` from `uw1-data/json` |
 | `uw1-data/` | the extractor, the reference PLAYER.DAT reader and the full JSON extracts |
@@ -57,6 +60,7 @@ The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the dama
 - A poisonous monster's hit poisons you (`critter_attack`); poison does its level in damage, then drops by one, at every third duration check (about once a minute). Monster heals do nothing in UW1 (they are cast with no target).
 - Buffs wear off after their rolled number of duration checks (one every 21 s); mana regenerates on the same clock.
 - A monster you hit re-evaluates `should_i_flee` at its next step; fleeing ends the fight (outcome "flees"). You never flee; your death ends it too; otherwise the time limit is a timeout.
+- Arena: a monster's blow on another monster takes COMBAT.C's `hitobj != 1` path: to-hit against the defender's own defence with no protection term, its armour at the zone (×5/3 if powerful), no easy mode, no poison, no wear. Critters only fight each other when one is the player's ally, so the arena takes one side as an ally; both run the hit reaction and can flee. Score: a kill 1, fleeing a loss for the one who fled, a timeout a draw (both switchable); ratings are a maximum-likelihood Bradley–Terry fit on the Elo scale, with one virtual draw per pair so a perfect record stays finite. `test/fight-snapshot.test.ts` guards the Combat tab's numbers; `test/arena.test.ts` checks the duels, the fit, and that a live run reproduces `src/data/arena.json` pair for pair.
 - Not modelled: movement, line of sight and projectile flight (a hit-chance setting stands in; monster missiles always hit), healing, potions and HP regeneration, failed buff casts, summons, scripted deaths, multiple enemies.
 
 `docs/SOURCE-COMPARISON.md` compares every part of the simulator with the game's byte-matched C, function by function: what is exact, what is a modelling choice, what was corrected, and what is still missing.
