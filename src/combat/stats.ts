@@ -3,7 +3,8 @@
 
 export const OUTCOMES = ['win', 'death', 'flee', 'timeout'] as const;
 export type Outcome = (typeof OUTCOMES)[number];
-export const SOURCES = ['melee 1', 'melee 2', 'melee 3', 'missile', 'spell', 'area spell'] as const;
+export const SOURCES = ['melee 1', 'melee 2', 'melee 3', 'missile', 'spell', 'area spell', 'poison'] as const;
+export const SRC_POISON = 6;
 export const DEALT_PARTS = ['weapon', 'strength', 'enchantment', 'critical', 'angle', 'missile', 'spell', 'poison weapon', 'special weapon'] as const;
 
 export const DUR_BIN = 0.5; // seconds per duration histogram bin
@@ -29,6 +30,9 @@ export interface Stats {
   easyHalved: number; resistedPlayer: number;
   srcAttempts: number[]; srcHits: number[]; srcCrits: number[]; srcDamage: number[];
   defensiveCasts: number;
+  poisoned: number;                   // times a bite poisoned the player (critter_attack)
+  monHeals: number;                   // heal spells the monster cast on itself (class 4)
+  monHealed: number;                  // HP they gave back (capped at avghit)
   xp: number;                         // XP the game awards, summed over kills (raw units, tenths)
   xpNominal: number;                  // the same without the 16-bit wrap of the powerful bonus
   xpWrapped: number;                  // kills whose powerful bonus wrapped in 16 bits
@@ -55,8 +59,8 @@ export function emptyStats(hpBins = 1, monBins = 1, durBins = 241): Stats {
     pShots: 0, pShotHits: 0, casts: 0, fizzles: 0, backfires: 0, selfDamage: 0, manaLeft: 0, manaSpent: 0,
     weaponWearEvents: 0, weaponQualityLost: 0, weaponBroken: 0, armourWearEvents: 0, armourQualityLost: 0, armourBroken: 0,
     zoneHits: z(4), zoneDamage: z(4), zoneAbsorbed: [z(3), z(3), z(3), z(3)], zoneProtMisses: z(4), zoneMisses: z(4),
-    easyHalved: 0, resistedPlayer: 0, srcAttempts: z(6), srcHits: z(6), srcCrits: z(6), srcDamage: z(6),
-    defensiveCasts: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0,
+    easyHalved: 0, resistedPlayer: 0, srcAttempts: z(SOURCES.length), srcHits: z(SOURCES.length), srcCrits: z(SOURCES.length), srcDamage: z(SOURCES.length), poisoned: 0,
+    defensiveCasts: 0, monHeals: 0, monHealed: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0,
     specialTriggers: 0, specialHealed: 0, specialHeldTicks: 0, targetRefused: 0, draws: 0, blockOverruns: 0, buffEnded: z(3), buffEndSum: z(3), ttkSum: 0, dps: 0,
   };
 }

@@ -275,7 +275,7 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   stackedBars(rBox, ZONE_NAMES, [
     { name: 'damage taken', color: C.death, values: s.zoneDamage.map((v) => v / n) },
     { name: 'absorbed by armour items', color: C.blue, values: s.zoneAbsorbed.map((a) => a[0] / n) },
-    { name: 'absorbed by armour spell', color: C.teal, values: s.zoneAbsorbed.map((a) => a[1] / n) },
+    { name: 'absorbed by armour spell (none in the game)', color: C.teal, values: s.zoneAbsorbed.map((a) => a[1] / n) },
     { name: 'absorbed by toughness', color: C.purple, values: s.zoneAbsorbed.map((a) => a[2] / n) }], { height: 200, yLabel: 'HP per fight' });
   const zt = h('table', { class: 'mini wide' }, h('tr', {}, ...['Location', 'Armour', 'Hits / fight', 'Misses / fight', 'Missed thanks to protection', 'Damage / fight', 'Absorbed / fight'].map((x) => h('th', {}, x))));
   ZONE_NAMES.forEach((z, i) => zt.append(h('tr', {}, h('td', {}, z), h('td', {}, String(P.armour[i])), h('td', {}, fmt(s.zoneHits[i] / n, 2)), h('td', {}, fmt(s.zoneMisses[i] / n, 2)),
@@ -288,6 +288,7 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   const mt = h('table', { class: 'mini wide' }, h('tr', {}, ...['Source', 'Attempts', 'Hits', 'Criticals', 'Damage'].map((x) => h('th', {}, x))));
   SOURCES.forEach((src, i) => { if (s.srcAttempts[i]) mt.append(h('tr', {}, h('td', {}, src), h('td', {}, fmt(s.srcAttempts[i] / n, 2)), h('td', {}, pct(s.srcHits[i] / s.srcAttempts[i])), h('td', {}, pct(s.srcCrits[i] / s.srcAttempts[i])), h('td', {}, fmt(s.srcDamage[i] / n, 2)))); });
   if (s.defensiveCasts) mt.append(h('tr', {}, h('td', {}, 'spells with no effect on you'), h('td', {}, fmt(s.defensiveCasts / n, 2)), h('td', {}), h('td', {}), h('td', {})));
+  if (s.monHeals) mt.append(h('tr', {}, h('td', {}, 'heals itself'), h('td', {}, fmt(s.monHeals / n, 2)), h('td', {}), h('td', {}), h('td', {}, `+${fmt(s.monHealed / n, 2)} HP`)));
   mc.append(mt);
   if (s.armourWearEvents || s.weaponWearEvents) mc.append(h('p', { class: 'hint' },
     `Wear per fight: weapon ${fmt(s.weaponWearEvents / n, 2)} events, ${fmt(s.weaponQualityLost / n, 2)} quality${s.weaponBroken ? `, broken in ${pct(s.weaponBroken / n)} of fights (you fight on barehanded)` : ''}; armour ${fmt(s.armourWearEvents / n, 2)} wear events, ${fmt(s.armourQualityLost / n, 2)} quality${s.armourBroken ? `, a piece destroyed in ${pct(s.armourBroken / n)} of fights` : ''}. A broken item is removed and the character recomputed, as FixPlayerEquips does.`));

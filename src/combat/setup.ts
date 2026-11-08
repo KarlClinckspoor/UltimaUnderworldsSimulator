@@ -27,9 +27,16 @@ export interface MeleeProfile {
     targeted class 7 spell. */
 export type AreaKind = 'sheet' | 'flame' | 'frost' | 'shockwave' | 'repel';
 export type TargetKind = 'bleed' | 'smite' | 'smiteUndead';
+/** A missile's explosion where it comes to rest (ComObjData fate 9: OBJPHYS.C mob_to_static -> EFFECT.C
+    mts_doanim -> SPELLS.C damage_square): 1 the fireballs (0x14, 0x1D), 10d6 type 0x0B; 2 the lightning
+    bolt (0x15), 6d5 type 3; 0 none. */
+export type Explosion = 0 | 1 | 2;
+export const explosionOf = (missileIndex: number): Explosion =>
+  missileIndex === 4 || missileIndex === 13 ? 1 : missileIndex === 5 ? 2 : 0;
+export interface MissileAttack { damage: number; type: number; name: string; explode: Explosion }
 export interface SpellAttack {
   index: number; name: string; circle: number; cost: number; delayTicks: number;
-  missile: { damage: number; type: number; name: string } | null;
+  missile: MissileAttack | null;
   area: AreaKind | null;
   target: TargetKind | null;
 }
@@ -38,7 +45,7 @@ export const AREA_SPELLS: Record<AreaKind, { count: number; dist: number; radius
   flame: { count: 10, dist: 4, radius: 2, random: false, name: 'Flame Wind' },       // 10d6 type 0x0B, once per square
   frost: { count: 5, dist: 3, radius: 1, random: false, name: 'Frost' },             // 10 type 0x23 to each critter
   shockwave: { count: 50, dist: 0, radius: 1, random: false, name: 'Shockwave' },    // Casting/2+15 type 3 to each critter
-  repel: { count: 50, dist: 4, radius: 2, random: false, name: 'Repel Undead' },     // 255 type 3 to the undead
+  repel: { count: 50, dist: 4, radius: 2, random: false, name: 'Repel Undead' },     // the undead flee; Casting type 3 to one already fleeing
 };
 
 export interface PlayerProfile {
@@ -59,15 +66,17 @@ export interface PlayerProfile {
 }
 
 export type MonsterSpell =
-  | { kind: 'missile'; damage: number; type: number; name: string }
+  | ({ kind: 'missile' } & MissileAttack)
   | { kind: 'area'; area: AreaKind; name: string }
+  | { kind: 'heal'; sub: number; name: string }       // class 4: healing(who, sub), rollem(sub, 8) (sub 15: all)
   | { kind: 'none'; name: string };
 
 export interface MonsterProfile {
   creature: number; itemId: number; name: string; hp: number; avghit: number; powerful: boolean; attitude: number;
   height: number; resist: number; armour: number[]; defence: number; nerve: number; equip: number; str: number;
   dex: number; passive: boolean; attacks: Attack[]; exp: number; blood: number; race: number;
-  missile: { damage: number; type: number; name: string } | null;
+  poison: number;          // Creature b0F: critter_attack's poison level on a hit
+  missile: MissileAttack | null;
   caster: number; offensive: boolean; spells: MonsterSpell[];
   dungeonLevel: number;    // 1..80, for player_get_exp's halving rule and the Britannia casting rule
   ignoresFights: boolean;  // bA_1: never reacts to being hit (no flee check, a non-hostile one stays peaceful)
@@ -88,8 +97,15 @@ export const defaultSettings = (): FightSettings => ({
   mode: 'melee', distance: 3, hitangle: 0, swing: 0, timeLimit: 120, rangedHitChance: 1, aimTicks: 16, rand: 'game',
 });
 
+/** spec_damage[8] and spec_skill[9] (COMBAT.C:59) are 17 contiguous bytes, 0 x 8, 5, 0 x 8, indexed by specweap
+    1..8: specweap 8 (effect 15) reads spec_damage[8], the 5, past the end of its table. */
+const SPEC_BYTES = [0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0];
+
+/** `hand` is the item actually in the weapon hand (undefined when it is empty): frp_check's Poison Weapon term
+    tests is_sharp on it. Bare-handed, AskInventory gives a null pointer and DOS reads the interrupt vector
+    table at 0000:0000, whose id word 0x0019 (a bow) passes is_sharp (COMBAT.C:275, 322). */
 function meleeFrom(c: Character, itemId: number | null, quality: number, ench: { major: number; effect: number } | null,
-  valor: number, poisonWeap: boolean): MeleeProfile {
+  valor: number, poisonWeap: boolean, hand: number | undefined): MeleeProfile {
   const wd = itemId !== null && itemId < 0x10 ? weapons[itemId] : weapons[15];
   const isFist = itemId === null || itemId >= 0x10;
   let skill = wd.skill;
@@ -107,14 +123,18 @@ function meleeFrom(c: Character, itemId: number | null, quality: number, ench: {
   if (!isFist && ench && ench.major === 0xc) {
     if (ench.effect < 4) dmgEnch = ench.effect * 2 + 1;
     else if (ench.effect < 8) toHit = ench.effect * 2 - 7;
-    else specweap = ench.effect - 7; // spec_damage and spec_skill add nothing for 1..8
+    else {
+      specweap = ench.effect - 7;
+      dmgEnch = SPEC_BYTES[specweap];        // spec_damage[specweap]: 5 for specweap 8, else 0
+      toHit = SPEC_BYTES[8 + specweap];      // spec_skill[specweap]: always 0
+    }
   }
   askill += toHit;
   const id = isFist ? 15 : itemId!;
   const kind = isFist ? -1 : Math.min(5, Math.max(3, wd.skill)) - 3;
   return {
     name: isFist ? 'Fist' : wd.name, isFist, itemId: id, askill, base, strBonus, ench: dmgEnch, toHitEnch: toHit, valor, specweap,
-    poison: poisonWeap && !isFist && isSharp(id), speed: wd.speed, minCharge: wd.minCharge, maxCharge: wd.maxCharge,
+    poison: poisonWeap && (hand === undefined || isSharp(hand)), speed: wd.speed, minCharge: wd.minCharge, maxCharge: wd.maxCharge,
     wsize: items[id].radius, kind, quality: isFist ? 63 : quality, qualclass: isFist ? 3 : items[id].qualclass,
   };
 }
@@ -127,8 +147,7 @@ export function spellAttackOf(index: number, level: number): SpellAttack | null 
   const base = { index: s.index, name: s.name ?? s.words, circle: s.circle, cost: 3 * s.circle,
     delayTicks: Math.max(0, Math.ceil(delayUnits / 16)), missile: null, area: null, target: null } as SpellAttack;
   if (s.cls === 5 && s.missile !== null) {
-    const m = missiles[s.missile];
-    return { ...base, missile: { damage: m.damage, type: m.damageType ?? 0, name: m.name } };
+    return { ...base, missile: missileAttack(s.missile) };
   }
   if (s.cls === 6) {
     const area = ({ 2: 'sheet', 4: 'flame', 5: 'repel', 6: 'shockwave', 7: 'frost' } as Record<number, AreaKind>)[s.minor];
@@ -142,11 +161,11 @@ export function spellAttackOf(index: number, level: number): SpellAttack | null 
 }
 
 export function playerProfile(c: Character, attackSpellIndex: number | null, fightLevel = c.dungeonLevel): PlayerProfile {
-  const d = derive(c);
+  const d = derive(c, fightLevel);
   const w = c.equipment[weaponSlot(c)];
-  const melee = w && w.itemId < 0x10 ? meleeFrom(c, w.itemId, w.quality, w.ench, d.valor, d.poisonWeap)
-    : meleeFrom(c, null, 0, null, d.valor, d.poisonWeap);
-  const fist = meleeFrom(c, null, 0, null, d.valor, d.poisonWeap);
+  const melee = w && w.itemId < 0x10 ? meleeFrom(c, w.itemId, w.quality, w.ench, d.valor, d.poisonWeap, w.itemId)
+    : meleeFrom(c, null, 0, null, d.valor, d.poisonWeap, w?.itemId);
+  const fist = meleeFrom(c, null, 0, null, d.valor, d.poisonWeap, undefined);
   let launcher: PlayerProfile['launcher'] = null;
   if (w && w.itemId >= 0x18 && w.itemId <= 0x1f) {
     const m = missiles[w.itemId - 0x10];
@@ -171,15 +190,27 @@ export function playerProfile(c: Character, attackSpellIndex: number | null, fig
   };
 }
 
-function monsterSpell(idx: number): MonsterSpell {
+/** A missile by its index from FIRST_MISSILE (0x10): missile_newhit's damage, type -ammo, and its explosion. */
+export function missileAttack(index: number, defaultType = 0): MissileAttack {
+  const m = missiles[index];
+  return { damage: m.damage, type: m.damageType ?? defaultType, name: m.name, explode: explosionOf(index) };
+}
+
+/** A creature's spell byte as SPELLS.C cast() reads it: 0..0x3F index spells[]; with bit 6 or 7 set it is
+    class 12 + (byte >> 6), minor byte & 0x3F. Class 13 minors 8 and 9 are the acid and snowball missiles
+    (special_spells -> do_spell(5, 4 or 6) -> release_missile items 6 and 12). */
+export function monsterSpell(idx: number): MonsterSpell {
   if (idx === 0xff) return { kind: 'none', name: '-' };
+  if (idx & 0xc0) {
+    const cls = 12 + (idx >> 6), sub = idx & 0x3f;
+    if (cls === 13 && (sub === 8 || sub === 9)) return { kind: 'missile', ...missileAttack(sub === 8 ? 6 : 12) };
+    return { kind: 'none', name: `special spell ${cls}.${sub} (no damage to the player)` };
+  }
   const s = spells[idx];
   if (!s) return { kind: 'none', name: `spell ${idx}` };
   const name = s.name ?? s.words ?? `spell ${idx}`;
-  if (s.cls === 5 && s.missile !== null) {
-    const m = missiles[s.missile];
-    return { kind: 'missile', damage: m.damage, type: m.damageType ?? 0, name: m.name };
-  }
+  if (s.cls === 5 && s.missile !== null) return { kind: 'missile', ...missileAttack(s.missile) };
+  if (s.cls === 4) return { kind: 'heal', sub: s.minor, name: `${name} (heals itself)` };
   if (s.cls === 6) {
     const area = ({ 2: 'sheet', 4: 'flame', 6: 'shockwave', 7: 'frost' } as Record<number, AreaKind>)[s.minor];
     if (area) return { kind: 'area', area, name: AREA_SPELLS[area].name };
@@ -194,7 +225,8 @@ export function monsterProfile(creatureIndex: number, hp: number, powerful: bool
     creature: creatureIndex, itemId: cr.id, name: creatureName(cr), hp, avghit: cr.avghit, powerful, attitude,
     height: heightOf(cr.id), resist: resistOf(cr.id), armour: cr.armour, defence: cr.defence, nerve: cr.nerve,
     equip: cr.equip, str: cr.str, dex: cr.dex, passive: !!cr.passive, attacks: cr.attacks, exp: cr.exp, blood: cr.blood, race: cr.race,
-    missile: fm !== null ? { damage: missiles[fm].damage, type: missiles[fm].damageType ?? 0x40, name: missiles[fm].name } : null,
+    poison: cr.poison ?? 0,
+    missile: fm !== null ? missileAttack(fm, 0x40) : null,
     caster: cr.caster, offensive: !!cr.offensive, spells: cr.spells.map(monsterSpell), ignoresFights: !!cr.ignoresFights, dungeonLevel,
     seqLen: cr.seqLen ?? [4, 4, 4, 4, 4, 4, 4, 4],
   };

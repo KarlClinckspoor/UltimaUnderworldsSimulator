@@ -19,7 +19,7 @@ export const ARMOUR_NAMES = ['Minor Protection', 'Protection', 'Additional Prote
   'Tremendous Toughness', 'Unsurpassed Toughness'];
 
 const SPECIALS = ['', 'heals you by the damage done', 'kills the undead (liches lose half their HP)', 'a fireball, 10d6 fire on the target',
-  'holds the target (not the undead)', 'opens doors', 'opens doors, on every hit', 'nothing', 'nothing'];
+  'holds the target (not the undead)', 'opens doors', 'opens doors, on every hit', 'nothing', '+5 damage (spec_damage read past its end), no power'];
 
 export interface EnchantInfo {
   gameName: string;      // what Look shows at lore 3, "of ..."

@@ -35,7 +35,7 @@ const ENCH_GROUPS: { label: string; opts: [string, string][] }[] = [
   { label: 'Weapon (class 12): the game\'s name, then what it does', opts: Array.from({ length: 16 }, (_, i) => encOpt(true, i)) },
   { label: 'Worn item (class 12): the game\'s name, then what it does', opts: Array.from({ length: 16 }, (_, i) => encOpt(false, i)) },
   { label: 'Spell effects on a worn item', opts: [
-    ['2:2', 'Resist Blows (+2 armour, all)'], ['2:3', 'Thick Skin (+3 armour, all)'], ['2:5', 'Iron Flesh (+5 armour, all)'],
+    ['2:2', 'Resist Blows (armour 2: adds nothing, game bug)'], ['2:3', 'Thick Skin (armour 3: adds nothing, game bug)'], ['2:5', 'Iron Flesh (armour 5: adds nothing, game bug)'],
     ['3:1', 'Luck (monsters -3 to hit)'], ['3:5', 'Missile Protection'], ['3:6', 'Flameproof'], ['3:7', 'Poison Resistance'],
     ['3:8', 'Resist Magic'], ['3:9', 'Resist Cold'], ['3:10', 'Valor (+10 + Casting/5 to hit)'], ['3:11', 'Poison Weapon'],
     ['11:2', 'Speed (Haste)']] },

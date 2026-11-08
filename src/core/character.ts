@@ -100,7 +100,11 @@ export interface Derived {
   notes: string[];
 }
 
-export function derive(c: Character): Derived {
+/** Whether class-2 armour spells add armour. They do not in the game (see derive). */
+export const ARMOUR_SPELLS_WORK = false;
+
+/** The derived values on dungeon level `at` (the fight's level: Britannia's circle rule decides which buffs took). */
+export function derive(c: Character, at = c.dungeonLevel): Derived {
   const notes: string[] = [];
   const armourParts: ArmourParts[] = [0, 1, 2, 3].map(() => ({ items: 0, spell: 0, toughness: 0 }));
   for (let s = 0; s <= 4; s++) {
@@ -122,7 +126,11 @@ export function derive(c: Character): Derived {
   let resist = 0, armourSpell = 0, hasted = false, timeStop = false, valor = 0, poisonWeap = false;
   const affect = (major: number, minor: number, slot: number) => {
     switch (major) {
-      case 2: armourSpell = Math.max(armourSpell, minor); break;               // armour
+      // armour: player_affected_by keeps the best level in bits 4-7 of the bonus word, but parse_spells
+      // shifts the word right four times in its stealth loop before adding (word >> 4) & 0xF, so it adds
+      // bits 8-11, always 0: Resist Blows, Thick Skin, Iron Flesh and class-2 enchantments give no armour
+      // (PLAYDATA.C:294; the same in UW2.EXE's bytes at ovr142:0615). The level is kept for the notes.
+      case 2: armourSpell = Math.max(armourSpell, minor); break;
       case 3:                                                                  // protect
         if (minor === 1) for (let z = 0; z < 4; z++) cmb[z] += 3;
         else if (minor >= 5 && minor <= 9) resist |= PROTECT_FLAGS[minor - 5];
@@ -146,7 +154,7 @@ export function derive(c: Character): Derived {
     }
   };
   // active spells (buffs): only the castable ones, at most three (set_curmagic)
-  const status = spellStatus(c);
+  const status = spellStatus(c, at);
   const activeBuffs: number[] = [];
   let buffMana = 0;
   for (const idx of c.buffs) {
@@ -163,7 +171,9 @@ export function derive(c: Character): Derived {
     const e = c.equipment[s];
     if (e && e.ench && objWorn(c, e.itemId, s)) affect(e.ench.major, e.ench.effect, s);
   }
-  for (const p of armourParts) p.spell = armourSpell;
+  for (const p of armourParts) p.spell = ARMOUR_SPELLS_WORK ? armourSpell : 0;
+  if (armourSpell && !ARMOUR_SPELLS_WORK)
+    notes.push(`An armour spell or enchantment (level ${armourSpell}) is active, but in the game it adds nothing: parse_spells reads the armour bonus from the wrong bits.`);
   const armour = armourParts.map((p) => p.items + p.spell + p.toughness);
   const mh = maxHp(c), mm = maxMana(c);
   const startMana = Math.max(0, (c.fullHp ? mm : Math.min(mm, c.mana)) - (c.payBuffMana ? buffMana : 0));
@@ -221,11 +231,11 @@ const RUNE_NAMES = ['An', 'Bet', 'Corp', 'Des', 'Ex', 'Flam', 'Grav', 'Hur', 'In
   'Nox', 'Ort', 'Por', 'Quas', 'Rel', 'Sanct', 'Tym', 'Uus', 'Vas', 'Wis', 'Ylem'];
 
 export const SPELL_NOTES: Record<number, string> = {
-  1: '-3 to be hit', 3: '+2 armour', 9: 'Valor: +10 + Casting/5 to hit', 22: 'monsters at half rate',
-  26: 'sharp weapon vs a bleeding foe: x(1 + (Casting+30)/40)', 28: 'resist fire', 29: '+3 armour',
-  31: 'resist missiles', 58: 'monsters frozen', 59: '+5 armour',
-  2: 'missile, 8 dmg', 10: 'homing missile, 7 dmg', 16: 'target: Casting/2 + 10, bleeding foes', 19: 'missile, 16 dmg',
-  21: 'area: undead take 255 (liches half HP)', 24: 'area: 10 cold', 33: 'missile, 28 dmg', 36: 'target: undead take 255',
+  1: '-3 to be hit', 3: 'armour 2: adds nothing (game bug)', 9: 'Valor: +10 + Casting/5 to hit', 22: 'monsters at half rate',
+  26: 'sharp weapon (or bare hands) vs a bleeding foe: x(1 + (Casting+30)/40)', 28: 'resist fire', 29: 'armour 3: adds nothing (game bug)',
+  31: 'resist missiles', 58: 'monsters frozen', 59: 'armour 5: adds nothing (game bug)',
+  2: 'missile, 8 dmg', 10: 'homing missile, 7 dmg', 16: 'target: Casting/2 + 10, bleeding foes', 19: 'missile, 16 dmg + 6d5 flash',
+  21: 'area: the undead flee (Casting damage if already fleeing)', 24: 'area: 10 cold', 33: 'missile, 28 dmg + 10d6 explosion', 36: 'target: undead take 255',
   41: 'area: 6d5 magic per strike', 51: 'area around you: Casting/2 + 15', 56: 'area: 10d6 fire', 62: 'target: Casting x 3 + 110, bleeding foes',
 };
 export const spellLabel = (i: number) => `${spells[i]?.name ?? spells[i]?.words ?? ''}${SPELL_NOTES[i] ? ' - ' + SPELL_NOTES[i] : ''}`;

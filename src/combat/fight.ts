@@ -12,10 +12,10 @@ import {
   ATK_CHARGE, checkRes, creatureArmourAt, critMultiplier, DMG_PHYSICAL, meleeProbe, pickloc, rollDamage, shouldIFlee,
 } from './blow';
 import {
-  AREA_SPELLS, chooseSwing, DUR_CHECK_TICKS, isUndead, PLAYER_HEIGHT, poisonBonus, swingKindOf, type AreaKind, type FightSettings,
-  type MeleeProfile, type MonsterProfile, type PlayerProfile,
+  AREA_SPELLS, chooseSwing, DUR_CHECK_TICKS, isUndead, PLAYER_HEIGHT, poisonBonus, swingKindOf, type AreaKind, type Explosion,
+  type FightSettings, type MeleeProfile, type MissileAttack, type MonsterProfile, type PlayerProfile,
 } from './setup';
-import { DUR_BIN, emptyStats, type Stats } from './stats';
+import { DUR_BIN, emptyStats, SRC_POISON, type Stats } from './stats';
 import { creatures, items, weaponFrames, worldOf } from '../data/gameData';
 import { objWorn, shieldSlot, weaponSlot, type Character } from '../core/character';
 import { playerProfile } from './setup';
@@ -162,7 +162,9 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   let mhp = monsterStartHp(M, hpMode, rng);
   const mhp0 = mhp;
   let dmgTaken = 0, lastHit = false, active = M.attitude === 0, bound = false;
-  let seq = 0, frame = 0, k = 0, castSlot = 0, heldUntil = -1, tNow = 0;
+  let seq = 0, frame = 0, k = 0, castSlot = 0;
+  // goal 15 (held, sp_hold): GTARG counts down one per AI step at rate 7; -1 when not held
+  let heldSteps = -1, rate = 4, fled = false;
   let interval = P.timeStop ? Infinity : P.hasted ? 8 : 4;
   let tM = P.timeStop ? Infinity : rng.int(4);
   // Duration checks come every 20 s at a phase the fight does not know (a model draw). The
@@ -171,7 +173,9 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   const I = DUR_CHECK_TICKS;
   const phase = Math.floor(rng.next() * I) + 1;
   const regenOk = manaRegenAllowed(P0.fightLevel);
-  let tRegen = regenOk ? phase + I * Math.floor(rng.next() * 3) : Infinity; // mana: skill_check(Mana, 10)
+  // every third check: the poison tick, then skill_check(Mana, 10) (drawn in the Academy too, where restore_mana does nothing)
+  let tRegen = phase + I * Math.floor(rng.next() * 3);
+  let poison = 0;   // player->poison: set by a poisonous bite, ticks down every third duration check
   const buffEnds = P0.buffs.map((b, slot) => ({ slot, index: b.index, t: phase + I * (rng.rollem(b.dice, b.sides) + b.plus - 1) }))
     .sort((a, b) => a.t - b.t);
   let tBuff = buffEnds.length ? buffEnds[0].t : Infinity;
@@ -211,7 +215,7 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
       else st.dealt[part] += lost;
     }
     dealt += lost;
-    dmgTaken = Math.min(255, dmgTaken + d);
+    dmgTaken = (dmgTaken + d) & 0xff;   // OBJ_DAMAGE is a byte (SET_DAMAGE masks with 0xFF)
     if (mhp <= d) { mhp = 0; return true; }
     mhp -= d;
     return false;
@@ -234,14 +238,19 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   };
 
   // A missile (launcher ammo or a missile spell) striking the monster: missile_thwack.
-  const thwackMonster = (damage: number, type: number, part: number): boolean => {
+  const thwackMonster = (damage: number, type: number, part: number, explode: Explosion = 0): boolean => {
     const mid = M.height >> 1;
     const hitloc = pickloc(0, M.height, mid, mid, rng) + 4;
     let dd = rollDamage(damage, rng);          // power 0x80, hitangle 0
     const arm = creatureArmourAt(M.armour, hitloc, M.powerful);
     st.absorbedMon += Math.min(arm, dd);
     dd = arm > dd ? 0 : dd - arm;
-    return spellHit(dd, type, part);
+    if (spellHit(dd, type, part)) return true;
+    // a fireball or lightning bolt then comes to rest and explodes: damage_square on the struck object's
+    // square (bounce_obj sets XP, YP to it), to every object there, with no armour step
+    if (explode === 1) return spellHit(rng.rollem(10, 6), 0x0b, part);
+    if (explode === 2) return spellHit(rng.rollem(6, 5), 0x03, part);
+    return false;
   };
   /** The player's area spell (gronk_area -> process_area), the monster D squares ahead on open floor. */
   const areaOnMonster = (kind: AreaKind, casting: number): boolean => {
@@ -276,9 +285,16 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
     }
     if (kind === 'frost') return spellHit(10, 0x23, 6);
     if (kind === 'shockwave') return spellHit(Math.trunc(casting / 2) + 15, 0x03, 6);
-    // repel: the undead take 255 (liches, race 0x17, half their HP) of type 3
-    if (!isUndead(M.resist)) return false;
-    return spellHit(M.race === 0x17 ? mhp >> 1 : 0xff, 0x03, 6);
+    // repel (sp_repel_undead, the player's only; target mode 0x80): every open square first calls it with no
+    // target (rand() % 3 for the effect), then each object on it. An undead critter (check_res type 0x80 gives
+    // 0) within the budget (Casting * 10 >= HP already affected: none yet, there is one critter) is made to flee
+    // (hit_critter_goal(6), shrugged off by check_res type 3), or, if it is already fleeing, takes Casting of
+    // type 3. A fleeing monster ends the fight here, so only the first case arises.
+    for (let i = 0; i < squares; i++) {
+      rng.int(3);
+      if (i === idx && isUndead(M.resist) && checkRes(M.resist, 1, 0x03, rng)) fled = true;
+    }
+    return false;
   };
 
   const playerMelee = (): boolean => {
@@ -300,8 +316,9 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
       wakeMonster(); // damage_item(..., 0) still records the attacker
       if (g === -1 && !M.passive) {
         st.pBadMisses++;
+        const w0 = rng.rollem(2, 3);   // DamageInventory's argument: drawn even bare-handed or for an unbreakable weapon
         if (!mel.isFist && mel.qualclass < 3) {
-          const w = rng.rollem(2, 3) >> mel.qualclass;
+          const w = w0 >> mel.qualclass;
           st.weaponWearEvents++;
           st.weaponQualityLost += Math.min(w, quality);
           quality -= w;
@@ -326,23 +343,30 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
     const f = damage > 0 ? scaled / damage : 0;
     const parts = [mel.base[kind] * f, mel.strBonus * f, mel.ench * f, critExtra * f, h, 0, 0, poisonExtra * f];
     wakeMonster();
-    if (hurtMonster(after, parts, 0)) return true;
-    // a special weapon's power after a hit: on a critical, or every hit for specweap 6 (player_attack)
+    const died = hurtMonster(after, parts, 0);
+    // a special weapon's power after a hit: on a critical, or every hit for specweap 6 (player_attack). do_attack
+    // returns 1 for the killing blow too and the dying critter is still a mobile, so the power fires then as
+    // well; only the healing one (get_hp_back) has an effect on a dead target.
     if (mel.specweap > 0 && (crit || mel.specweap === 6)) {
       st.specialTriggers++;
       switch (mel.specweap) {
         case 1: { const before = php; php = Math.min(P.hpMax, php + ddone); st.specialHealed += php - before; break; }
-        case 2: if (isUndead(M.resist)) return spellHit(M.race === 0x17 ? mhp >> 1 : 0xff, 0x03, 8); break;
-        case 3: return spellHit(rng.rollem(10, 6), 0x0b, 8); // damage_square(tx, ty, 1) on the monster's square
-        case 4: // sp_hold: not undead, and not shrugged off (check_res type 3)
+        case 2: if (!died && isUndead(M.resist)) return spellHit(M.race === 0x17 ? mhp >> 1 : 0xff, 0x03, 8); break;
+        case 3: if (!died) return spellHit(rng.rollem(10, 6), 0x0b, 8); break; // damage_square(tx, ty, 1)
+        case 4: { // sp_hold(src 1): the time is drawn first; not the undead (check_res type 0x80), not shrugged off (type 3)
+          if (died) break;
+          const time = (rng.int(16) * Math.trunc(P.casting / 3) + 0x10) & 0xff;
           if (!isUndead(M.resist) && checkRes(M.resist, 1, 0x03, rng)) {
-            const time = (rng.int(16)) * Math.trunc(P.casting / 3) + 0x10;
-            heldUntil = Math.max(heldUntil, tNow + time); seq = 0; frame = 0; castSlot = 0; st.specialHeldTicks += time;
+            // critter_set_goal(15, time): a swing already under way still lands (critter_ai plays sequences 3-6
+            // without critter_mv); then time steps at rate 7 count GTARG down, and one more drops the goal
+            heldSteps = time;
+            st.specialHeldTicks += (time + 1) * 7 * (P.hasted ? 2 : 1);
           }
           break;
+        }
       }
     }
-    return false;
+    return died;
   };
   const playerShot = (): boolean => {
     st.pShots++;
@@ -376,7 +400,7 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
       st.pShots++;
       if (rng.next() >= S.rangedHitChance) return [false, wait];
       st.pShotHits++;
-      return [thwackMonster(sp.missile.damage, sp.missile.type, 6), wait];
+      return [thwackMonster(sp.missile.damage, sp.missile.type, 6, sp.missile.explode), wait];
     }
     if (sp.area) {
       mana -= sp.cost; st.manaSpent += sp.cost;
@@ -394,10 +418,10 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   // ---- the monster's blows on the player
   const monsterMelee = (slot: number): boolean => {
     const a = M.attacks[slot];
+    const swing = rng.int(9);           // critter_ai's argument, drawn before critter_attack's own rolls
     let askill = a.chance + (M.equip >> 1);
     let damage = a.damage + Math.trunc(M.str / 5);
     if (M.powerful) { askill += rng.int(6) + 7; damage += rng.int(12) + 4; }
-    const swing = rng.int(9);
     const probe = meleeProbe(0, M.height, swing, 2);
     const hitloc = pickloc(0, PLAYER_HEIGHT, probe.z, probe.top, rng);
     const mod = P.cmbModTH[hitloc];
@@ -417,7 +441,13 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
     st.srcHits[slot]++;
     st.zoneHits[hitloc]++;
     let dd = (rollDamage(damage, rng) * ATK_CHARGE[k]) >> 7;
-    return armourAndApply(dd, hitloc % 4, DMG_PHYSICAL, slot);
+    const died = armourAndApply(dd, hitloc % 4, DMG_PHYSICAL, slot);
+    // critter_attack (COMBAT.C:910): a hit by a creature whose poison is above the player's poisons him at
+    // that level when rand() % (poison + 6) beats twice his armour there and he does not resist poison
+    if (M.poison > poison && rng.int(M.poison + 6) > P.armour[hitloc % 4] << 1 && checkRes(P.resist, 1, 0x10, rng)) {
+      poison = M.poison; st.poisoned++;
+    }
+    return died;
   };
   /** A critical on the player wears the item in the slot for the location (frp_check):
       locations 0 and 1 the shield hand, 2 the legs (one time in five the boots), 3 the head;
@@ -456,24 +486,29 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
     st.resistedPlayer += dd - after;
     return hurtPlayer(after, src, zone);
   };
-  const monsterMissile = (damage: number, type: number, src: number): boolean => {
+  /** damage_item on the player with no armour step and no easy-mode halving (spells, damage_square). */
+  const hitPlayerDirect = (dd: number, type: number, src: number): boolean => {
+    dd &= 0xff;
+    const after = checkRes(P.resist, dd, type, rng);
+    st.resistedPlayer += dd - after;
+    return hurtPlayer(after, src, -1);
+  };
+  const monsterMissile = (m: MissileAttack, src: number): boolean => {
     st.srcAttempts[src]++;
     const hitloc = pickloc(0, PLAYER_HEIGHT, PLAYER_HEIGHT >> 1, PLAYER_HEIGHT >> 1, rng) + 4;
     st.srcHits[src]++;
     st.zoneHits[hitloc % 4]++;
-    return armourAndApply(rollDamage(damage, rng), hitloc % 4, type, src);
+    if (armourAndApply(rollDamage(m.damage, rng), hitloc % 4, m.type, src)) return true;
+    if (m.explode === 1) return hitPlayerDirect(rng.rollem(10, 6), 0x0b, src);
+    if (m.explode === 2) return hitPlayerDirect(rng.rollem(6, 5), 0x03, src);
+    return false;
   };
   /** The monster's area spell on the player, D squares ahead of it (the same geometry, mirrored). */
   const monsterArea = (kind: AreaKind): boolean => {
     st.srcAttempts[5]++;
     const a = AREA_SPELLS[kind];
     const idx = areaSquareIndex(kind, D);
-    const onPlayer = (dd: number, type: number) => {
-      dd &= 0xff;
-      const after = checkRes(P.resist, dd, type, rng);
-      st.resistedPlayer += dd - after;
-      return hurtPlayer(after, 5, -1);
-    };
+    const onPlayer = (dd: number, type: number) => hitPlayerDirect(dd, type, 5);
     if (kind === 'sheet') {
       const side = 2 * a.radius + 2, squares = side * side, den = (2 * a.radius + 1) ** 2 + 3;
       let count = a.count, tries = 0, hits = 0;
@@ -501,18 +536,23 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   // ---- one monster AI step (AI.C critter_ai -> critter_mv -> crit_offense)
   const monsterStep = (): number => { // 0 nothing, 1 player died, 2 fled
     if (!active) return 0;
-    if (tNow < heldUntil) return 0;      // held (goal 15): no move, no attack
     if (seq !== 0) {
       // this step finds `frame`: the blow on frame 3, the sequence over on frame seq_len - 1
       let died = false;
       if (frame === 3) {
         if (seq <= 3) died = monsterMelee(seq - 1);
-        else if (seq === 5) died = monsterMissile(M.missile!.damage, M.missile!.type, 3);
+        else if (seq === 5) died = monsterMissile(M.missile!, 3);
         else {
           const sp = M.spells[castSlot - 1];
-          if (sp.kind === 'missile') died = monsterMissile(sp.damage, sp.type, 4);
+          if (sp.kind === 'missile') died = monsterMissile(sp, 4);
           else if (sp.kind === 'area') died = monsterArea(sp.area);
-          else st.defensiveCasts++;
+          else if (sp.kind === 'heal') {
+            // healing(): rollem(sub, 8), or all for sub 15; get_hp_back caps the result at avghit
+            const amount = sp.sub === 15 ? 0xff : rng.rollem(sp.sub, 8) & 0xff;
+            const before = mhp;
+            mhp = mhp + amount > M.avghit ? M.avghit : mhp + amount;
+            st.monHeals++; st.monHealed += mhp - before;
+          } else st.defensiveCasts++;
         }
       }
       const len = M.seqLen[seq <= 3 ? seq + 2 : 6];
@@ -520,6 +560,13 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
       else frame++;
       return died ? 1 : 0;
     }
+    if (heldSteps >= 0) {
+      // goal 15: critter_mv skips the hit test; rate 7; GTARG-- until 0, then critter_discard_goal
+      rate = 7;
+      heldSteps = heldSteps > 0 ? heldSteps - 1 : -1;
+      return 0;
+    }
+    rate = 4;
     if (lastHit) {
       lastHit = false;
       if (ranged && D2 > 2 && !M.offensive) bound = true; // bound to fight
@@ -547,7 +594,6 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
   while (outcome < 0) {
     t = Math.min(tP, tM, tRegen, tBuff);
     if (t > T) { t = T; outcome = 3; break; }
-    tNow = t;
     if (t === tBuff) {
       // dispel_spell, then FixPlayerEquips: armour, protection, Valor, Speed and Freeze Time recomputed
       const b = buffEnds.shift()!;
@@ -562,8 +608,17 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
       continue;
     }
     if (t === tRegen) {
+      if (poison > 0) {
+        // duration_check (PLAYTIME.C:129): damage_item(player, poison--, type 0x10), no armour
+        const dmg = poison--;
+        st.srcAttempts[SRC_POISON]++;
+        const after = checkRes(P.resist, dmg, 0x10, rng);
+        st.resistedPlayer += dmg - after;
+        if (after > 0) st.srcHits[SRC_POISON]++;
+        if (hurtPlayer(after, SRC_POISON, -1)) { outcome = 1; break; }
+      }
       const g = skillCheck(P.manaSkill, 10, rng);
-      if (g > 0) mana = Math.min(P.manaMax, mana + g);
+      if (g > 0 && regenOk) mana = Math.min(P.manaMax, mana + g);
       tRegen += 3 * I;
       if (plan === 'none') schedule(t);
       continue;
@@ -574,10 +629,11 @@ export function fight(st: Stats, P0: PlayerProfile, M: MonsterProfile, S: FightS
       else if (plan === 'launcher') { died = playerShot(); schedule(nextStart); }
       else if (plan === 'spell') { const [d, wait] = playerCast(); died = d; schedule(t + wait - Math.max(1, S.aimTicks)); }
       if (died) { outcome = 0; break; }
+      if (fled) { outcome = 2; break; }
       if (php <= 0) { outcome = 1; break; }
     } else {
       const r = monsterStep();
-      tM += interval;
+      tM += interval * rate / 4;   // the bin advances by the rate (4, or 7 while held); Speed halves the frames
       if (r === 1) { outcome = 1; break; }
       if (r === 2) { outcome = 2; break; }
     }

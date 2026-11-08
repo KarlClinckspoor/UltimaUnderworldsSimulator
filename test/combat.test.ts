@@ -278,7 +278,7 @@ describe('ranged and spells', () => {
     expect(playerProfile(c, 33, 3).attackSpellBlocked).toContain('Britannia');
     expect(playerProfile(c, 33, 9).attackSpell?.missile?.damage).toBe(28);
   });
-  it('Smite Foe pays mana only on a bleeding target; Repel Undead only hurts the undead', () => {
+  it('Smite Foe pays mana only on a bleeding target; Repel Undead only makes the undead flee', () => {
     const c = defaultCharacter();
     c.runes = [...Array(24).keys()]; c.manaMax = 60; c.level = 16; c.skills[SK.Casting] = 30; c.dungeonLevel = 9;
     const S = { ...defaultSettings(), mode: 'ranged' as const, timeLimit: 20, distance: 4 };
@@ -294,7 +294,9 @@ describe('ranged and spells', () => {
     const R = playerProfile(c, 21, 9);
     expect(R.attackSpell?.area).toBe('repel');
     const sr = simulate(newStats(R, sk, S), R, sk, S, { kind: 'stored' }, 100, makeRng(5));
-    expect(sr.outcomes[0]).toBeGreaterThan(50);
+    // sp_repel_undead: hit_critter_goal(6) sends the skeleton fleeing; it never takes 255
+    expect(sr.outcomes[2]).toBeGreaterThan(50);
+    expect(sr.dealt.reduce((a, b) => a + b)).toBe(0);
     const sgr = simulate(newStats(R, g, S), R, g, S, { kind: 'stored' }, 50, makeRng(5));
     expect(sgr.dealt.reduce((a, b) => a + b)).toBe(0);
   });
