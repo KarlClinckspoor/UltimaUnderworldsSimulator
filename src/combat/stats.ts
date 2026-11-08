@@ -3,8 +3,15 @@
 
 export const OUTCOMES = ['win', 'death', 'flee', 'timeout'] as const;
 export type Outcome = (typeof OUTCOMES)[number];
-export const SOURCES = ['melee 1', 'melee 2', 'melee 3', 'missile', 'spell', 'area spell'] as const;
-export const DEALT_PARTS = ['weapon', 'strength', 'enchantment', 'critical', 'angle', 'missile', 'spell'] as const;
+/** The monster's sources of damage on the player. 'explosion' is a Fireball or Lightning missile
+    bursting on the player's square after it hit (EFFECT.C mts_doanim); 'poison' the ticks of the
+    poison its bite left (PLAYTIME.C duration_check). */
+export const SOURCES = ['melee 1', 'melee 2', 'melee 3', 'missile', 'spell', 'area spell', 'explosion', 'poison'] as const;
+export const SRC = { missile: 3, spell: 4, area: 5, explosion: 6, poison: 7 } as const;
+/** Parts of the player's damage on the monster ('explosion': his Fireball or Lightning bursting
+    on the monster's square). */
+export const DEALT_PARTS = ['weapon', 'strength', 'enchantment', 'critical', 'angle', 'missile', 'spell', 'explosion'] as const;
+export const PART = { missile: 5, spell: 6, explosion: 7 } as const;
 
 export const DUR_BIN = 0.5; // seconds per duration histogram bin
 
@@ -23,12 +30,13 @@ export interface Stats {
   casts: number; fizzles: number; backfires: number; selfDamage: number; manaLeft: number; manaSpent: number;
   weaponWearEvents: number; weaponQualityLost: number; weaponBroken: number;
   armourWearEvents: number; armourQualityLost: number; armourBroken: number;
-  zoneHits: number[]; zoneDamage: number[]; zoneAbsorbed: number[][]; // [zone][items, spell, toughness]
+  zoneHits: number[]; zoneDamage: number[]; zoneAbsorbed: number[][]; // [zone][items, spell (always 0 in DOS UW1), toughness]
   zoneProtMisses: number[];           // misses that the to-hit protection caused
   zoneMisses: number[];
   easyHalved: number; resistedPlayer: number;
   srcAttempts: number[]; srcHits: number[]; srcCrits: number[]; srcDamage: number[];
   defensiveCasts: number;
+  poisoned: number;                   // monster hits that poisoned the player (or raised his poison)
   xp: number;                         // XP the game awards, summed over kills (raw units, tenths)
   xpNominal: number;                  // the same without the 16-bit wrap of the powerful bonus
   xpWrapped: number;                  // kills whose powerful bonus wrapped in 16 bits
@@ -51,8 +59,8 @@ export function emptyStats(hpBins = 1, monBins = 1, durBins = 241): Stats {
     pShots: 0, pShotHits: 0, casts: 0, fizzles: 0, backfires: 0, selfDamage: 0, manaLeft: 0, manaSpent: 0,
     weaponWearEvents: 0, weaponQualityLost: 0, weaponBroken: 0, armourWearEvents: 0, armourQualityLost: 0, armourBroken: 0,
     zoneHits: z(4), zoneDamage: z(4), zoneAbsorbed: [z(3), z(3), z(3), z(3)], zoneProtMisses: z(4), zoneMisses: z(4),
-    easyHalved: 0, resistedPlayer: 0, srcAttempts: z(6), srcHits: z(6), srcCrits: z(6), srcDamage: z(6),
-    defensiveCasts: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0, draws: 0, blockOverruns: 0, buffEnded: z(3), buffEndSum: z(3), ttkSum: 0, dps: 0,
+    easyHalved: 0, resistedPlayer: 0, srcAttempts: z(SOURCES.length), srcHits: z(SOURCES.length), srcCrits: z(SOURCES.length), srcDamage: z(SOURCES.length),
+    defensiveCasts: 0, poisoned: 0, xp: 0, xpNominal: 0, xpWrapped: 0, xpNegative: 0, xpHalved: 0, draws: 0, blockOverruns: 0, buffEnded: z(3), buffEndSum: z(3), ttkSum: 0, dps: 0,
   };
 }
 

@@ -88,6 +88,9 @@ export interface Derived {
   maxHp: number; maxMana: number; startHp: number; startMana: number; buffMana: number;
   armour: number[];                 // per hit location 0..3
   armourParts: ArmourParts[];
+  /** The best armour-spell level player_affected_by records (bits 4..7 of bonuses). It adds
+      nothing: parse_spells reads bits 8..11 (see derive). */
+  armourSpellLevel: number;
   cmbModTH: number[];               // subtracted from the monster's to-hit, per location
   resist: number;                   // the player's ComObjData resist byte
   defence: number;                  // the monsters' to-hit target
@@ -158,14 +161,20 @@ export function derive(c: Character): Derived {
     const e = c.equipment[s];
     if (e && e.ench && objWorn(c, e.itemId, s)) affect(e.ench.major, e.ench.effect, s);
   }
-  for (const p of armourParts) p.spell = armourSpell;
+  // Armour spells (class 2, from an active spell or a worn item) add nothing in DOS UW1.
+  // player_affected_by keeps the best level in bits 4..7 of `bonuses`, but parse_spells first
+  // shifts `bonuses` right once per pass of its four-pass stealth loop (PLAYDATA.C:340) and then
+  // adds (bonuses >> 4) & 0xF, which are the original bits 8..11, always 0 (PLAYDATA.C:356).
+  // UW.EXE has the same: SI >>= 1 four times, then shr ax,4 / and al,0Fh (ovr133 parse_spells,
+  // file offsets 0x7E38D and 0x7E39F). So armourParts[].spell stays 0.
+  if (armourSpell) notes.push(`The armour spell (level ${armourSpell}) adds no armour: in the original game parse_spells reads the wrong bits of the bonus word, so Resist Blows, Thick Skin and Iron Flesh (and armour enchantments) only take a spell slot and mana.`);
   const armour = armourParts.map((p) => p.items + p.spell + p.toughness);
   const mh = maxHp(c), mm = maxMana(c);
   const startMana = Math.max(0, (c.fullHp ? mm : Math.min(mm, c.mana)) - (c.payBuffMana ? buffMana : 0));
   if (c.payBuffMana && buffMana > mm) notes.push('The buffs cost more mana than the character has.');
   return {
     maxHp: mh, maxMana: mm, startHp: c.fullHp ? mh : Math.max(1, Math.min(mh, c.hp)), startMana, buffMana,
-    armour, armourParts, cmbModTH: cmb, resist, defence, defenceSkill, hasted, timeStop, activeBuffs, notes,
+    armour, armourParts, armourSpellLevel: armourSpell, cmbModTH: cmb, resist, defence, defenceSkill, hasted, timeStop, activeBuffs, notes,
   };
 }
 
@@ -211,10 +220,10 @@ const RUNE_NAMES = ['An', 'Bet', 'Corp', 'Des', 'Ex', 'Flam', 'Grav', 'Hur', 'In
   'Nox', 'Ort', 'Por', 'Quas', 'Rel', 'Sanct', 'Tym', 'Uus', 'Vas', 'Wis', 'Ylem'];
 
 export const SPELL_LABELS: Record<number, string> = {
-  0: 'Light', 1: 'Resist Blows (+2 armour)', 2: 'Magic Arrow', 6: 'Protection (-3 to be hit)', 8: 'Lesser Heal',
-  12: 'Speed (monsters at half rate)', 15: 'Lightning', 17: 'Thick Skin (+3 armour)', 19: 'Heal',
+  0: 'Light', 1: 'Resist Blows (no armour: game bug)', 2: 'Magic Arrow', 6: 'Protection (-3 to be hit)', 8: 'Lesser Heal',
+  12: 'Speed (monsters at half rate)', 15: 'Lightning', 17: 'Thick Skin (no armour: game bug)', 19: 'Heal',
   22: 'Flameproof (resist fire)', 24: 'Fireball', 27: 'Missile Protection (resist missiles)',
-  31: 'Sheet Lightning', 42: 'Iron Flesh (+5 armour)', 45: 'Flame Wind', 46: 'Freeze Time',
+  31: 'Sheet Lightning', 42: 'Iron Flesh (no armour: game bug)', 45: 'Flame Wind', 46: 'Freeze Time',
 };
 export const spellLabel = (i: number) => `${spells[i]?.words ?? ''}${SPELL_LABELS[i] ? ' - ' + SPELL_LABELS[i] : ''}`;
 

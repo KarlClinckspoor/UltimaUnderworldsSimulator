@@ -220,7 +220,7 @@ Combat-relevant spells (from `spells.json`; the effect column is what the code d
 
 | spell (index, circle) | runes | effect in the simulator |
 |---|---|---|
-| 1 (c1), 17 (c3), 42 (c8) | Bet In Sanct; In Sanct; In Vas Sanct | Armour class, +2, +3 or +5 on all four zones; the best one counts |
+| 1 (c1), 17 (c3), 42 (c8) | Bet In Sanct; In Sanct; In Vas Sanct | Armour class 2, 3 or 5: **no effect** in DOS UW1 (`parse_spells` reads the wrong bits; see docs/SOURCE-COMPARISON.md 4.1). They still take a slot and mana |
 | 6 (c2) | An Sanct | protect minor 1: -3 on the monster's to-hit, every zone |
 | 22 (c4) | Sanct Flam | resist fire (bit 0x08): Fireball and Flame Wind do nothing |
 | 27 (c5) | Grav Sanct Por | resist missiles (bit 0x40): sling stones, arrows, Magic Missile |
@@ -368,7 +368,7 @@ Traced while building, and how the code now reads (these refine Part B):
 - **Launchers** (`MISSILE.C player_fire`, `OBJPHYS.C missile_newhit`): the launcher adds nothing to damage. Damage is the ammunition's Missile[] damage (sling stone 5, arrow 8, bolt 10) × (Missile × 8 + 192 ± the skill check) / 256, then `missile_thwack` at power 0x80. Cycle: frames 0..3, aim (1 s), fire, back to ready.
 - **Monster probe for melee**: `resolve_attack` uses a probe of height (wsize × 2 + 1) × 4 = 20 for both sides, starting at z + height × (swing / 3) / 3; the hit location comes from `pickloc` against the defender's box.
 - **ObjWorn**: only slots 0..4, the rings (9, 10) and a shield in the shield hand count as worn. Shoulder slots (5, 6) and the weapon hand never apply item enchantments through `player_affected_by`; the weapon's class 12 enchantment acts only through `DoPlayerWeapon`. (B3 said shoulders add enchantments: corrected.) The shield test is items 0x3B..0x3F, so the Shiny Shield (0x37) adds no armour.
-- **Armour spell** is applied after the item enchantments (`parse_spells` adds the high nibble of `bonuses` to all four locations).
+- **Armour spell**: superseded (2026-11-07). `parse_spells` shifts `bonuses` right four times in its stealth loop before it adds `(bonuses >> 4) & 0xF`, so the level `player_affected_by` stored in bits 4..7 is never added: armour spells add nothing (confirmed in UW.EXE; docs/SOURCE-COMPARISON.md 4.1).
 - **Slingers' range**: `crit_missile_attack` needs `tdistsqr < 0x10`, so goblins with sling stones fire from 3 tiles but not from 4. The ranged default distance is therefore 3 tiles, not 4.
 - **Area spells** (`nail_area`, `process_area` in AREA_RANDOM mode): 3d4 activations over a 6 × 6 block of squares (the loop bounds are inclusive) around the square 4 ahead, each square taken with chance count / 28; Sheet Lightning hits its square (6d5, magic), Flame Wind its square and the four beside it (10d6, fire and magic). They go straight to `damage_item`: no armour, no easy-mode halving. Simulated exactly with the target straight ahead.
 - **Weapon wear** on a −1 against a non-passive monster: `rollem(2, 3) >> qualclass` quality (class 3 never wears); a weapon at quality 0 breaks and the fight continues barehanded.
@@ -379,3 +379,7 @@ Traced while building, and how the code now reads (these refine Part B):
 - **Launcher recovery**: after `missile_finish` the next `adjust_weapon` goes straight to ready (`swung`), so a new shot can start one tick after the next 32-unit boundary.
 - **Open**: the charge release may be one tick earlier or later depending on the game's frame rate (`player_attack` runs per frame); the model uses one frame per tick.
 - **Experience** (added after the first build): only a kill pays. `damage_critter` (AI.C:1495) calls `player_killed_a` when the critter dies and the attacker is the player (also through his missiles and spells); a monster that flees gives nothing. exp × 4 + 2d(exp); powerful: × (24 + rand % 24) / 16 computed in a 16-bit int (COMBAT.C:843), which wraps for powerful monsters with exp above about 116 (the Headless, Fighter 0x68, Great Troll, Dread Spider, Ghost 0x61, Dire Ghost, Feral Troll, Shadow Beast in LEV.ARK) and can take experience away. `player_get_exp` then floors a loss at 0, ignores gains above 0x17700 and halves gains (+1) when the level is above twice the dungeon level plus two. The Combat tab shows total and per-fight XP, fights to the next level and skill point; the all-enemies view the expected XP for fighting each monster once. `killXp()` in `src/combat/fight.ts`.
+
+# Source comparison (2026-11-07)
+
+A function-by-function comparison with the byte-matched C of underworld-exhumed-enhanced is in `docs/SOURCE-COMPARISON.md`. Corrections it made to the model above: armour spells add no armour (B3 table); Fireball and Lightning Bolt burst on the struck target's square (fate 9, `mts_doanim`, 10d6 magic and fire or 6d5 magic, no armour); poisonous bites poison the player and poison ticks every third duration check (B11 no longer lists poison); the monster's damage tally wraps as a byte; the monster's swing is drawn before its powerful bonus; a bad miss always draws the 2d3 of weapon wear; destroyed items draw their debris roll; the monster's step phase comes from the model stream.

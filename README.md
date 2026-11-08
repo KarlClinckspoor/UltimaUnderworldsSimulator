@@ -52,5 +52,11 @@ The C cross-check (`test/c/harness.c`) copies `skill_check`, `pickloc`, the dama
 - Your swing follows the weapon animation (`adjust_weapon`, one frame per 32 clock units) and charges to full before release (`player_attack`), so a dagger swing takes about 1.5 s. Launcher shots and spells add 1 s of aiming.
 - Each blow: hit location (`pickloc`), to-hit `skill_check`, critical ×1 or ×2, dice `(d/6)d6 + 1d(d%6)`, × charge/128, + hit angle, − armour (×5/3 for a powerful monster), easy mode halves damage to you, then `check_res`.
 - Experience comes only from a kill (`player_killed_a`): exp × 4 + 2d(exp), × (24..47)/16 for a powerful monster in a 16-bit int that can wrap negative in DOS UW1, then `player_get_exp`'s rules (halved above twice the dungeon level plus two, nothing past 96000 raw). The Combat tab totals it over the simulated fights; the all-enemies view gives the expected XP for fighting everything once.
+- A Fireball or Lightning Bolt that hits comes to rest on the target's square and bursts there (`mts_doanim` → `damage_square`: 10d6 magic and fire, or 6d5 magic, no armour), for your spells and the monsters' alike.
+- Armour spells (Resist Blows, Thick Skin, Iron Flesh, and armour enchantments) add no armour: in the original `parse_spells` reads the wrong bits of the bonus word (confirmed in UW.EXE). They still take a spell slot and mana.
+- A poisonous monster's hit poisons you (`critter_attack`); poison does its level in damage, then drops by one, at every third duration check (about once a minute). Monster heals do nothing in UW1 (they are cast with no target).
+- Buffs wear off after their rolled number of duration checks (one every 21 s); mana regenerates on the same clock.
 - A monster you hit re-evaluates `should_i_flee` at its next step; fleeing ends the fight (outcome "flees"). You never flee; your death ends it too; otherwise the time limit is a timeout.
-- Not modelled: movement, line of sight and projectile flight (a hit-chance setting stands in), healing and potions, buff durations and failed buff casts, summons, poison, multiple enemies.
+- Not modelled: movement, line of sight and projectile flight (a hit-chance setting stands in; monster missiles always hit), healing, potions and HP regeneration, failed buff casts, summons, scripted deaths, multiple enemies.
+
+`docs/SOURCE-COMPARISON.md` compares every part of the simulator with the game's byte-matched C, function by function: what is exact, what is a modelling choice, what was corrected, and what is still missing.

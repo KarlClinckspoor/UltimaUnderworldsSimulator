@@ -166,6 +166,7 @@ function enemySummary(r: EnemyRow) {
   const atk = cr.attacks.map((a, i) => (a.prob ? `slot ${i + 1}: to-hit ${a.chance + (cr.equip >> 1)}, damage ${a.damage} (${a.prob}%)` : '')).filter(Boolean).join(' · ');
   const extra = [M.missile ? `fires ${M.missile.name} (${M.missile.damage})` : '',
     M.caster ? `caster ${M.caster}${M.offensive ? '' : ' (no attack spells)'}: ${M.spells.map((s) => s.name).filter((n) => n !== '-').join(', ')}` : '',
+    M.poison ? `poisonous bite: poison ${M.poison} (that much damage, then one less, every 63 s)` : '',
     M.resist ? `resist 0x${M.resist.toString(16)}` : '', r.pw ? 'powerful: +7..12 to hit, +4..15 damage, armour ×5/3' : ''].filter(Boolean).join(' · ');
   return h('div', {},
     h('h2', {}, rowName(r), h('small', {}, ` level ${state.combat.level} · ${ATTITUDES[r.att]} · stored HP ${r.hp} (average ${cr.avghit}) · ${creatureHex(cr)}`)),
@@ -258,12 +259,11 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   cards.append(dd);
 
   // damage received per body part
-  const rc = card('Damage you received, per body part', 'mean per fight · armour absorption split by item, armour spell and toughness');
+  const rc = card('Damage you received, per body part', 'mean per fight · armour absorption split by item and toughness (armour spells add no armour in DOS UW1)');
   const rBox = h('div');
   stackedBars(rBox, ZONE_NAMES, [
     { name: 'damage taken', color: C.death, values: s.zoneDamage.map((v) => v / n) },
     { name: 'absorbed by armour items', color: C.blue, values: s.zoneAbsorbed.map((a) => a[0] / n) },
-    { name: 'absorbed by armour spell', color: C.teal, values: s.zoneAbsorbed.map((a) => a[1] / n) },
     { name: 'absorbed by toughness', color: C.purple, values: s.zoneAbsorbed.map((a) => a[2] / n) }], { height: 200, yLabel: 'HP per fight' });
   const zt = h('table', { class: 'mini wide' }, h('tr', {}, ...['Location', 'Armour', 'Hits / fight', 'Misses / fight', 'Missed thanks to protection', 'Damage / fight', 'Absorbed / fight'].map((x) => h('th', {}, x))));
   ZONE_NAMES.forEach((z, i) => zt.append(h('tr', {}, h('td', {}, z), h('td', {}, String(P.armour[i])), h('td', {}, fmt(s.zoneHits[i] / n, 2)), h('td', {}, fmt(s.zoneMisses[i] / n, 2)),
@@ -277,6 +277,8 @@ function renderSingle(out: HTMLElement, s: Stats, P: PlayerProfile, M: MonsterPr
   SOURCES.forEach((src, i) => { if (s.srcAttempts[i]) mt.append(h('tr', {}, h('td', {}, src), h('td', {}, fmt(s.srcAttempts[i] / n, 2)), h('td', {}, pct(s.srcHits[i] / s.srcAttempts[i])), h('td', {}, pct(s.srcCrits[i] / s.srcAttempts[i])), h('td', {}, fmt(s.srcDamage[i] / n, 2)))); });
   if (s.defensiveCasts) mt.append(h('tr', {}, h('td', {}, 'spells with no effect on you'), h('td', {}, fmt(s.defensiveCasts / n, 2)), h('td', {}), h('td', {}), h('td', {})));
   mc.append(mt);
+  if (s.poisoned) mc.append(h('p', { class: 'hint' }, `Its bite poisoned you ${fmt(s.poisoned / n, 2)} times per fight; poison does its level in damage (then drops by one) at every third duration check, about once a minute (the "poison" row).`));
+  if (s.srcAttempts[6]) mc.append(h('p', { class: 'hint' }, 'A Fireball or Lightning Bolt that hits you comes to rest on your square and bursts there (10d6 magic and fire, or 6d5 magic, no armour): the "explosion" row.'));
   if (s.armourWearEvents || s.weaponWearEvents) mc.append(h('p', { class: 'hint' },
     `Wear per fight: weapon ${fmt(s.weaponWearEvents / n, 2)} events, ${fmt(s.weaponQualityLost / n, 2)} quality${s.weaponBroken ? `, broken in ${pct(s.weaponBroken / n)} of fights (you fight on barehanded)` : ''}; armour ${fmt(s.armourWearEvents / n, 2)} wear events, ${fmt(s.armourQualityLost / n, 2)} quality${s.armourBroken ? `, a piece destroyed in ${pct(s.armourBroken / n)} of fights` : ''}. A broken item is removed and the character recomputed, as FixPlayerEquips does.`));
   cards.append(mc);

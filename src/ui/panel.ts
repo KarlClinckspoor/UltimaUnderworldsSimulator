@@ -35,7 +35,7 @@ const ENCH_GROUPS: { label: string; opts: [string, string][] }[] = [
   { label: 'Weapon (class 12): the game\'s name, then what it does', opts: Array.from({ length: 16 }, (_, i) => encOpt(true, i)) },
   { label: 'Worn item (class 12): the game\'s name, then what it does', opts: Array.from({ length: 16 }, (_, i) => encOpt(false, i)) },
   { label: 'Spell effects on a worn item', opts: [
-    ['2:2', 'Resist Blows (+2 armour, all)'], ['2:3', 'Thick Skin (+3 armour, all)'], ['2:5', 'Iron Flesh (+5 armour, all)'],
+    ['2:2', 'Resist Blows (adds no armour: game bug)'], ['2:3', 'Thick Skin (adds no armour: game bug)'], ['2:5', 'Iron Flesh (adds no armour: game bug)'],
     ['3:1', 'Protection (monsters -3 to hit)'], ['3:5', 'Missile Protection'], ['3:6', 'Flameproof'], ['3:7', 'Poison Resistance'],
     ['11:2', 'Speed (Haste)']] },
 ];
@@ -118,9 +118,9 @@ export function renderPanel(root: HTMLElement) {
   const resNames = RES_NAMES.filter(([b]) => d.resist & b).map(([, n]) => n);
   root.append(h('div', { class: 'panel-sec' }, h('h4', {}, 'Combat values'),
     h('table', { class: 'mini' },
-      h('tr', {}, h('th', {}, 'Location'), h('th', {}, 'Armour'), h('th', {}, 'items/spell/tough'), h('th', { title: 'subtracted from the monster to-hit' }, 'to-hit prot.')),
+      h('tr', {}, h('th', {}, 'Location'), h('th', {}, 'Armour'), h('th', { title: 'armour from items and from toughness enchantments; armour spells add nothing in DOS UW1 (parse_spells reads the wrong bits)' }, 'items/tough'), h('th', { title: 'subtracted from the monster to-hit' }, 'to-hit prot.')),
       ...ZONE_NAMES.map((z, i) => h('tr', {}, h('td', {}, z), h('td', {}, String(d.armour[i])),
-        h('td', { class: 'muted' }, `${d.armourParts[i].items}/${d.armourParts[i].spell}/${d.armourParts[i].toughness}`), h('td', {}, String(d.cmbModTH[i]))))),
+        h('td', { class: 'muted' }, `${d.armourParts[i].items}/${d.armourParts[i].toughness}`), h('td', {}, String(d.cmbModTH[i]))))),
     h('p', { class: 'derived' }, `Defence (monsters roll against it): Defense ${c.skills[SK.Defense]} + ${SKILLS[d.defenceSkill]} ${c.skills[d.defenceSkill]} / 2 = `, h('b', {}, String(d.defence))),
     h('p', { class: 'derived' }, `Resists: ${resNames.length ? resNames.join(', ') : 'nothing'}${d.hasted ? ' · Hasted' : ''}${d.timeStop ? ' · Time stopped' : ''}`),
     ...d.notes.map((n) => h('p', { class: 'warn' }, n)),

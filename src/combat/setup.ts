@@ -17,11 +17,19 @@ export interface MeleeProfile {
   base: number[];          // damage byte per kind: slash, bash, stab (fist: the barehand formula)
   strBonus: number; ench: number; toHitEnch: number;
   speed: number; minCharge: number; maxCharge: number; wsize: number;
-  quality: number; qualclass: number;
+  quality: number; qualclass: number; resist: number;
 }
+/** A missile that bursts where it comes to rest: ComObjData fate 9 makes mob_to_static call
+    mts_doanim (OBJPHYS.C:483), which knows two items, the Fireball and the Lightning Bolt, and
+    hands them to damage_square kind 1 (10d6 magic and fire) and kind 2 (6d5 magic) on their
+    square (EFFECT.C:318-336, SPELLS.C:861). A struck missile stops (bounce 0) at the target. */
+export type Explosion = 1 | 2 | null;
+export const explosionOf = (missileIndex: number): Explosion =>
+  missileIndex === 0x14 - 0x10 ? 1 : missileIndex === 0x15 - 0x10 ? 2 : null;
+
 export interface SpellAttack {
   index: number; words: string; circle: number; cost: number; delayTicks: number;
-  missile: { damage: number; type: number; name: string } | null;
+  missile: { damage: number; type: number; name: string; explode: Explosion } | null;
   area: 1 | 2 | null;      // damage_square kind: 1 flame wind (10d6 fire+magic), 2 sheet lightning (6d5 magic)
 }
 export interface PlayerProfile {
@@ -31,7 +39,9 @@ export interface PlayerProfile {
   /** the active buffs, with their duration dice (set_curmagic); they wear off during the fight */
   buffs: { index: number; dice: number; sides: number; plus: number }[];
   melee: MeleeProfile; fist: MeleeProfile;
-  launcher: { name: string; ammoName: string; damage: number; type: number } | null;
+  /** scaled: the ammunition's Missile[] ammo field is -64, so missile_newhit scales its damage by
+      the Missile skill (OBJPHYS.C:115); true for every UW1 ammunition */
+  launcher: { name: string; ammoName: string; damage: number; type: number; scaled: boolean } | null;
   missileSkill: number; casting: number; manaSkill: number;
   attackSpell: SpellAttack | null;
   /** The character and spell choice, so the fight can redo FixPlayerEquips when an item breaks. */
@@ -40,7 +50,7 @@ export interface PlayerProfile {
 }
 
 export type MonsterSpell =
-  | { kind: 'missile'; damage: number; type: number; name: string }
+  | { kind: 'missile'; damage: number; type: number; name: string; explode: Explosion }
   | { kind: 'area'; area: 1 | 2; name: string }
   | { kind: 'none'; name: string };
 
@@ -48,6 +58,8 @@ export interface MonsterProfile {
   creature: number; itemId: number; name: string; hp: number; avghit: number; powerful: boolean; attitude: number;
   height: number; resist: number; armour: number[]; defence: number; nerve: number; equip: number; str: number;
   dex: number; passive: boolean; attacks: Attack[]; exp: number;
+  /** Creature b0F: a melee hit poisons the player at this level (COMBAT.C:807) */
+  poison: number;
   missile: { damage: number; type: number; name: string } | null;
   caster: number; offensive: boolean; spells: MonsterSpell[];
   dungeonLevel: number;    // 1..9, for player_get_exp's halving rule
@@ -68,6 +80,9 @@ export const defaultSettings = (): FightSettings => ({
   mode: 'melee', distance: 3, hitangle: 0, swing: 0, timeLimit: 120, rangedHitChance: 1, aimTicks: 16, rand: 'game',
 });
 
+/** DoPlayerWeapon. itemId: the weapon (0x00..0x0F) or null for the fist; ench: the enchantment
+    of whatever object is in the weapon hand, which DoPlayerWeapon decodes even when the blow is
+    a fist's (a non-weapon held there: COMBAT.C:591). */
 function meleeFrom(c: Character, itemId: number | null, quality: number, ench: { major: number; effect: number } | null): MeleeProfile {
   const wd = itemId !== null && itemId < 0x10 ? weapons[itemId] : weapons[15];
   const isFist = itemId === null || itemId >= 0x10;
@@ -82,7 +97,7 @@ function meleeFrom(c: Character, itemId: number | null, quality: number, ench: {
     base = [wd.slash, wd.bash, wd.stab]; strBonus = Math.trunc(c.str / 9);
   }
   let dmgEnch = 0, toHit = 0;
-  if (!isFist && ench && ench.major === 0xc) {
+  if (ench && ench.major === 0xc) {
     if (ench.effect & 8) dmgEnch = (ench.effect & 7) + 1; else toHit = (ench.effect & 7) + 1;
   }
   askill += toHit;
@@ -90,21 +105,21 @@ function meleeFrom(c: Character, itemId: number | null, quality: number, ench: {
   return {
     name: isFist ? 'Fist' : wd.name, isFist, askill, base, strBonus, ench: dmgEnch, toHitEnch: toHit,
     speed: wd.speed, minCharge: wd.minCharge, maxCharge: wd.maxCharge, wsize: items[id].radius,
-    quality: isFist ? 63 : quality, qualclass: isFist ? 3 : items[id].qualclass,
+    quality: isFist ? 63 : quality, qualclass: isFist ? 3 : items[id].qualclass, resist: items[id].resist,
   };
 }
 
 export function playerProfile(c: Character, attackSpellIndex: number | null): PlayerProfile {
   const d = derive(c);
   const w = c.equipment[weaponSlot(c)];
-  const melee = w && w.itemId < 0x10 ? meleeFrom(c, w.itemId, w.quality, w.ench) : meleeFrom(c, null, 0, null);
+  const melee = w && w.itemId < 0x10 ? meleeFrom(c, w.itemId, w.quality, w.ench) : meleeFrom(c, null, 0, w ? w.ench : null);
   const fist = meleeFrom(c, null, 0, null);
   let launcher: PlayerProfile['launcher'] = null;
   if (w && w.itemId >= 0x18 && w.itemId <= 0x1f) {
     const m = missiles[w.itemId - 0x10];
     if (m.ammo >= 0 && m.ammo < 0x10) {
       const ammo = missiles[m.ammo];
-      launcher = { name: m.name, ammoName: ammo.name, damage: ammo.damage, type: ammo.damageType ?? 0x40 };
+      launcher = { name: m.name, ammoName: ammo.name, damage: ammo.damage, type: ammo.damageType ?? 0x40, scaled: ammo.ammo === -64 };
     }
   }
   let attackSpell: SpellAttack | null = null;
@@ -116,7 +131,7 @@ export function playerProfile(c: Character, attackSpellIndex: number | null): Pl
       let missile: SpellAttack['missile'] = null, area: SpellAttack['area'] = null;
       if (s.cls === 5 && s.missile !== null) {
         const m = missiles[s.missile];
-        missile = { damage: m.damage, type: m.damageType ?? 0, name: m.name };
+        missile = { damage: m.damage, type: m.damageType ?? 0, name: m.name, explode: explosionOf(s.missile) };
       } else if (s.cls === 6 && s.minor === 2) area = 2;
       else if (s.cls === 6 && s.minor === 4) area = 1;
       if (missile || area) attackSpell = { index: s.index, words: s.words, circle: s.circle, cost: 3 * s.circle,
@@ -133,14 +148,21 @@ export function playerProfile(c: Character, attackSpellIndex: number | null): Pl
   };
 }
 
+/** A creature spell byte as critter_ai casts it: cast(spells[slot - 1], meptr, 0L) (AI.C:1166).
+    UW1's cast() ignores any index of 53 or more (SPELLS.C:84; UW2 packs special spells in bits 6
+    and 7, UW1 does not), and the target is null, so a heal (class 4) does nothing (do_spell
+    returns before healing, SPELLS.C:114), nor do the player-only classes (active spells, class
+    7, xt). Missile spells go through release_missile, area spells through nail_area. */
 function monsterSpell(idx: number): MonsterSpell {
   if (idx === 0xff) return { kind: 'none', name: '-' };
   const s = spells[idx];
-  if (!s) return { kind: 'none', name: `spell ${idx}` };
+  if (!s) return { kind: 'none', name: `spell ${idx} (ignored by cast)` };
   const name = s.words || `spell ${idx}`;
   if (s.cls === 5 && s.missile !== null) {
     const m = missiles[s.missile];
-    return { kind: 'missile', damage: m.damage, type: m.damageType ?? 0, name: m.name };
+    const explode = explosionOf(s.missile);
+    return { kind: 'missile', damage: m.damage, type: m.damageType ?? 0, explode,
+      name: explode ? `${m.name} (bursts: ${explode === 1 ? '10d6' : '6d5'})` : m.name };
   }
   if (s.cls === 6 && s.minor === 2) return { kind: 'area', area: 2, name: 'Sheet Lightning' };
   if (s.cls === 6 && s.minor === 4) return { kind: 'area', area: 1, name: 'Flame Wind' };
@@ -153,7 +175,7 @@ export function monsterProfile(creatureIndex: number, hp: number, powerful: bool
   return {
     creature: creatureIndex, itemId: cr.id, name: creatureName(cr), hp, avghit: cr.avghit, powerful, attitude,
     height: heightOf(cr.id), resist: resistOf(cr.id), armour: cr.armour, defence: cr.defence, nerve: cr.nerve,
-    equip: cr.equip, str: cr.str, dex: cr.dex, passive: !!cr.passive, attacks: cr.attacks, exp: cr.exp,
+    equip: cr.equip, str: cr.str, dex: cr.dex, passive: !!cr.passive, attacks: cr.attacks, exp: cr.exp, poison: cr.poison,
     missile: fm !== null ? { damage: missiles[fm].damage, type: missiles[fm].damageType ?? 0x40, name: missiles[fm].name } : null,
     caster: cr.caster, offensive: !!cr.offensive, spells: cr.spells.map(monsterSpell), ignoresFights: !!cr.ignoresFights, dungeonLevel,
   };
